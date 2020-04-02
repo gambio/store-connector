@@ -1,0 +1,15 @@
+<?xml version="1.0"?>
+<!-- {load_language_text section="admin_menu" use_fallback=$smarty.const.SHOW_UNTRANSLATED_MENUITEMS} -->
+
+<admin_menu>
+	<menugroup id="BOX_HEADING_ORDERS" sort="20" background="favs.png" class="fa fa-shopping-cart" title="{$txt.BOX_ORDERS|escape}">
+		<menuitem sort="15" link="admin.php" link_param="do=PaymentMatchingHub" title="{$txt.BOX_HUB_PAYMENT_MATCHING|escape}" />
+	</menugroup>
+	
+	<menugroup id="BOX_HEADING_HUB" sort="250" background="" class="fa fa-share-alt-square" title="{$txt.BOX_HEADING_HUB|escape}">
+		<menuitem sort="10" link="admin.php" link_param="do=HubConfiguration/Account" title="{$txt.BOX_HUB_ACCOUNT|escape}" />
+		<!--<menuitem sort="20" link="admin.php" link_param="do=HubConfiguration/transactions" title="{$txt.BOX_HUB_TRANSACTIONS|escape}" />-->
+		<menuitem sort="20" link="admin.php" link_param="do=KlarnaHubSettlements" title="Klarna Settlements" />
+		<menuitem sort="30" link="admin.php" link_param="do=KlarnaHubBoost" title="Klarna Boost" />
+	</menugroup>
+</admin_menu>
