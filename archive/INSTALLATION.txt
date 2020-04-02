@@ -2,9 +2,9 @@ Installation des Gambio Store Connectors
 
 Dieses Update rüstet alle Komponenten nach, um die Funktionen des Gambio Stores in den unterstützen Shopversionen zu nutzen.
 
-Dieses Paket ist geeignet für alle Gambio GX3 Shops von Version 3.9.1.0 bis 4.1.x
+Dieses Paket ist geeignet für alle Gambio GX3 Shops von Version 3.13.1.0 bis 4.1.x
 
-Ältere Shopversionen als 3.9.1.0 werden durch dieses Paket nicht unterstützt.
+Ältere Shopversionen als 3.13.1.0 werden durch dieses Paket nicht unterstützt.
 
 Verfahren Sie zur Installation bitte wie folgt:
 

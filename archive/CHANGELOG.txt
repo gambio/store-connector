@@ -1,5 +1,5 @@
 Gambio Store Connector
 
-Das Modul ist vorgesehen für Shops von Version 3.9.x - 4.1.x
+Das Modul ist vorgesehen für Shops von Version 3.13.x - 4.1.x
 
-Änderungen der Version 2.0.0 zur Vorversion des Moduls:
+Änderungen der Version 1.0.0 zur Vorversion des Moduls:
