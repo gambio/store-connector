@@ -1,0 +1,25 @@
+Installation des Gambio Store Connectors
+
+Dieses Update rüstet alle Komponenten nach, um die Funktionen des Gambio Stores in den unterstützen Shopversionen zu nutzen.
+
+Dieses Paket ist geeignet für alle Gambio GX3 Shops von Version 3.9.1.0 bis 4.1.x
+
+Ältere Shopversionen als 3.9.1.0 werden durch dieses Paket nicht unterstützt.
+
+Verfahren Sie zur Installation bitte wie folgt:
+
+- Führen Sie eine vollständige Sicherung Ihres Shops durch (Dateien und Datenbank)
+
+- Laden Sie den Inhalt des Ordners (nicht den Ordner selbst!) [Ihre Shopversion]/Shopsystem/Dateien per FTP-Programm in das Hauptverzeichnis Ihres Shops hoch.
+	- Bestätigen Sie dabei das Überschreiben von Dateien, soweit die Frage auftritt.
+	- Sie können anhand des vorhandenseins folgender beispielhaft genannter Dateien erkennen, ob Sie sich im Hauptverzeichnis Ihres Shops befinden:
+	  Ordner admin und GXEngine, Datei fax.html
+
+- Rufen Sie den Gambio Updater auf und folgen Sie dessen Anweisungen.
+	- Ist ihr Shop zum Beispiel unter folgender URL aufrufbar https://www.shop.de ist die URL des Updaters https://www.shop.de/gambio_updater
+
+- Rufen Sie den Adminbereich Ihres Shops auf, navigieren Sie dort zum Menüpunkt Toolbox -> Cache. Leeren Sie hier Modulcache und Seitencache in der angegegeben Reihenfolge.
+
+Die Installation ist abgeschlossen.
+
+Sie sollten nun den neuen Menüpunkt Gambio Store im linken Menü des Gambio Admin vorfinden.

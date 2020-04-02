@@ -1,0 +1,11 @@
+/.idea
+/docs/phpdox
+/docs/build
+/vendor
+/node_modules
+/build
+/src/GXModules/Gambio/Hub/Build
+/docker/*
+!/docker/boilerplate
+/*.zip
+/**/.phpunit.result.cache

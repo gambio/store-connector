@@ -1,0 +1,33 @@
+MANUELLE DATENSICHERUNG 
+ 
+Die im Shop enthaltenen Funktionen zur Datensicherung können aus technischen Gründen nur bis zu einem serverabhängigen Shopumfang verwendet werden. Sollte die Verwendung dieser Funktionen bei Ihnen zu Fehlern führen, müssen Datensicherungen manuell angelegt werden. 
+ 
+Eine komplette Sicherung der Daten Ihres Onlineshops umfasst sämtliche Dateien und Verzeichnisse sowie die gesamte Datenbank Ihres Shops. Die Datensicherung sollte regelmäßig durchgeführt werden und auf einem störungsanfälligen Datenträger wie CD- oder DVD-ROM archiviert werden. Im unwahrscheinlichen Fall eines Datenverlustes auf Ihrem Server können Sie dann Ihre aktuellste Datensicherung zurückspielen. Beachten Sie, dass beim vollständigen Wiedereinspielen einer Datensicherung sämtliche neu eingetroffenen Bestellungen, neue Kunden und Änderungen an Artikeln verloren gehen. 
+ESTUGO.net Webhosting: 
+Zusätzlich zur manuellen Datensicherung können Shopbetreiber welche bei ESTUGO.net gehostet werden folgende Video- und Bild-Anleitung nutzen: http://www.estugo.de/backup-plesk-erstellen
+Hinweis: Versetzen Sie Ihren Shop vor der Datensicherung in den Offline-Modus. Sie stellen dadurch sicher, dass während Ihrer Datensicherung keine Änderungen vorgenommen werden.
+
+SICHERUNG DER DATEIEN UND VERZEICHNISSE IHRES SHOPS
+
+Die Dateien und Verzeichnisse Ihres Shops können Sie direkt von Ihrem Webserver herunterladen. Sie benötigen dazu ein FTP-Programm, wie beispielsweise das im Installationspaket enthaltene, kostenlose 'FileZilla'. Starten Sie Ihr FTP-Programm und verbinden Sie sich mit dem FTP-Server. Wechseln Sie auf Ihrem FTP-Server in das Verzeichnis, in das Sie Ihren Shop installiert haben. Erstellen Sie auf Ihrem Computer ein neues Verzeichnis und weisen Sie diesem Verzeichnis einen aussagekräftigen Namen, wie beispielsweise 'Datensicherung_2012-08-01' zu. Laden Sie sämtliche Dateien aus dem Shopverzeichnis auf Ihrem FTP-Server in das neu erstellte Verzeichnis auf Ihrem Computer herunter.
+Bitte beachten Sie, dass dieser Vorgang, je nach Umfang Ihres Shops, einige Zeit in Anspruch nehmen kann. Wenn alle Dateien und Verzeichnisse heruntergeladen wurden, haben Sie die für Ihre Shopdatenbank erforderlichen Dateien und Verzeichnisse gesichert. Sämtliche Artikel-, Kunden- und Bestelldaten befinden sich in der Datenbank Ihres Shops.
+
+SICHERUNG DER SHOP-DATENBANK
+
+Viele Hosting-Provider bieten zur Verwaltung von MySQL-Datenbanken die Software 'phpMyAdmin' an, die in der Regel über das Kundenportal des Providers aufgerufen werden kann. Mit phpMyAdmin kann die komplette Datenbank gesichert und zu einem späteren Zeitpunkt bei Bedarf wieder eingespielt werden.
+
+ACHTUNG!: Ihre MySQL-Datenbank ist sehr empfindlich. Nehmen Sie keine Änderungen an der Konfiguration des Shopsystems direkt in der Datenbank vor. Die unsachgemäße Verwendung der Software kann zu unwiderruflichem Verlust von wichtigen Shopdaten führen!
+
+Gegebenenfalls werden Sie von phpMyAdmin zur Eingabe eines Benutzernamen und Passworts aufgefordert. Wenn Sie Ihre MySQL-Zugangsdaten nicht kennen, können Sie diese im Kundenportal Ihres Providers einsehen oder aus den Konfigurationsdateien des Shops auslesen.
+
+ACHTUNG!: Ändern Sie unter keinen Umständen das MySQL-Passwort im Kundenportal Ihres Providers. Die Daten sind in den Konfigurationsdateien hinterlegt, wenn sich das Passwort ändert, kann das Shopsystem nicht mehr auf die Datenbank zugreifen und Ihr Shop wird nicht mehr korrekt dargestellt. In den Konfigurationsdateien
+
+admin/includes/configure.php
+und
+includes/configure.php
+
+finden Sie im unteren Bereich einen Block, der unter Anderem die Konstanten 'DB_SERVER_USERNAME' und 'DB_SERVER_PASSWORD' enthält. Diese Konstanten enthalten die für phpMyAdmin erforderlichen Zugangsdaten. Merken Sie sich außerdem den Wert der Konstante 'DB_DATABASE', der den Namen der verwendeten Datenbank enthält.
+
+Loggen Sie sich mit den Daten aus den Konfigurationsdateien bei phpMyAdmin ein. Je nach Konfiguration der Software wird die Datenbank für Ihren Shop automatisch ausgewählt, oder muss anhand des Namens aus der Konfigurationsdatei aus einer Liste ausgewählt werden. Wählen Sie Ihre Shopdatenbank aus und klicken Sie auf 'Exportieren'. In der Regel müssen an dieser Stelle keine weiteren Einstellungen vorgenommen werden. Klicken Sie auf 'OK'. Je nach Konfiguration Ihres Browsers wird die Export-Datei automatisch heruntergeladen, oder Sie werden in einem Dialogfenster aufgefordert, den Speicherort der erzeugten Datei festzulegen. Der Name der Exportdatei enthält den Datenbanknamen und, je nach Konfiguration, das aktuelle Datum. Verschieben Sie die Datenbanksicherung in das im vorangegangenen Schritt erstellte Verzeichnis für Ihre Datensicherung.
+
+Sichern Sie die neu angelegte komplette Datensicherung zusätzlich auf einem störungsunanfälligen Datenträger wie CD- oder DVD-ROM.

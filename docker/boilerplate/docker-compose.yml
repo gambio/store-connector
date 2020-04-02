@@ -1,0 +1,23 @@
+version: "3.1"
+services:
+    server:
+        build: ./server
+        image: shop/php:v1
+        container_name: store-connector-server-{{branch}}
+        ports:
+        - "{{serverPort}}:80"
+        volumes:
+        - ./shop/src:/var/www/html
+        - ./server/php.ini:/usr/local/etc/php/conf.d/99-overrides.ini
+    mysql:
+        image: mysql:5.7
+        container_name: store-connector-mysql-{{branch}}
+        volumes:
+        - ./mysql:/var/lib/mysql
+        environment:
+        - MYSQL_ROOT_PASSWORD=root
+        - MYSQL_DATABASE=gxdev
+        - MYSQL_USER=gxdev
+        - MYSQL_PASSWORD=gxdev
+        ports:
+        - "{{mysqlPort}}:3306"
