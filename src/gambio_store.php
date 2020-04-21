@@ -9,8 +9,8 @@
    --------------------------------------------------------------
 */
 
-require __DIR__ . 'GXModules/Gambio/Store/StoreModule.inc.php';
+require __DIR__ . 'GXModules/Gambio/Store/StoreConnector.inc.php';
 
-$storeModule = new StoreModule();
+$storeModule = new StoreConnector();
 
 $storeModule->run(); 

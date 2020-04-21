@@ -13,10 +13,15 @@ require __DIR__ . '/Core/StoreCompatibility.inc.php';
 require __DIR__ . '/Core/StoreDatabase.inc.php';
 require __DIR__ . '/Core/StoreLogger.inc.php';
 
-class StoreModule
+/**
+ * Class StoreModule
+ *
+ * The entry point of the Store Connector, it takes care of package installations and removals.
+ */
+class StoreConnector
 {
     public function run()
     {
-        $database = StoreDatabase::connect();
+        // TODO: Process the incoming request.     
     }
 }
