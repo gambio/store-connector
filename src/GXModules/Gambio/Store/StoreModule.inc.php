@@ -12,16 +12,11 @@
 require __DIR__ . '/Core/StoreCompatibility.inc.php';
 require __DIR__ . '/Core/StoreDatabase.inc.php';
 require __DIR__ . '/Core/StoreLogger.inc.php';
-require __DIR__ . '/Core/StoreMigration.inc.php';
 
 class StoreModule
 {
     public function run()
     {
         $database = StoreDatabase::connect();
-        
-        $migration = new StoreMigration($database);
-        
-        $migration->run();
     }
 }
