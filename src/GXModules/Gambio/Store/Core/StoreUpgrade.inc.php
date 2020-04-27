@@ -18,10 +18,8 @@
  */
 class StoreUpgrade
 {
-    public static function run()
+    public function run()
     {
         
     }
 }
-
-StoreUpgrade::run();
