@@ -1,6 +1,6 @@
 <?php
 /* --------------------------------------------------------------
-   StoreCompatibility.php 2020-04-02
+   GambioStoreCompatibility.php 2020-04-29
    Gambio GmbH
    http://www.gambio.de
    Copyright (c) 2020 Gambio GmbH
@@ -18,7 +18,7 @@
  *
  * $storeCompatibility->has(StoreCompatibility::RESOURCE_GM_CONFIGURATION_TABLE); // returns true or false
  */
-class StoreCompatibility
+class GambioStoreCompatibility
 {
     const RESOURCE_GM_CONFIGURATION_TABLE = 'gm_configuration';
     

@@ -1,6 +1,6 @@
 <?php
 /* --------------------------------------------------------------
-   StoreInstallation.inc.php 2020-04-21
+   GambioStoreRemoval.inc.php 2020-04-29
    Gambio GmbH
    http://www.gambio.de
    Copyright (c) 2020 Gambio GmbH
@@ -10,13 +10,13 @@
 */
 
 /**
- * Class StoreInstallation
+ * Class StoreRemoval
  *
- * Performs a Store package installation and take care of all the required actions.
+ * Performs a Store package removal and take care of all the required actions.
  *
- * Execute the upgrade script if needed.
+ * Execute the downgrade script if needed.
  */
-class StoreInstallation
+class GambioStoreRemoval
 {
     public function perform()
     {

@@ -1,6 +1,6 @@
 <?php
 /* --------------------------------------------------------------
-   StoreLogger.php 2020-04-02
+   GambioStoreLogger.php 2020-04-29
    Gambio GmbH
    http://www.gambio.de
    Copyright (c) 2020 Gambio GmbH
@@ -14,7 +14,7 @@
  *
  * This class enables store related debug logging, information that are particularly useful for troubleshooting.
  */
-class StoreLogger
+class GambioStoreLogger
 {
     /**
      * System is unusable.

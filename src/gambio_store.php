@@ -1,6 +1,6 @@
 <?php
 /* --------------------------------------------------------------
-   gambio_store.php 2020-04-02
+   gambio_store.php 2020-04-29
    Gambio GmbH
    http://www.gambio.de
    Copyright (c) 2020 Gambio GmbH
@@ -11,6 +11,6 @@
 
 require __DIR__ . 'GXModules/Gambio/Store/StoreConnector.inc.php';
 
-$storeModule = new StoreConnector();
+$storeModule = new GambioStoreConnector();
 
 $storeModule->run(); 

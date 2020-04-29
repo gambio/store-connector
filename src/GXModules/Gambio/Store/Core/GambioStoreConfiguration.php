@@ -1,6 +1,6 @@
 <?php
 /* --------------------------------------------------------------
-   StoreConfiguration.php 2020-04-02
+   GambioStoreConfiguration.php 2020-04-29
    Gambio GmbH
    http://www.gambio.de
    Copyright (c) 2020 Gambio GmbH
@@ -16,15 +16,15 @@
  *
  * These operations differ depending on the shop version but this class makes sure data are being read correctly.
  */
-class StoreConfiguration
+class GambioStoreConfiguration
 {
     /**
-     * @var \StoreDatabase
+     * @var \GambioStoreDatabase
      */
     private $database;
     
     /**
-     * @var \StoreCompatibility
+     * @var \GambioStoreCompatibility
      */
     private $compatibility;
     
@@ -32,10 +32,10 @@ class StoreConfiguration
     /**
      * StoreConfiguration constructor.
      *
-     * @param \StoreDatabase      $database
-     * @param \StoreCompatibility $compatibility
+     * @param \GambioStoreDatabase      $database
+     * @param \GambioStoreCompatibility $compatibility
      */
-    public function __construct(\StoreDatabase $database, \StoreCompatibility $compatibility)
+    public function __construct(\GambioStoreDatabase $database, \GambioStoreCompatibility $compatibility)
     {
         $this->database      = $database;
         $this->compatibility = $compatibility;

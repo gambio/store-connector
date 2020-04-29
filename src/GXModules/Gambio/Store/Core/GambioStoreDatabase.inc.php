@@ -1,6 +1,6 @@
 <?php
 /* --------------------------------------------------------------
-   StoreLogger.php 2020-04-02
+   GambioStoreDatabase.php 2020-04-29
    Gambio GmbH
    http://www.gambio.de
    Copyright (c) 2020 Gambio GmbH
@@ -14,10 +14,10 @@
  *
  * This class encapsulates the PDO database layer provided by PHP.
  */
-class StoreDatabase
+class GambioStoreDatabase
 {
     /**
-     * @var \StoreDatabase
+     * @var \GambioStoreDatabase
      */
     private static $instance;
     
@@ -50,7 +50,7 @@ class StoreDatabase
             
             $pdo = new PDO($dsn, DB_SERVER_USERNAME, DB_SERVER_PASSWORD);
             
-            self::$instance = new StoreDatabase($pdo);
+            self::$instance = new GambioStoreDatabase($pdo);
         }
         
         return self::$instance;

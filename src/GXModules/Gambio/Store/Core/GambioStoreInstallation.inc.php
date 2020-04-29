@@ -1,6 +1,6 @@
 <?php
 /* --------------------------------------------------------------
-   StoreController.inc.php 2020-04-02
+   GambioStoreInstallation.inc.php 2020-04-29
    Gambio GmbH
    http://www.gambio.de
    Copyright (c) 2020 Gambio GmbH
@@ -9,8 +9,17 @@
    --------------------------------------------------------------
 */
 
-
-class StoreController
+/**
+ * Class StoreInstallation
+ *
+ * Performs a Store package installation and take care of all the required actions.
+ *
+ * Execute the upgrade script if needed.
+ */
+class GambioStoreInstallation
 {
-    
+    public function perform()
+    {
+        
+    }
 }

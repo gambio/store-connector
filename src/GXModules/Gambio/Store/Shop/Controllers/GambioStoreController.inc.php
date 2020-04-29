@@ -1,6 +1,6 @@
 <?php
 /* --------------------------------------------------------------
-   StoreRemoval.inc.php 2020-04-21
+   GambioStoreController.inc.php 2020-04-29
    Gambio GmbH
    http://www.gambio.de
    Copyright (c) 2020 Gambio GmbH
@@ -9,17 +9,8 @@
    --------------------------------------------------------------
 */
 
-/**
- * Class StoreRemoval
- *
- * Performs a Store package removal and take care of all the required actions.
- *
- * Execute the downgrade script if needed.
- */
-class StoreRemoval
+
+class GambioStoreController
 {
-    public function perform()
-    {
-        
-    }
+    
 }

@@ -1,6 +1,6 @@
 <?php
 /* --------------------------------------------------------------
-   StoreModule.php 2020-04-02
+   GambioStoreConnector.php 2020-04-29
    Gambio GmbH
    http://www.gambio.de
    Copyright (c) 2020 Gambio GmbH
@@ -18,7 +18,7 @@ require __DIR__ . '/Core/StoreLogger.inc.php';
  *
  * The entry point of the Store Connector, it takes care of package installations and removals.
  */
-class StoreConnector
+class GambioStoreConnector
 {
     public function run()
     {
