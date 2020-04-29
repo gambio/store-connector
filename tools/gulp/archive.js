@@ -27,11 +27,16 @@ module.exports = (gulp, $) => {
 	
 	return (async) => {
 		del.sync('build');
-		
-		fs.mkdirSync('build');
-		fs.copySync('archive', 'build');
-        fs.mkdirSync('build/src');
-        fs.copySync('src', 'build/src');
+        
+        fs.mkdirSync('build');
+        
+        fs.copySync('archive', 'build', (src) => {
+            return src.indexOf('Lizenzen') === -1;
+        });
+
+        fs.copySync('archive/Lizenzen', 'build/Shopsystem/Lizenzen');
+        fs.copySync('src', 'build/Shopsystem/Dateien');
+
 
 		zip('build', {saveTo: 'Gambio Store Connector 0.0.0.zip'}, function(error, buffer) {
 			if (error) {
