@@ -9,9 +9,9 @@
    --------------------------------------------------------------
 */
 
-require __DIR__ . '/Core/StoreCompatibility.inc.php';
-require __DIR__ . '/Core/StoreDatabase.inc.php';
-require __DIR__ . '/Core/StoreLogger.inc.php';
+require __DIR__ . '/Core/GambioStoreCompatibility.inc.php';
+require __DIR__ . '/Core/GambioStoreDatabase.inc.php';
+require __DIR__ . '/Core/GambioStoreLogger.inc.php';
 
 /**
  * Class StoreModule
