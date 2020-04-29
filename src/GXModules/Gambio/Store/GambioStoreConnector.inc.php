@@ -20,6 +20,41 @@ require __DIR__ . '/Core/GambioStoreLogger.inc.php';
  */
 class GambioStoreConnector
 {
+    
+    /**
+     * @var \StoreConfiguration
+     */
+    private $configuration;
+    
+    /**
+     * @var \StoreCompatibility
+     */
+    private $compatibility;
+    
+    /**
+     * @var \StoreLogger
+     */
+    private $logger;
+    
+    
+    /**
+     * GambioStoreConnector constructor.
+     *
+     * @param \StoreConfiguration $configuration
+     * @param \StoreCompatibility $compatibility
+     * @param \StoreLogger        $logger
+     */
+    public function __construct(
+        StoreConfiguration $configuration,
+        StoreCompatibility $compatibility,
+        StoreLogger $logger
+    ) {
+        $this->configuration = $configuration;
+        $this->compatibility = $compatibility;
+        $this->logger        = $logger;
+    }
+    
+    
     public function run()
     {
         // TODO: Process the incoming request.     
