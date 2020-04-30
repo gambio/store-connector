@@ -78,7 +78,7 @@ class GambioStoreController extends AdminHttpViewController
     
         $languageTextManager = MainFactory::create('LanguageTextManager', 'gambio_store', $_SESSION['languages_id']);
         $title               = new NonEmptyStringType($languageTextManager->get_text('PAGE_TITLE'));
-        $template            = new ExistingFile(new NonEmptyStringType(dirname(__FILE__, 2) . '/Html/gambio_store_downloads.html'));
+        $template            = new ExistingFile(new NonEmptyStringType(dirname(__FILE__, 2) . '/Templates/gambio_store.html'));
         $contentNavigation   = MainFactory::create('ContentNavigationCollection', []);
         $assets = MainFactory::create('AssetCollection', [ MainFactory::create('Asset', 'gambio_store.lang.inc.php') ]);
         
@@ -111,7 +111,7 @@ class GambioStoreController extends AdminHttpViewController
         
         $languageTextManager = MainFactory::create('LanguageTextManager', 'gambio_store', $_SESSION['languages_id']);
         $title               = new NonEmptyStringType($languageTextManager->get_text('PAGE_TITLE'));
-        $template            = new ExistingFile(new NonEmptyStringType(dirname(__FILE__, 2) . '/Html/gambio_store_configuration.html'));
+        $template            = new ExistingFile(new NonEmptyStringType(dirname(__FILE__, 2) . '/Templates/gambio_store_configuration.html'));
 
         $data                = MainFactory::create('KeyValueCollection', ['url' => $gambioStoreUrl]);
         
