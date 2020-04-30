@@ -9,6 +9,8 @@
    --------------------------------------------------------------
 */
 
+require __DIR__ . '/../../GambioStoreConnector.inc.php';
+
 /**
  * Class GambioStoreCallbackController
  *
