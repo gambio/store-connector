@@ -68,10 +68,9 @@ class GambioStoreController extends AdminHttpViewController
         if ($this->configuration->get('ADMIN_FEED_ACCEPTED_SHOP_INFORMATION_DATA_PROCESSING') === 'false') {
             $data = $this->getIFrameTemplateData('/dataprocessing');
         }
-        if ($this->configuration->get('GAMBIO_STORE_IS_REGISTERED') === 'false') {
+        elseif ($this->configuration->get('GAMBIO_STORE_IS_REGISTERED') === 'false') {
             $data = $this->getIFrameTemplateData('/register');
-        }
-        if ($this->configuration->get('ADMIN_FEED_ACCEPTED_SHOP_INFORMATION_DATA_PROCESSING') === 'true') {
+        } elseif ($this->configuration->get('ADMIN_FEED_ACCEPTED_SHOP_INFORMATION_DATA_PROCESSING') === 'true') {
             $contentNavigation = $this->getStoreNavigation();
             $data              = $this->getIFrameTemplateData('/downloads');
         }
