@@ -1,8 +1,8 @@
 /* --------------------------------------------------------------
- gulp_doc.js 2018-11-02
+ doc.js 2020-04-30
  Gambio GmbH
  http://www.gambio.de
- Copyright (c) 2018 Gambio GmbH
+ Copyright (c) 2020 Gambio GmbH
  Released under the GNU General Public License (Version 2)
  [http://www.gnu.org/licenses/gpl-2.0.html]
  --------------------------------------------------------------
@@ -13,7 +13,7 @@
 /**
  * Gulp Doc Task
  *
- * This task will generate the Hub Connector documentation.
+ * This task will generate the Store Connector documentation.
  *
  * @param {Gulp} gulp Gulp Instance
  * @param {Object} $ Contains the automatically loaded gulp plugins.
