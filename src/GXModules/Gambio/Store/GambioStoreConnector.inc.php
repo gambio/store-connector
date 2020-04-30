@@ -77,7 +77,7 @@ class GambioStoreConnector
      *
      * @return \GambioStoreConfiguration
      */
-    public function GetConfiguration()
+    public function getConfiguration()
     {
         return $this->configuration;
     }
@@ -88,7 +88,7 @@ class GambioStoreConnector
      *
      * @return \GambioStoreCompatibility
      */
-    public function GetCompatibility()
+    public function getCompatibility()
     {
         return $this->compatibility;
     }
