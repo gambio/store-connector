@@ -15,16 +15,14 @@ const setUpdatesCounter = ({updatesCounter}) => {
 	
 	let updatesCounterElement = document.getElementsByClassName(className);
 	
-	if (updatesAvailable === 0) {
-		if (updatesCounterElement.length && updatesCounterElement.style) {
+	if(updatesCounterElement.length && updatesCounterElement.style){
+		if (updatesCounter === 0){
 			updatesCounterElement.style.display = "none";
+			return;
 		}
-		return;
-	} else {
-		if (updatesCounterElement.length && updatesCounterElement.style) {
-			updatesCounterElement.style.display = "inline";
-		}
+		updatesCounterElement.style.display = "inline";
 	}
+	
 	
 	if (updatesCounterElement.length) {
 		updatesCounterElement.innerHTML = updatesCounter;

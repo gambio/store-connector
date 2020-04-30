@@ -61,9 +61,13 @@ class GambioStoreController extends AdminHttpViewController
                 'gambio_store')), new StringType('admin.php?do=GambioStore/Installations'), new BoolType(false));
         }
         
+        $translations = $languageTextManager->get_section_array('gambio_store', $_SESSION['languages_id']);
+    
         return [
-            'storeUrl'   => $gambioUrl,
-            'storeToken' => $gambioToken
+            'storeUrl'      => $gambioUrl,
+            'storeToken'    => $gambioToken,
+            'storeLanguage' => $_SESSION['languages_id'],
+            'translations'  => $translations
         ];
     }
     
@@ -128,6 +132,41 @@ class GambioStoreController extends AdminHttpViewController
         
         $contentNavigation->add(new StringType($languageTextManager->get_text('INSTALLED_PACKAGES_AND_UPDATES',
             'gambio_store')), new StringType('admin.php?do=GambioStore/Installations'), new BoolType(false));
+        
+        return MainFactory::create('AdminLayoutHttpControllerResponse', $title, $template,
+            $data,
+            $assets,
+            $contentNavigation);
+    }
+    
+    public function actionInstallations()
+    {
+        if ($this->configuration->get('ADMIN_FEED_ACCEPTED_SHOP_INFORMATION_DATA_PROCESSING') !== 'true') {
+            return $this->actionDefault();
+        }
+        
+        $languageTextManager = MainFactory::create('LanguageTextManager', 'gambio_store', $_SESSION['languages_id']);
+        $title               = new NonEmptyStringType($languageTextManager->get_text('PAGE_TITLE'));
+        $template            = new ExistingFile(new NonEmptyStringType(dirname(__FILE__, 2) . '/Templates/gambio_store.html'));
+        
+        setcookie('auto_updater_admin_check', 'admin_logged_in', time() + 5 * 60, '/');
+        
+        $data = MainFactory::create('KeyValueCollection', [
+            'storeUrl'   => $this->configuration->get('GAMBIO_STORE_URL') . '/installations',
+            'storeToken' => $this->configuration->get('GAMBIO_STORE_TOKEN')
+        ]);
+        
+        $assets = MainFactory::create('AssetCollection', [
+            MainFactory::create('Asset', 'gambio_store.lang.inc.php')
+        ]);
+        
+        $contentNavigation = MainFactory::create('ContentNavigationCollection', []);
+        
+        $contentNavigation->add(new StringType($languageTextManager->get_text('DOWNLOADS', 'gambio_store')),
+            new StringType('admin.php?do=GambioStore'), new BoolType(false));
+        
+        $contentNavigation->add(new StringType($languageTextManager->get_text('INSTALLED_PACKAGES_AND_UPDATES',
+            'gambio_store')), new StringType('admin.php?do=GambioStore/Installations'), new BoolType(true));
         
         return MainFactory::create('AdminLayoutHttpControllerResponse', $title, $template,
             $data,
