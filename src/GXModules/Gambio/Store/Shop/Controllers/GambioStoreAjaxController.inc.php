@@ -45,7 +45,7 @@ class GambioStoreAjaxController extends AdminHttpViewController
     {
         $this->connector = GambioStoreConnector::getInstance();
         $this->configuration = $this->connector->getConfiguration();
-        $this->compatibility = $this->connector->getConfiguration();
+        $this->compatibility = $this->connector->getCompatibility();
     }
     
     /**
