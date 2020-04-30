@@ -26,6 +26,11 @@ class GambioStoreAjaxController extends AdminHttpViewController
      */
     private $configuration;
     
+    /**
+     * @var \GambioStoreCompatibility
+     */
+    private $compatibility;
+    
     
     /**
      * Sets up this class avoiding the constructor.
@@ -35,6 +40,7 @@ class GambioStoreAjaxController extends AdminHttpViewController
     {
         $this->connector = GambioStoreConnector::getInstance();
         $this->configuration = $this->connector->getConfiguration();
+        $this->compatibility = $this->connector->getConfiguration();
     }
     
     /**
@@ -109,6 +115,8 @@ class GambioStoreAjaxController extends AdminHttpViewController
      */
     public function actionActivateTheme()
     {
+        $this->setup();
+        
         if (!isset($_POST) || !isset($_POST['themeStorageName'])) {
             return MainFactory::create('JsonHttpControllerResponse', ['success' => false]);
         }
