@@ -22,8 +22,6 @@
  */
 module.exports = function(gulp, $) {
 	return () => {
-		const environment = require('./lib/environment');
-		const variant = environment.getArgument('variant') || 'src';
 		
 		const config = {
 			jquery: true,
@@ -40,7 +38,6 @@ module.exports = function(gulp, $) {
 			undef: true,
 			unused: false,
 			predef: [
-				'jse',
 				'gx',
 				'js_options',
 				'CKEDITOR',
@@ -56,8 +53,8 @@ module.exports = function(gulp, $) {
 		};
 		
 		return gulp.src([
-			variant + '/GXModules/**/*.js',
-			'!' + variant + '/GXModules/*/*/Build/**/*.js',
+			'src/GXModules/**/*.js',
+			'!src/GXModules/*/*/Build/**/*.js',
 		])
 			.pipe($.jshint(config))
 			.pipe($.jshint.reporter('jshint-stylish'));
