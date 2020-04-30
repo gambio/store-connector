@@ -181,4 +181,11 @@ class GambioStoreAjaxController extends AdminHttpViewController
         
         return MainFactory::create('JsonHttpControllerResponse', ['success' => true]);
     }
+    
+    public function actionCheckFilePermissions()
+    {
+        $success = $this->connector->checkFilePermissions($_POST);
+    
+        return MainFactory::create('JsonHttpControllerResponse', ['success' => $success]);
+    }
 }
