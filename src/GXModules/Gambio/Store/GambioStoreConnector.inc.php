@@ -57,6 +57,8 @@ class GambioStoreConnector
     
     
     /**
+     * Instantiates the GambioStoreConnector with its dependencies
+     *
      * @return \GambioStoreConnector
      */
     public static function getInstance()
@@ -68,5 +70,16 @@ class GambioStoreConnector
         
         return new self($configuration, $compatability, $logger);
     }
-
+    
+    
+    /**
+     * Returns the configuration wrapper
+     *
+     * @return \GambioStoreConfiguration
+     */
+    public function getConfiguration()
+    {
+        return $this->configuration;
+    }
+    
 }
