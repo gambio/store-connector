@@ -73,6 +73,10 @@ class GambioStoreDatabase
      */
     public function query($sql, array $parameters = [])
     {
+        if ($parameters && !count(array_filter(array_keys($parameters), 'is_string'))) {
+            throw new \RuntimeException('Parameters array should be associative.');
+        }
+
         $statement = $this->pdo->prepare($sql);
         
         foreach ($parameters as $key => $value) {
