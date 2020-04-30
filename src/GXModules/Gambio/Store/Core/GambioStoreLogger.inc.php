@@ -1,6 +1,6 @@
 <?php
 /* --------------------------------------------------------------
-   GambioStoreLogger.php 2020-04-29
+   GambioStoreLogger.php 2020-04-30
    Gambio GmbH
    http://www.gambio.de
    Copyright (c) 2020 Gambio GmbH
@@ -26,7 +26,7 @@ class GambioStoreLogger
      */
     public function emergency($message, array $context = [])
     {
-        
+        $this->log('EMERGENCY', $message, $context);
     }
     
     
@@ -43,7 +43,7 @@ class GambioStoreLogger
      */
     public function alert($message, array $context = [])
     {
-        
+        $this->log('ALERT', $message, $context);
     }
     
     
@@ -59,7 +59,7 @@ class GambioStoreLogger
      */
     public function critical($message, array $context = [])
     {
-        
+        $this->log('CRITICAL', $message, $context);
     }
     
     
@@ -74,7 +74,7 @@ class GambioStoreLogger
      */
     public function error($message, array $context = [])
     {
-        
+        $this->log('ERROR', $message, $context);
     }
     
     
@@ -91,7 +91,7 @@ class GambioStoreLogger
      */
     public function warning($message, array $context = [])
     {
-        
+        $this->log('WARNING', $message, $context);
     }
     
     
@@ -105,7 +105,7 @@ class GambioStoreLogger
      */
     public function notice($message, array $context = [])
     {
-        
+        $this->log('NOTICE', $message, $context);
     }
     
     
@@ -121,7 +121,7 @@ class GambioStoreLogger
      */
     public function info($message, array $context = [])
     {
-        
+        $this->log('INFO', $message, $context);
     }
     
     
@@ -135,7 +135,7 @@ class GambioStoreLogger
      */
     public function debug($message, array $context = [])
     {
-        
+        $this->log('DEBUG', $message, $context);
     }
     
     
@@ -150,6 +150,31 @@ class GambioStoreLogger
      */
     public function log($level, $message, array $context = [])
     {
+        if (isset($context['actionName'])) {
+            $suffix = $context['actionName'];
+            unset($context['actionName']);
+        } else {
+            $suffix = 'general';
+        }
         
+        $now   = new DateTime();
+        $today = $now->format('Y-m-d');
+        $time  = $now->format('H:i:s');
+        
+        $fileName = $today . '-' . $suffix . '.log';
+        $logPath  = './../Logs/';
+        
+        if (count($context) === 0) {
+            $contextMessage = '';
+        } else {
+            ob_start();
+            print_r($context);
+            $prettifiedContext = ob_get_clean();
+            $contextMessage    = PHP_EOL . 'context: ' . $prettifiedContext;
+        }
+        
+        $logMeta = '[' . $time . '] [' . $level . '] ';
+        
+        file_put_contents($logPath . $fileName, $logMeta . $message . $contextMessage, FILE_APPEND);
     }
 }
