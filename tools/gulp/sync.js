@@ -1,5 +1,5 @@
 /* --------------------------------------------------------------
- gulp_doc.js 2018-11-02
+ doc.js 2020-04-30
  Gambio GmbH
  http://www.gambio.de
  Copyright (c) 2018 Gambio GmbH
@@ -13,7 +13,7 @@
 /**
  * Gulp Doc Task
  *
- * This task will generate the Hub Connector documentation.
+ * This task will generate the Store Connector documentation.
  *
  * @param {Gulp} gulp Gulp Instance
  * @param {Object} $ Contains the automatically loaded gulp plugins.
@@ -22,21 +22,28 @@
  */
 module.exports = (gulp, $) => {
 	const environment = require('./lib/environment');
-	const fs = require('fs-extra');
-
+	const fsExtra = require('fs-extra');
+	const fs = require('fs');
+	
 	return () => {
-		const variant = environment.getArgument('variant') || 'src';
-		let target = environment.getArgument('target') || 'docker/4.1_develop/shop/src';
-
-		if (!fs.existsSync(target)) {
+		const shopVersions = fs.readdirSync('docker').filter(dir => dir !== 'boilerplate');
+		
+		if(shopVersions.length === 0)
+		{
+			throw new Error('"docker/" directory has no version in it.')
+		}
+		
+		let target = environment.getArgument('target') || `docker/${shopVersions[0]}/shop/src`;
+		
+		if (!fsExtra.existsSync(target)) {
 			target = 'docker/' + target + '/shop/src';
-
-			if (!fs.existsSync(target)) {
+			
+			if (!fsExtra.existsSync(target)) {
 				throw new Error('Target directory was not found at ' + target);
 			}
 		}
-
-		return gulp.src(variant + '/**/*')
+		
+		return gulp.src('src/**/*')
 			.pipe(gulp.dest(target));
 	}
 };
