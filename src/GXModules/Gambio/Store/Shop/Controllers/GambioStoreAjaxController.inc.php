@@ -85,7 +85,10 @@ class GambioStoreAjaxController extends AdminHttpViewController
     {
         $this->setup();
         
-        if (!isset($_GET) || !isset($_GET['themeName'])) {
+        if (!isset($_GET) 
+            || !isset($_GET['themeName']) 
+            || !$this->compatibility->has(GambioStoreCompatibility::FEATURE_THEME_CONTROL)
+        ) {
             return MainFactory::create('JsonHttpControllerResponse', ['success' => false]);
         }
         
@@ -117,7 +120,10 @@ class GambioStoreAjaxController extends AdminHttpViewController
     {
         $this->setup();
         
-        if (!isset($_POST) || !isset($_POST['themeStorageName'])) {
+        if (!isset($_POST) 
+            || !isset($_POST['themeStorageName']) 
+            || !$this->compatibility->has(GambioStoreCompatibility::FEATURE_THEME_SERVICE)
+        ) {
             return MainFactory::create('JsonHttpControllerResponse', ['success' => false]);
         }
         
