@@ -49,6 +49,6 @@ const setUpdatesCounter = ({updatesCounter}) => {
 }
 
 
-document.onload = function() {
+window.addEventListener('DOMContentLoaded', function() {
 	messenger.listenToMessage('updates_counter', setUpdatesCounter);
-}
+});
