@@ -39,7 +39,7 @@ class GambioStoreConnector
      * @param \GambioStoreCompatibility $compatibility
      * @param \GambioStoreLogger        $logger
      */
-    private function __construct(
+    public function __construct(
         GambioStoreConfiguration $configuration,
         GambioStoreCompatibility $compatibility,
         GambioStoreLogger $logger

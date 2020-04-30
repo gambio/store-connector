@@ -43,7 +43,8 @@ class GambioStoreAjaxController extends AdminHttpViewController
      */
     private function setup()
     {
-        $this->connector     = GambioStoreConnector::getInstance();
+        $factory             = MainFactory::create('GambioStoreConnectorFactory');
+        $this->connector     = $factory->createConnector();
         $this->configuration = $this->connector->getConfiguration();
         $this->compatibility = $this->connector->getCompatibility();
     }
