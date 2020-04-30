@@ -1,4 +1,5 @@
 import translation from './translation'
+import messenger from './messenger'
 
 /**
  * Builds the Iframe into the html document with store url and language code.
@@ -36,14 +37,11 @@ const adjustBackgroundColor = () => {
 /**
  * Callback for the message event.
  *
- * @param data
+ * @param payload
  */
-const onMessage = ({data}) => {
-	const {type, payload} = data;
-	
-	if (type === 'response_iframe_height') {
-		iframe.style.height = `${payload.height}px`;
-	}
+const onResponseIframeHeight = (payload) => {
+	const iframe = document.getElementById('storeIframe');
+	iframe.style.height = `${payload.height}px`;
 };
 
 /**
@@ -53,6 +51,6 @@ const onMessage = ({data}) => {
  */
 window.addEventListener('DOMContentLoaded', (event) => {
 	adjustBackgroundColor();
-	window.addEventListener('message', onMessage);
+	messenger.listenToMessage('response_iframe_height', onResponseIframeHeight);
 	build().catch();
 });
