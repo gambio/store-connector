@@ -13,7 +13,7 @@ use Gambio\AdminFeed\Services\ShopInformation\ShopInformationFactory;
 
 /**
  * Class GambioStoreAjaxController
- * 
+ *
  * Allows for requests from the Browser to the Shop.
  *
  * @category System
@@ -43,10 +43,11 @@ class GambioStoreAjaxController extends AdminHttpViewController
      */
     private function setup()
     {
-        $this->connector = GambioStoreConnector::getInstance();
+        $this->connector     = GambioStoreConnector::getInstance();
         $this->configuration = $this->connector->getConfiguration();
         $this->compatibility = $this->connector->getCompatibility();
     }
+    
     
     /**
      * Collects shop information and sends them back.
@@ -57,13 +58,51 @@ class GambioStoreAjaxController extends AdminHttpViewController
     {
         $this->setup();
         $factory = new ShopInformationFactory();
-        
+    
         $service    = $factory->createService();
         $serializer = $factory->createShopInformationSerializer();
-        
+    
         $shopInformation = $serializer->serialize($service->getShopInformation());
+    
+        return MainFactory::create('JsonHttpControllerResponse', $shopInformation);
+    }
+    
+    
+    /**
+     * Starts an installation or gets the progress of one
+     *
+     * @return mixed
+     */
+    public function actionInstallPackage()
+    {
+        $this->setup();
         
-        return new JsonHttpControllerResponse($shopInformation);
+        try {
+            $response = $this->connector->installPackage($_POST);
+            
+            return MainFactory::create('JsonHttpControllerResponse', $response);
+        } catch (\Exception $e) {
+            return MainFactory::create('JsonHttpControllerResponse', ['success' => false]);
+        }
+    }
+    
+    
+    /**
+     * Uninstalls a package
+     *
+     * @return mixed
+     */
+    public function actionUninstallPackage()
+    {
+        $this->setup();
+        
+        try {
+            $this->connector->uninstallPackage($_POST);
+        } catch (\Exception $e) {
+            return MainFactory::create('JsonHttpControllerResponse', ['success' => false]);
+        }
+        
+        return MainFactory::create('JsonHttpControllerResponse', ['success' => true]);
     }
     
     
@@ -89,13 +128,12 @@ class GambioStoreAjaxController extends AdminHttpViewController
     public function actionIsThemeActive()
     {
         $this->setup();
-        
-        if (!isset($_GET) || !isset($_GET['themeName'])
-        ) {
+    
+        if (!isset($_GET) || !isset($_GET['themeName'])) {
             return MainFactory::create('JsonHttpControllerResponse', ['success' => false]);
         }
-        
-        if(!$this->compatibility->has(GambioStoreCompatibility::FEATURE_THEME_CONTROL)) {
+    
+        if (!$this->compatibility->has(GambioStoreCompatibility::FEATURE_THEME_CONTROL)) {
             return MainFactory::create('JsonHttpControllerResponse', ['isActive' => true]);
         }
         
@@ -104,17 +142,15 @@ class GambioStoreAjaxController extends AdminHttpViewController
         
         foreach ($themeControl->getCurrentThemeHierarchy() as $theme) {
             if ($theme === $themeName) {
-                return MainFactory::create('JsonHttpControllerResponse',
-                    [
-                        'isActive' => true
-                    ]);
+                return MainFactory::create('JsonHttpControllerResponse', [
+                    'isActive' => true
+                ]);
             }
         }
-        
-        return MainFactory::create('JsonHttpControllerResponse',
-            [
-                'isActive' => false
-            ]);
+    
+        return MainFactory::create('JsonHttpControllerResponse', [
+            'isActive' => false
+        ]);
     }
     
     
@@ -126,17 +162,16 @@ class GambioStoreAjaxController extends AdminHttpViewController
     public function actionActivateTheme()
     {
         $this->setup();
-        
-        if (!isset($_POST) 
-            || !isset($_POST['themeStorageName']) 
-            || !$this->compatibility->has(GambioStoreCompatibility::FEATURE_THEME_SERVICE)
-        ) {
+    
+        if (!isset($_POST)
+            || !isset($_POST['themeStorageName'])
+            || !$this->compatibility->has(GambioStoreCompatibility::FEATURE_THEME_SERVICE)) {
             return MainFactory::create('JsonHttpControllerResponse', ['success' => false]);
         }
-        
+    
         $themeService = StaticGXCoreLoader::getService('Theme');
         $themeName    = $_POST['themeStorageName'];
-        
+    
         try {
             $themeService->activateTheme($themeName);
         } catch (Exception $e) {
