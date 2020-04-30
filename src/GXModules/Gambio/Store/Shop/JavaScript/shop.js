@@ -31,7 +31,7 @@ export default function({storeToken}) {
      * @returns {Promise<Object>}
      */
     function fetchShopInfo() {
-        return fetch('./admin.php?do=GambioStoreAjax/collectShopInformation');
+        return fetch('admin.php?do=GambioStoreAjax/collectShopInformation');
     }
     
     /**
@@ -40,7 +40,7 @@ export default function({storeToken}) {
      * @returns {Promise<Object>}
      */
     function isDataProcessingAccepted() {            
-        return fetch('./admin.php?do=GambioStoreAjax/isDataProcessingAccepted');
+        return fetch('admin.php?do=GambioStoreAjax/isDataProcessingAccepted');
     }
     
     /**
