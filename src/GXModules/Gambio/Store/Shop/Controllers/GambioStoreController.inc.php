@@ -61,9 +61,13 @@ class GambioStoreController extends AdminHttpViewController
                 'gambio_store')), new StringType('admin.php?do=GambioStore/Installations'), new BoolType(false));
         }
         
+        $translations = $languageTextManager->get_section_array('gambio_store', $_SESSION['languages_id']);
+    
         return [
-            'storeUrl'   => $gambioUrl,
-            'storeToken' => $gambioToken
+            'storeUrl'      => $gambioUrl,
+            'storeToken'    => $gambioToken,
+            'storeLanguage' => $_SESSION['languages_id'],
+            'translations'  => $translations
         ];
     }
     
