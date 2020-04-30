@@ -45,7 +45,7 @@ class GambioStoreConnector
      * @param \GambioStoreCompatibility $compatibility
      * @param \GambioStoreLogger        $logger
      */
-    public function __construct(
+    private function __construct(
         GambioStoreConfiguration $configuration,
         GambioStoreCompatibility $compatibility,
         GambioStoreLogger $logger
@@ -80,6 +80,17 @@ class GambioStoreConnector
     public function getConfiguration()
     {
         return $this->configuration;
+    }
+    
+    
+    /**
+     * Returns the compatibility checker
+     *
+     * @return \GambioStoreCompatibility
+     */
+    public function getCompatibility()
+    {
+        return $this->compatibility;
     }
     
 }

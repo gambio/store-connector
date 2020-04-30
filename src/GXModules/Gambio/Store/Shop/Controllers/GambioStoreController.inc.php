@@ -11,10 +11,25 @@
 
 require __DIR__ . '../../GambioStoreConnector.inc.php';
 
-class GambioStoreController
+class GambioStoreController extends AdminHttpViewController
 {
-    public function __construct()
+    /**
+     *
+     */
+    private $gambioStoreConnector;
+    
+    /**
+     *
+     */
+    private $gambioStoreConfiguration;
+    
+    
+    /**
+     *
+     */
+    private function setup()
     {
         $this->gambioStoreConnector = GambioStoreConnector::getInstance();
+        $this->gambioStoreConfiguration = $this->gambioStoreConnector->getConfiguration();
     }
 }
