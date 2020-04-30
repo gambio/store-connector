@@ -26,9 +26,8 @@ const translation = {
 	translate(phrase) {
 		const div = document.getElementById('gambio-store-iframe');
 		const translations = div.dataset.translations;
-		const languageCode = this.getLanguageCode();
 		
-		return translations[languageCode][phrase];
+		return translations[phrase];
 	}
 }
 
