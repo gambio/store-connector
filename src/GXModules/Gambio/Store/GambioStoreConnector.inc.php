@@ -9,11 +9,6 @@
    --------------------------------------------------------------
 */
 
-require __DIR__ . 'Core/GambioStoreCompatibility.inc.php';
-require __DIR__ . 'Core/GambioStoreDatabase.inc.php';
-require __DIR__ . 'Core/GambioStoreLogger.inc.php';
-require __DIR__ . 'Core/GambioStoreConfiguration.inc.php';
-
 /**
  * Class GambioStoreConnector
  *
@@ -21,7 +16,6 @@ require __DIR__ . 'Core/GambioStoreConfiguration.inc.php';
  */
 class GambioStoreConnector
 {
-    
     /**
      * @var \GambioStoreConfiguration
      */
@@ -53,22 +47,6 @@ class GambioStoreConnector
         $this->configuration = $configuration;
         $this->compatibility = $compatibility;
         $this->logger        = $logger;
-    }
-    
-    
-    /**
-     * Instantiates the GambioStoreConnector with its dependencies
-     *
-     * @return \GambioStoreConnector
-     */
-    public static function getInstance()
-    {
-        $database      = GambioStoreDatabase::connect();
-        $compatibility = new GambioStoreCompatibility($database);
-        $configuration = new GambioStoreConfiguration($database, $compatibility);
-        $logger        = new GambioStoreLogger();
-        
-        return new self($configuration, $compatibility, $logger);
     }
     
     
