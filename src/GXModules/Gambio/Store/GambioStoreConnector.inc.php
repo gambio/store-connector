@@ -93,4 +93,17 @@ class GambioStoreConnector
         return $this->compatibility;
     }
     
+    
+    /**
+     * Determines whether the storeToken belongs to the shop or not
+     *
+     * @param $storeToken
+     *
+     * @return bool
+     */
+    public function verifyStoreToken($storeToken)
+    {
+        return $this->configuration->get('GAMBIO_STORE_TOKEN') === $storeToken;
+    }
+    
 }
