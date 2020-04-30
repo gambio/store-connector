@@ -64,7 +64,6 @@ Gulp Tasks:
 - "gulp archive": Creates a new "Gambio Hub Connector v0.0.0.zip" archive at the root directory, based on the current "variants" directory state.
 - "gulp build": Builds all the assets of the active variant.
 - "gulp clean": Removes all dynamically generated assets from the active variant.
-- "gulp composer": Copies the required composer files to the active variant.
 - "gulp dev": Compiles the assets of the active variant and starts the file watchers.
 - "gulp doc": Generates the PHP documentation for the project.
 - "gulp docker": Clones and prepares a new docker environment for the target shop.
