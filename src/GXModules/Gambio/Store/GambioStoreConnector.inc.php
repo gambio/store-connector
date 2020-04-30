@@ -64,11 +64,11 @@ class GambioStoreConnector
     public static function getInstance()
     {
         $database      = GambioStoreDatabase::connect();
-        $compatability = new GambioStoreCompatibility($database);
-        $configuration = new GambioStoreConfiguration($database, $compatability);
+        $compatibility = new GambioStoreCompatibility($database);
+        $configuration = new GambioStoreConfiguration($database, $compatibility);
         $logger        = new GambioStoreLogger();
         
-        return new self($configuration, $compatability, $logger);
+        return new self($configuration, $compatibility, $logger);
     }
     
     
