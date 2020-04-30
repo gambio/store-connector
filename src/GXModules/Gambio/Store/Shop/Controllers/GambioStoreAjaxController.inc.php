@@ -90,11 +90,13 @@ class GambioStoreAjaxController extends AdminHttpViewController
     {
         $this->setup();
         
-        if (!isset($_GET) 
-            || !isset($_GET['themeName']) 
-            || !$this->compatibility->has(GambioStoreCompatibility::FEATURE_THEME_CONTROL)
+        if (!isset($_GET) || !isset($_GET['themeName'])
         ) {
             return MainFactory::create('JsonHttpControllerResponse', ['success' => false]);
+        }
+        
+        if(!$this->compatibility->has(GambioStoreCompatibility::FEATURE_THEME_CONTROL)) {
+            return MainFactory::create('JsonHttpControllerResponse', ['isActive' => true]);
         }
         
         $themeName    = $_GET['themeName'];
