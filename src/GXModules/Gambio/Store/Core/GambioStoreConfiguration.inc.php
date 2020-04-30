@@ -16,7 +16,7 @@
  *
  * These operations differ depending on the shop version but this class makes sure data are being read correctly.
  */
-class inc
+class GambioStoreConfiguration
 {
     /**
      * @var \GambioStoreDatabase
