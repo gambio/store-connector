@@ -1,8 +1,8 @@
 /* --------------------------------------------------------------
- archive.js 2018-11-29
+ docker.js 2020-04-30
  Gambio GmbH
  http://www.gambio.de
- Copyright (c) 2018 Gambio GmbH
+ Copyright (c) 2020 Gambio GmbH
  Released under the GNU General Public License (Version 2)
  [http://www.gnu.org/licenses/gpl-2.0.html]
  --------------------------------------------------------------
@@ -11,9 +11,7 @@
 'use strict';
 
 /**
- * Gulp Archive Task
- *
- * This task will create a zip archive with all connector variants.
+ * Gulp Docker Task
  *
  * @param {Gulp} gulp Gulp Instance
  * @param {Object} $ Contains the automatically loaded gulp plugins.
@@ -98,7 +96,7 @@ module.exports = (gulp, $) => {
 			branch: shopBranchName
 		});
 
-		replace(clonePath + '/swap_hub_urls.php', {
+		replace(clonePath + '/swap_store_urls.php', {
 			branch: shopBranchName
 		});
 

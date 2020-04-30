@@ -1,8 +1,8 @@
 /* --------------------------------------------------------------
- gulp_doc.js 2018-11-02
+ doc.js 2020-04-30
  Gambio GmbH
  http://www.gambio.de
- Copyright (c) 2018 Gambio GmbH
+ Copyright (c) 2020 Gambio GmbH
  Released under the GNU General Public License (Version 2)
  [http://www.gnu.org/licenses/gpl-2.0.html]
  --------------------------------------------------------------
@@ -25,7 +25,7 @@ module.exports = (gulp, $) => {
 		const information = `
 \n\n\n
 
-Hub Connector - Gulp Workflow
+Store Connector - Gulp Workflow
 ------------------------------
 
 The gulp workflow provided for this repository is quite similar to GX, with the only difference being the lack of
@@ -47,7 +47,7 @@ that can change the default PHP version installed to an older one (e.g. "gulp do
 
 Active Variant:
 
-The Gambio Hub Connector needs to support multiple shop versions, something that can be very cumbersome during
+The Gambio Store Connector needs to support multiple shop versions, something that can be very cumbersome during
 development. While working you can pick up the preferred variant by providing a "--variant" argument followed by a
 relative/absolute path to the root directory of the Connector (e.g. "gulp dev --variant 'variants/GX 3.3.1.0 - 3.3.3.0'"),
 If no argument is provided the gulp task will use the "src" directory.
@@ -61,7 +61,7 @@ in the "docker" directory (e.g. "gulp dev --variant 'variants/GX 3.3.1.0 - 3.3.3
 
 Gulp Tasks:
 
-- "gulp archive": Creates a new "Gambio Hub Connector v0.0.0.zip" archive at the root directory, based on the current "variants" directory state.
+- "gulp archive": Creates a new "Gambio Store Connector v0.0.0.zip" archive at the root directory, based on the current "variants" directory state.
 - "gulp build": Builds all the assets of the active variant.
 - "gulp clean": Removes all dynamically generated assets from the active variant.
 - "gulp dev": Compiles the assets of the active variant and starts the file watchers.
