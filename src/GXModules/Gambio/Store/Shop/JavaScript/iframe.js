@@ -27,6 +27,13 @@ const build = async () => {
 };
 
 /**
+ * Applies a darker background color to the page.
+ */
+const adjustBackgroundColor = () => {
+	document.getElementById('main-content').style.background = '#F5F5F5';
+}
+
+/**
  * Callback for the message event.
  *
  * @param data
@@ -45,6 +52,7 @@ const onMessage = ({data}) => {
  * Creates the iframe after dome is loaded.
  */
 window.addEventListener('DOMContentLoaded', (event) => {
+	adjustBackgroundColor();
 	window.addEventListener('message', onMessage);
 	build().catch();
 });
