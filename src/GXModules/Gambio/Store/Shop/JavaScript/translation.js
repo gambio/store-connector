@@ -11,7 +11,24 @@ const translation = {
 	 */
 	getLanguageCode() {
 		const div = document.getElementById('gambio-store-iframe');
-		return  div.dataset.storeLanguage;
+		const languageCode = div.dataset.storeLanguage;
+		
+		if (languageCode !== 'en' && languageCode !== 'de') {
+			return 'de';
+		}
+		return languageCode;
+	},
+	/**
+	 * Returns the translated phrase
+	 * @param phrase
+	 * @returns {*}
+	 */
+	translate(phrase) {
+		const div = document.getElementById('gambio-store-iframe');
+		const translations = div.dataset.translations;
+		const languageCode = this.getLanguageCode();
+		
+		return translations[languageCode][phrase];
 	}
 }
 
