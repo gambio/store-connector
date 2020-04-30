@@ -23,7 +23,7 @@ class GambioStoreConnector
 {
     
     /**
-     * @var \inc
+     * @var \GambioStoreConfiguration
      */
     private $configuration;
     
