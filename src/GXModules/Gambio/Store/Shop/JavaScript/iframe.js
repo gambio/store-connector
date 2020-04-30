@@ -24,4 +24,27 @@ const build = async () => {
 	iframe.style.overflow = 'hidden';
 	
 	parent.appendChild(iframe);
-}
+};
+
+/**
+ * Callback for the message event.
+ *
+ * @param data
+ */
+const onMessage = ({data}) => {
+	const {type, payload} = data;
+	
+	if (type === 'response_iframe_height') {
+		iframe.style.height = `${payload.height}px`;
+	}
+};
+
+/**
+ * Is automatically called after dom content is loaded.
+ * Listens to iframe type messages
+ * Creates the iframe after dome is loaded.
+ */
+window.addEventListener('DOMContentLoaded', (event) => {
+	window.addEventListener('message', onMessage);
+	build().catch();
+});
