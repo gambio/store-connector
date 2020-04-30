@@ -3,17 +3,18 @@ import translation from './translation'
 /**
  * Builds the Iframe into the html document with store url and language code.
  *
- * @return {Promise<void>}
+ * @returns {Promise<void>}
  */
 const build = async () => {
-	const storeUrl = shop.getStoreUrl();
+	const div = document.getElementById('gambio-store-iframe');
+	const storeUrl = div.dataset.url;
 	const iframe = document.createElement('iframe');
 	const languageCode = translation.getLanguageCode();
 	
 	if (storeUrl.includes('?')) {
-		iframe.src = `&language=${languageCode}`;
+		iframe.src = `${storeUrl}&language=${languageCode}`;
 	} else {
-		iframe.src = `?language=${languageCode}`;
+		iframe.src = `${storeUrl}?language=${languageCode}`;
 	}
 	
 	iframe.id = 'storeIframe';
@@ -22,7 +23,28 @@ const build = async () => {
 	iframe.style.border = 'none';
 	iframe.style.overflow = 'hidden';
 	
-	iframe.addEventListener('load', resolve);
-	
 	parent.appendChild(iframe);
-}
+};
+
+/**
+ * Callback for the message event.
+ *
+ * @param data
+ */
+const onMessage = ({data}) => {
+	const {type, payload} = data;
+	
+	if (type === 'response_iframe_height') {
+		iframe.style.height = `${payload.height}px`;
+	}
+};
+
+/**
+ * Is automatically called after dom content is loaded.
+ * Listens to iframe type messages
+ * Creates the iframe after dome is loaded.
+ */
+window.addEventListener('DOMContentLoaded', (event) => {
+	window.addEventListener('message', onMessage);
+	build().catch();
+});
