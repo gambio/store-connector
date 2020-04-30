@@ -52,10 +52,10 @@ export default shop;
  */
 window.addEventListener('DOMContentLoaded', () => {
     messenger.listenToMessage('update_shop_information', function() {
-        shop.fetchShopInfo().then(sendShopInfo);
+        shop.fetchShopInfo().then(shop.sendShopInfo);
     });
     messenger.listenToMessage('request_shop_information', function() {
-        shop.fetchShopInfo().then(sendShopInfo);
+        shop.fetchShopInfo().then(shop.sendShopInfo);
     });
     
     messenger.listenToMessage('request_store_token', function() {
