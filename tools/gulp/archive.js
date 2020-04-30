@@ -27,29 +27,24 @@ module.exports = (gulp, $) => {
 	
 	return (async) => {
 		del.sync('build');
-		
-		fs.mkdirSync('build');
-		
-		fs.copySync('archive', 'build', (src) => {
-			return src.indexOf('Lizenzen') === -1;
-		});
-		
-		const variants = fs.readdirSync('variants');
-		
-		variants.forEach(variant => {
-			fs.mkdirSync('build/' + variant);
-			fs.mkdirSync('build/' + variant + '/Shopsystem');
-			fs.copySync('archive/Lizenzen', 'build/' + variant + '/Shopsystem/Lizenzen');
-			fs.copySync('variants/' + variant, 'build/' + variant + '/Shopsystem/Dateien');
-		});
-		
-		zip('build', {saveTo: 'Gambio Hub Connector 0.0.0.zip'}, function(error, buffer) {
+        
+        fs.mkdirSync('build');
+        
+        fs.copySync('archive', 'build', (src) => {
+            return src.indexOf('Lizenzen') === -1;
+        });
+
+        fs.copySync('archive/Lizenzen', 'build/Shopsystem/Lizenzen');
+        fs.copySync('src', 'build/Shopsystem/Dateien');
+
+
+		zip('build', {saveTo: 'Gambio Store Connector 0.0.0.zip'}, function(error, buffer) {
 			if (error) {
 				console.error('Zip Error', error);
 			}
-			
+
 			del.sync('build');
-			
+
 			async();
 		});
 	};
