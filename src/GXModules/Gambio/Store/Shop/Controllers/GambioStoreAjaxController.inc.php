@@ -101,4 +101,27 @@ class GambioStoreAjaxController extends AdminHttpViewController
             ]);
     }
     
+    
+    /**
+     * Activate a theme
+     *
+     * @return \JsonHttpControllerResponse
+     */
+    public function actionActivateTheme()
+    {
+        if (!isset($_POST) || !isset($_POST['themeStorageName'])) {
+            return MainFactory::create('JsonHttpControllerResponse', ['success' => false]);
+        }
+        
+        $themeService = StaticGXCoreLoader::getService('Theme');
+        $themeName    = $_POST['themeStorageName'];
+        
+        try {
+            $themeService->activateTheme($themeName);
+        } catch (Exception $e) {
+            return MainFactory::create('JsonHttpControllerResponse', ['success' => false]);
+        }
+        
+        return MainFactory::create('JsonHttpControllerResponse', ['success' => true]);
+    }
 }
