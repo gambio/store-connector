@@ -13,6 +13,11 @@ use Gambio\AdminFeed\Services\ShopInformation\ShopInformationFactory;
 
 /**
  * Class GambioStoreAjaxController
+ * 
+ * Allows for requests from the Browser to the Shop.
+ *
+ * @category System
+ * @package  AdminHttpViewControllers
  */
 class GambioStoreAjaxController extends AdminHttpViewController
 {
