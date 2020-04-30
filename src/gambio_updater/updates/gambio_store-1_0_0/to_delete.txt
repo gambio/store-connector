@@ -1,0 +1,6 @@
+GXMainComponents/Controllers/HttpView/Admin/GambioStoreController.inc.php
+GXMainComponents/Controllers/HttpView/AdminAjax/GambioStoreAjaxController.inc.php
+GXMainComponents/Controllers/HttpView/Shop/GambioStoreCallbackController.inc.php
+GXMainComponents/Extensions/GambioStore/*
+admin/html/content/gambio_store/*
+admin/javascript/engine/controllers/gambio_store/*
