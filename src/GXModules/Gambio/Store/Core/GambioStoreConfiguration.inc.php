@@ -49,7 +49,54 @@ class GambioStoreConfiguration
      */
     public function get($key)
     {
+        if ($this->compatibility->has(GambioStoreCompatibility::RESOURCE_GM_CONFIGURATION_TABLE)) {
+            return $this->gmGet($key);
+        }
         
+        return $this->gxGet($key);
+    }
+    
+    
+    /**
+     * Returns the value from gm configurations
+     *
+     * @param $key
+     *
+     * @return mixed|null
+     */
+    private function gmGet($key)
+    {
+        $statement = $this->database->query('SELECT gm_value FROM gm_configuration WHERE gm_key = :key',
+            ['key' => $key]);
+        
+        $result = $statement->fetch(PDO::FETCH_ASSOC);
+        
+        if ($result === false) {
+            return null;
+        }
+        
+        return $result['gm_value'];
+    }
+    
+    
+    /**
+     * Returns the value from gx configurations
+     *
+     * @param $key
+     *
+     * @return mixed|null
+     */
+    private function gxGet($key)
+    {
+        $statement = $this->database->query('SELECT `value` FROM gx_configuration WHERE `key` = :key', ['key' => $key]);
+        
+        $result = $statement->fetch(PDO::FETCH_ASSOC);
+        
+        if ($result === false) {
+            return null;
+        }
+        
+        return $result['value'];
     }
     
     
@@ -61,6 +108,36 @@ class GambioStoreConfiguration
      */
     public function set($key, $value)
     {
-        
+        if ($this->compatibility->has(GambioStoreCompatibility::RESOURCE_GM_CONFIGURATION_TABLE)) {
+            $this->gmSet($key, $value);
+        } else {
+            $this->gxSet($key, $value);
+        }
+    }
+    
+    
+    /**
+     * Sets the value from gm configurations
+     *
+     * @param $key
+     * @param $value
+     */
+    private function gmSet($key, $value)
+    {
+        $this->database->query('UPDATE gm_configuration SET gm_value = :value WHERE gm_key = :key',
+            ['value' => $value, 'key' => $key]);
+    }
+    
+    
+    /**
+     * Sets the value from gx configurations
+     *
+     * @param $key
+     * @param $value
+     */
+    private function gxSet($key, $value)
+    {
+        $this->database->query('UPDATE gx_configuration SET `value` = :value WHERE `key` = :key',
+            ['value' => $value, 'key' => $key]);
     }
 }
