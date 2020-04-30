@@ -17,48 +17,38 @@ import messenger from './messenger';
  *
  * @module Controllers/gambio_store
  */
-const shop = {
-    /**
-     * Return shop information
-     *
-     * @returns {Promise<Object>}
-     */
-    fetchShopInfo: function() {
-        return fetch('admin.php?do=GambioStoreAjax/collectShopInformation');
-    },
-    
-    /**
-     * Return whether the data processing has been accepted.
-     *
-     * @returns {Promise<Object>}
-     */
-    isDataProcessingAccepted: function() {
-        return fetch('admin.php?do=GambioStoreAjax/isDataProcessingAccepted');
-    },
-    
-    /**
-     * Send shop information data to Iframe
-     *
-     * @param {Object} shopInfo Shop information data
-     */
-    sendShopInfo: function(shopInfo) {
-        messenger.sendMessage('send_shop_information', {shopInfo})
-    }
+
+/**
+ * Return shop information
+ *
+ * @returns {Promise<Object>}
+ */
+const fetchShopInfo = () => {
+    return fetch('admin.php?do=GambioStoreAjax/collectShopInformation');
 };
-export default shop;
+
+/**
+ * Send shop information data to Iframe
+ *
+ * @param {Object} shopInfo Shop information data
+ */
+const sendShopInfo = (shopInfo) => {
+    messenger.sendMessage('send_shop_information', {shopInfo})
+};
 
 /**
  * Initiate messenger listeners upon a built document.
  */
 window.addEventListener('DOMContentLoaded', () => {
     messenger.listenToMessage('update_shop_information', function() {
-        shop.fetchShopInfo().then(shop.sendShopInfo);
+        fetchShopInfo().then(sendShopInfo);
     });
     messenger.listenToMessage('request_shop_information', function() {
-        shop.fetchShopInfo().then(shop.sendShopInfo);
+        fetchShopInfo().then(sendShopInfo);
     });
     
     messenger.listenToMessage('request_store_token', function() {
+        const storeToken = document.getElementById('gambio-store-iframe').dataset.storeToken;
         messenger.sendMessage('send_store_token', {'storeToken': storeToken});
     });
     
