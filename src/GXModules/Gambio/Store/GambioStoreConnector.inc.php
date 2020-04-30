@@ -106,4 +106,20 @@ class GambioStoreConnector
         return $this->configuration->get('GAMBIO_STORE_TOKEN') === $storeToken;
     }
     
+    
+    /**
+     * Generates the Gambio Store Token for the Shop
+     * 
+     * @return string
+     */
+    public function generateToken()
+    {
+        $prefix    = 'STORE';
+        $date      = date('Ymd');
+        $hash      = md5(time());
+        $suffix    = 'XX';
+        $delimiter = '-';
+    
+        return implode($delimiter, [$prefix, $date, $hash, $suffix]);
+    }
 }
