@@ -80,14 +80,12 @@ class GambioStoreController extends AdminHttpViewController
         $title               = new NonEmptyStringType($languageTextManager->get_text('PAGE_TITLE'));
         $template            = new ExistingFile(new NonEmptyStringType(dirname(__FILE__, 2) . '/Html/gambio_store_downloads.html'));
         $contentNavigation   = MainFactory::create('ContentNavigationCollection', []);
-
+        $assets = MainFactory::create('AssetCollection', [ MainFactory::create('Asset', 'gambio_store.lang.inc.php') ]);
+        
         setcookie('auto_updater_admin_check', 'admin_logged_in', time() + 5 * 60, '/');
         
         $gambioStoreData = $this->getGambioStoreData($contentNavigation, $languageTextManager);
-        
         $data = MainFactory::create('KeyValueCollection', $gambioStoreData);
-        
-        $assets = MainFactory::create('AssetCollection', [ MainFactory::create('Asset', 'gambio_store.lang.inc.php') ]);
         
         return MainFactory::create('AdminLayoutHttpControllerResponse',
             $title,
