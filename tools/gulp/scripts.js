@@ -1,8 +1,8 @@
 /* --------------------------------------------------------------
- gulp_scripts.js 2018-11-02
+ scripts.js 2020-04-30
  Gambio GmbH
  http://www.gambio.de
- Copyright (c) 2018 Gambio GmbH
+ Copyright (c) 2020 Gambio GmbH
  Released under the GNU General Public License (Version 2)
  [http://www.gnu.org/licenses/gpl-2.0.html]
  --------------------------------------------------------------
@@ -14,7 +14,7 @@
  * Gulp Scripts Task
  *
  * This task will concatenate and minify the javascript files. The final files will be
- * placed in the GXModules/Gambio/Hub/Build directory.
+ * placed in the GXModules/Gambio/Store/Build directory.
  *
  * @param {Gulp} gulp Gulp Instance
  * @param {Object} $ Contains the automatically loaded gulp plugins.
@@ -24,7 +24,6 @@
 module.exports = function(gulp, $) {
 	const fs = require('fs');
 	const path = require('path');
-	const environment = require('./lib/environment');
 	
 	const isDir = (file) => {
 		return fs.lstatSync(file.path).isDirectory();
@@ -58,16 +57,14 @@ module.exports = function(gulp, $) {
 	};
 	
 	return (async) => {
-		const variant = environment.getArgument('variant') || 'src';
-		
-		const vendorNames = fs.readdirSync(variant + '/GXModules')
-			.filter(file => fs.statSync(path.join(variant + '/GXModules', file)).isDirectory());
+		const vendorNames = fs.readdirSync('src/GXModules')
+			.filter(file => fs.statSync(path.join('src/GXModules', file)).isDirectory());
 		
 		const compilations = [];
 		
 		for (let vendorName of vendorNames) {
-			const moduleNames = fs.readdirSync(variant + '/GXModules/' + vendorName)
-				.filter(file => fs.statSync(path.join(variant + '/GXModules/', vendorName, file)).isDirectory());
+			const moduleNames = fs.readdirSync('src/GXModules/' + vendorName)
+				.filter(file => fs.statSync(path.join('src/GXModules/', vendorName, file)).isDirectory());
 			
 			for (let moduleName of moduleNames) {
 			    const src = path.join(variant, 'GXModules', vendorName, moduleName);
