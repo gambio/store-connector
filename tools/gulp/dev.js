@@ -1,8 +1,8 @@
 /* --------------------------------------------------------------
- gulp_dev.js 2018-11-02
+ dev.js 2020-04-30
  Gambio GmbH
  http://www.gambio.de
- Copyright (c) 2018 Gambio GmbH
+ Copyright (c) 2020 Gambio GmbH
  Released under the GNU General Public License (Version 2)
  [http://www.gnu.org/licenses/gpl-2.0.html]
  --------------------------------------------------------------
@@ -23,17 +23,24 @@
 module.exports = (gulp, $) => {
 	const gulpsync = require('gulp-sync')(gulp);
 	const del = require('del');
+	const fs = require('fs');
 	const environment = require('./lib/environment');
-
+	
 	return () => {
 		global.devEnvironment = true;
-
-		let target = environment.getArgument('target') || 'docker/4.1_develop/shop/src';
-
+		const shopVersions = fs.readdirSync('docker').filter(dir => dir !== 'boilerplate');
+		
+		if(shopVersions.length === 0)
+		{
+			throw new Error('"docker/" directory has no version in it.')
+		}
+		
+		let target = environment.getArgument('target') || `docker/${shopVersions[0]}/shop/src`;
+		
 		del.sync([
 			target + '/GXModules/Gambio/Hub'
 		]);
-
+		
 		gulp.start(gulpsync.sync([
 			'clean', 'scripts', 'styles', 'watch', 'sync'
 		], 'dev'));
