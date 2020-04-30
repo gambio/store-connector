@@ -35,6 +35,14 @@ class GambioStoreCompatibility
         $this->database = $database;
     }
     
+    
+    /**
+     * Checks if a given feature is available
+     *
+     * @param $resource
+     *
+     * @return bool
+     */
     public function has($resource)
     {
     
