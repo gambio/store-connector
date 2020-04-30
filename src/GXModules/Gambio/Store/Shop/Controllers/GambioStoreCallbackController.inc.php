@@ -9,8 +9,6 @@
    --------------------------------------------------------------
 */
 
-require __DIR__ . '/../../GambioStoreConnector.inc.php';
-
 /**
  * Class GambioStoreCallbackController
  *
@@ -32,7 +30,8 @@ class GambioStoreCallbackController extends HttpViewController
      */
     private function setup()
     {
-        $this->connector = GambioStoreConnector::getInstance();
+        $factory         = MainFactory::create('GambioStoreConnectorFactory');
+        $this->connector = $factory->createConnector();
     }
     
     
