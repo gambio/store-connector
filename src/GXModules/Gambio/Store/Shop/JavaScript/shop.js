@@ -56,7 +56,10 @@ window.addEventListener('DOMContentLoaded', () => {
         window.location.href = 'admin.php?do=GambioStore/AcceptDataProcessing';
     });
     
-    messenger.listenToMessage('reload_page', function() {
-        window.location.reload(true);
+    messenger.listenToMessage('scroll_to_top', function() {
+	    window.scrollTo({
+		    top: 0,
+		    left: 0
+	    });
     });
 });
