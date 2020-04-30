@@ -57,6 +57,8 @@ class GambioStoreConnector
     
     
     /**
+     * Instantiates the GambioStoreConnector with its dependencies
+     *
      * @return \GambioStoreConnector
      */
     public static function getInstance()
@@ -71,15 +73,37 @@ class GambioStoreConnector
     
     
     /**
-     * @return \GambioStoreConfiguration|\inc
+     * Returns the configuration wrapper
+     *
+     * @return \GambioStoreConfiguration
      */
     public function getConfiguration()
     {
         return $this->configuration;
     }
     
+    
+    /**
+     * Returns the compatibility checker
+     *
+     * @return \GambioStoreCompatibility
+     */
     public function getCompatibility()
     {
         return $this->compatibility;
     }
+    
+    
+    /**
+     * Determines whether the storeToken belongs to the shop or not
+     *
+     * @param $storeToken
+     *
+     * @return bool
+     */
+    public function verifyStoreToken($storeToken)
+    {
+        return $this->configuration->get('GAMBIO_STORE_TOKEN') === $storeToken;
+    }
+    
 }
