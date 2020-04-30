@@ -118,7 +118,6 @@ gulp.src = function() {
     'archive',
     'build',
     'clean',
-    'composer',
     'dev',
     'doc',
     'docker',
