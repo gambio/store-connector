@@ -9,8 +9,12 @@
    --------------------------------------------------------------
 */
 
+require __DIR__ . '../../GambioStoreConnector.inc.php';
 
 class GambioStoreController
 {
-    
+    public function __construct()
+    {
+        $this->gambioStoreConnector = GambioStoreConnector::getInstance();
+    }
 }

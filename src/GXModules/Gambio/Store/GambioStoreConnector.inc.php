@@ -9,30 +9,31 @@
    --------------------------------------------------------------
 */
 
-require __DIR__ . '/Core/GambioStoreCompatibility.inc.php';
-require __DIR__ . '/Core/GambioStoreDatabase.inc.php';
-require __DIR__ . '/Core/GambioStoreLogger.inc.php';
+require __DIR__ . 'Core/GambioStoreCompatibility.inc.php';
+require __DIR__ . 'Core/GambioStoreDatabase.inc.php';
+require __DIR__ . 'Core/GambioStoreLogger.inc.php';
+require __DIR__ . 'Core/GambioStoreConfiguration.inc.php';
 
 /**
- * Class StoreModule
+ * Class GambioStoreConnector
  *
- * The entry point of the Store Connector, it takes care of package installations and removals.
+ * The entry point of the Gambio Store Connector, it takes care of package installations and removals.
  */
 class GambioStoreConnector
 {
     
     /**
-     * @var \StoreConfiguration
+     * @var \inc
      */
     private $configuration;
     
     /**
-     * @var \StoreCompatibility
+     * @var \GambioStoreCompatibility
      */
     private $compatibility;
     
     /**
-     * @var \StoreLogger
+     * @var \GambioStoreLogger
      */
     private $logger;
     
@@ -40,14 +41,14 @@ class GambioStoreConnector
     /**
      * GambioStoreConnector constructor.
      *
-     * @param \StoreConfiguration $configuration
-     * @param \StoreCompatibility $compatibility
-     * @param \StoreLogger        $logger
+     * @param \GambioStoreConfiguration $configuration
+     * @param \GambioStoreCompatibility $compatibility
+     * @param \GambioStoreLogger        $logger
      */
     public function __construct(
-        StoreConfiguration $configuration,
-        StoreCompatibility $compatibility,
-        StoreLogger $logger
+        GambioStoreConfiguration $configuration,
+        GambioStoreCompatibility $compatibility,
+        GambioStoreLogger $logger
     ) {
         $this->configuration = $configuration;
         $this->compatibility = $compatibility;
@@ -55,8 +56,17 @@ class GambioStoreConnector
     }
     
     
-    public function run()
+    /**
+     * @return \GambioStoreConnector
+     */
+    public static function getInstance()
     {
-        // TODO: Process the incoming request.     
+        $database      = GambioStoreDatabase::connect();
+        $compatability = new GambioStoreCompatibility($database);
+        $configuration = new GambioStoreConfiguration($database, $compatability);
+        $logger        = new GambioStoreLogger();
+        
+        return new self($configuration, $compatability, $logger);
     }
+
 }

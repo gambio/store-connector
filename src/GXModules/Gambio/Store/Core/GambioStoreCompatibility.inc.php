@@ -9,6 +9,8 @@
    --------------------------------------------------------------
 */
 
+require __DIR__ . '/GambioStoreDatabase.inc.php';
+
 /**
  * Class StoreCompatibility
  *
@@ -23,8 +25,19 @@ class GambioStoreCompatibility
     const RESOURCE_GM_CONFIGURATION_TABLE = 'gm_configuration';
     
     
+    /**
+     * GambioStoreCompatibility constructor.
+     *
+     * @param \GambioStoreDatabase $database
+     */
+    public function __construct(GambioStoreDatabase $database)
+    {
+        $this->database = $database;
+    }
+    
     public function has($resource)
     {
-        
+    
     }
 }
+
