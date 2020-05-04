@@ -8,6 +8,7 @@
    [http://www.gnu.org/licenses/gpl-2.0.html]
    --------------------------------------------------------------
 */
+require './Abstract/AbstractFileSystemOperation.inc.php';
 
 /**
  * Class StoreInstallation
@@ -16,9 +17,24 @@
  *
  * Execute the upgrade script if needed.
  */
-class GambioStoreInstallation
+class GambioStoreInstallation extends AbstractFileSystemOperation
 {
-    public function perform()
+    private $token;
+    
+    private $cache;
+    
+    private $fileList;
+    
+    
+    public function __construct($fileList, $token, $cache)
+    {
+        $this->fileList = $fileList;
+        $this->token = $token;
+        $this->cache = $cache;
+    }
+    
+    
+    public function perform($data, $name)
     {
         
     }
