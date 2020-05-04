@@ -8,6 +8,7 @@
    [http://www.gnu.org/licenses/gpl-2.0.html]
    --------------------------------------------------------------
 */
+require './Abstract/AbstractGambioStoreFileSystem.inc.php';
 
 /**
  * Class StoreRemoval
@@ -16,7 +17,7 @@
  *
  * Execute the downgrade script if needed.
  */
-class GambioStoreRemoval
+class GambioStoreRemoval extends AbstractGambioStoreFileSystem
 {
     public function perform()
     {

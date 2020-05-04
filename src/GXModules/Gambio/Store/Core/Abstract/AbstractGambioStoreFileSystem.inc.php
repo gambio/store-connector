@@ -1,6 +1,6 @@
 <?php
 /* --------------------------------------------------------------
-   AbstractFileSystemOperation.inc.php 2020-05-04
+   AbstractGambioStoreFileSystem.inc.php 2020-05-04
    Gambio GmbH
    http://www.gambio.de
    Copyright (c) 2020 Gambio GmbH
@@ -10,6 +10,6 @@
 */
 
 
-class AbstractFileSystemOperation
+class AbstractGambioStoreFileSystem
 {
 }
