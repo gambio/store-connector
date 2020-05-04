@@ -1,6 +1,6 @@
 <?php
 /* --------------------------------------------------------------
-   GambioStoreRemoval.inc.php 2020-04-29
+   GambioStoreRemoval.inc.php 2020-05-04
    Gambio GmbH
    http://www.gambio.de
    Copyright (c) 2020 Gambio GmbH
@@ -19,8 +19,39 @@ require './Abstract/AbstractGambioStoreFileSystem.inc.php';
  */
 class GambioStoreRemoval extends AbstractGambioStoreFileSystem
 {
+    /**
+     * @var array
+     */
+    private $fileList;
+    
+    /**
+     * GambioStoreRemoval constructor.
+     *
+     * @param array $fileList
+     */
+    public function __construct(array $fileList)
+    {
+        $this->fileList = $fileList;
+    }
+    
+    
+    /**
+     * Starts the performing of a gambio store removal.
+     * Removes for example the files of a gambio store package.
+     *
+     * @throws \RuntimeException
+     */
     public function perform()
     {
-        
+        // $this->checkPermissions($this->fileList);
+        // $this->createBackup($this->fileList);
+        try {
+            foreach ($this->fileList as $file) {
+                @unlink($file);
+            }
+        } catch (Exception $exception) {
+            $this->restoreBackup();
+            throw new RuntimeException('Removing of file list failed', $this->fileList);
+        }
     }
 }
