@@ -8,7 +8,9 @@
    [http://www.gnu.org/licenses/gpl-2.0.html]
    --------------------------------------------------------------
 */
+require './Exceptions/WrongFilePermissionException.inc.php';
 require './Abstract/AbstractGambioStoreFileSystem.inc.php';
+require './GambioStoreLogger.inc.php';
 
 /**
  * Class StoreRemoval
@@ -28,9 +30,10 @@ class GambioStoreRemoval extends AbstractGambioStoreFileSystem
     /**
      * GambioStoreRemoval constructor.
      *
-     * @param array $fileList
+     * @param array              $fileList
+     * @param \GambioStoreLogger $logger
      */
-    public function __construct(array $fileList)
+    public function __construct(array $fileList, GambioStoreLogger $logger)
     {
         $this->fileList = $fileList;
     }
@@ -41,12 +44,14 @@ class GambioStoreRemoval extends AbstractGambioStoreFileSystem
      * Removes for example the files of a gambio store package.
      *
      * @throws \RuntimeException
+     * @throws \WrongFilePermissionException
      */
     public function perform()
     {
         $wrongPermittedFiles = $this->checkFilesPermissionsWithFileList($this->fileList);
         if (count($wrongPermittedFiles) !== 0) {
-            throw new RuntimeException('Wrong permissions, cannot remove gambio store package');
+            throw new WrongFilePermissionException('Wrong permissions, cannot remove gambio store package', 0, null,
+                $wrongPermittedFiles);
         }
         
         // $this->createBackup($this->fileList);
