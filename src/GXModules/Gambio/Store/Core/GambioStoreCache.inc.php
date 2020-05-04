@@ -47,7 +47,7 @@ class GambioStoreCache
         return $this->database->query($sql, [':name' => $name]);
     }
     
-    public function has($name, $data)
+    public function has($name)
     {
         $sql = 'SELECT COUNT(*) FROM ' . self::CACHE_TABLE .  ' WHERE name = :name LIMIT 1';
     

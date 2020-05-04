@@ -19,6 +19,8 @@ require './Abstract/AbstractGambioStoreFileSystem.inc.php';
  */
 class GambioStoreInstallation extends AbstractGambioStoreFileSystem
 {
+    const CACHE_FOLDER = '';
+    
     private $token;
     
     private $cache;
@@ -36,6 +38,24 @@ class GambioStoreInstallation extends AbstractGambioStoreFileSystem
     
     public function perform($data, $name)
     {
+        if ($this->cache->has()) {
+            return $this->cache->get();
+        }
         
+        try {
+            $this->downloadZipToCache();
+        } catch (Exception $e) {
+            $this->downLoadFilesToCache();
+        }
+        
+        $this->backup();
+        
+        try {
+            $this->movePackageToDestination();
+        } catch (Exception $e) {
+            $this->restoreBackup();
+        } finally {
+            $this->cleanCache();
+        }
     }
 }
