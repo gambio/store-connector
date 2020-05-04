@@ -15,11 +15,11 @@ class AbstractGambioStoreFileSystem
     /**
      * Checks the writing permissions of all needed directories for an update by a given update files directory.
      *
-     * @param string $fileList
+     * @param array $fileList
      *
      * @return array
      */
-    public function checkFilesPermissionsWithFileList($fileList)
+    public function checkFilesPermissionsWithFileList(array $fileList)
     {
         $wrongPermittedFiles = [];
         $checkDirectories = [];
