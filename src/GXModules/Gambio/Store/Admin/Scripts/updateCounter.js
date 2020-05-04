@@ -8,7 +8,7 @@
    --------------------------------------------------------------
  */
 
-import messenger from 'messenger';
+import messenger from 'src/GXModules/Gambio/Store/Admin/JavaScript/messenger';
 
 const setUpdatesCounter = ({updatesCounter}) => {
 	const className = 'gambio-store-updates-counter';

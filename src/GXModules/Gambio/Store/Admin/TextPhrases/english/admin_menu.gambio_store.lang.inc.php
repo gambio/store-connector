@@ -10,8 +10,5 @@
 */
 
 $t_language_text_section_content_array = [
-    'BOX_HEADING_HUB_PAYMENT'      => 'Gambio Payment Hub',
-    'BOX_HEADING_HUB_PAYMENT_MISC' => 'Miscellaneous',
-    'TEXT_HUB_CONNECTED'           => 'HUB connected',
-    'TEXT_HUB_DISCONNECTED'        => 'HUB disconnected'
+    'BOX_GAMBIO_STORE' => 'Gambio Store'
 ];
