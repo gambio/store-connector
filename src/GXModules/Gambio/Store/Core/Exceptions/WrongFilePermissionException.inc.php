@@ -9,6 +9,9 @@
    --------------------------------------------------------------
 */
 
+/**
+ * Class WrongFilePermissionException
+ */
 class WrongFilePermissionException extends Exception
 {
     /**
@@ -21,17 +24,15 @@ class WrongFilePermissionException extends Exception
      * WrongFilePermissionException constructor.
      *
      * @param string          $message
-     * @param int             $code
-     * @param \Throwable|null $previous
      * @param array           $content
+     * @param \Throwable|null $previous
      */
     public function __construct(
         $message = "",
-        $code = 0,
-        Throwable $previous = null,
-        array $content = []
+        array $content = [],
+        Throwable $previous = null
     ) {
-        parent::__construct($message, $code, $previous);
+        parent::__construct($message, 0, $previous);
         $this->content = $content;
     }
     

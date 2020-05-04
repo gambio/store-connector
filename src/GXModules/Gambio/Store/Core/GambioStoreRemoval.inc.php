@@ -50,7 +50,7 @@ class GambioStoreRemoval extends AbstractGambioStoreFileSystem
     {
         $wrongPermittedFiles = $this->checkFilesPermissionsWithFileList($this->fileList);
         if (count($wrongPermittedFiles) !== 0) {
-            throw new WrongFilePermissionException('Wrong permissions, cannot remove gambio store package', 0, null,
+            throw new WrongFilePermissionException('Wrong permissions, cannot remove gambio store package',
                 $wrongPermittedFiles);
         }
         
