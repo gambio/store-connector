@@ -24,6 +24,7 @@ class GambioStoreRemoval extends AbstractGambioStoreFileSystem
      */
     private $fileList;
     
+    
     /**
      * GambioStoreRemoval constructor.
      *
@@ -43,7 +44,11 @@ class GambioStoreRemoval extends AbstractGambioStoreFileSystem
      */
     public function perform()
     {
-        // $this->checkPermissions($this->fileList);
+        $wrongPermittedFiles = $this->checkFilesPermissionsWithFileList($this->fileList);
+        if (count($wrongPermittedFiles) !== 0) {
+            throw new RuntimeException('Wrong permissions, cannot remove gambio store package');
+        }
+        
         // $this->createBackup($this->fileList);
         try {
             foreach ($this->fileList as $file) {
@@ -51,7 +56,7 @@ class GambioStoreRemoval extends AbstractGambioStoreFileSystem
             }
         } catch (Exception $exception) {
             $this->restoreBackup();
-            throw new RuntimeException('Removing of file list failed', $this->fileList);
+            throw new RuntimeException('Removing of package failed, because of : ', 0, $exception);
         }
     }
 }
