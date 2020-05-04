@@ -30,10 +30,9 @@ class GambioStoreRemoval extends AbstractGambioStoreFileSystem
     /**
      * GambioStoreRemoval constructor.
      *
-     * @param array              $fileList
-     * @param \GambioStoreLogger $logger
+     * @param array $fileList
      */
-    public function __construct(array $fileList, GambioStoreLogger $logger)
+    public function __construct(array $fileList)
     {
         $this->fileList = $fileList;
     }
