@@ -20,7 +20,7 @@ require 'GambioStoreDatabase.inc.php';
  */
 class GambioStoreCache
 {
-    const CACHE_TABLE = '';
+    const CACHE_TABLE = 'gambio_store_cache';
     
     private $database;
     
