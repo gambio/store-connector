@@ -48,7 +48,7 @@ class GambioStoreMigration
     public function up()
     {
         foreach ($this->up as $item) {
-            require $item;
+            require_once $item;
         }
     }
     
@@ -61,7 +61,7 @@ class GambioStoreMigration
     public function down()
     {
         foreach ($this->down as $item) {
-            require $item;
+            require_once $item;
         }
     }
 }

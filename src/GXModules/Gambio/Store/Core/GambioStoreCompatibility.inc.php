@@ -9,7 +9,7 @@
    --------------------------------------------------------------
 */
 
-require __DIR__ . '/GambioStoreDatabase.inc.php';
+require_once __DIR__ . '/GambioStoreDatabase.inc.php';
 
 /**
  * Class StoreCompatibility

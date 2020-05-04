@@ -8,9 +8,9 @@
    [http://www.gnu.org/licenses/gpl-2.0.html]
    --------------------------------------------------------------
 */
-require './Exceptions/WrongFilePermissionException.inc.php';
-require './Abstract/AbstractGambioStoreFileSystem.inc.php';
-require './GambioStoreLogger.inc.php';
+require_once './Exceptions/WrongFilePermissionException.inc.php';
+require_once './Abstract/AbstractGambioStoreFileSystem.inc.php';
+require_once './GambioStoreLogger.inc.php';
 
 /**
  * Class StoreRemoval

@@ -7,11 +7,11 @@
    --------------------------------------------------------------
 */
 
-require __DIR__ . '/GambioStoreConnector.inc.php';
-require __DIR__ . 'Core/GambioStoreCompatibility.inc.php';
-require __DIR__ . 'Core/GambioStoreDatabase.inc.php';
-require __DIR__ . 'Core/GambioStoreLogger.inc.php';
-require __DIR__ . 'Core/GambioStoreConfiguration.inc.php';
+require_once __DIR__ . '/GambioStoreConnector.inc.php';
+require_once __DIR__ . 'Core/GambioStoreCompatibility.inc.php';
+require_once __DIR__ . 'Core/GambioStoreDatabase.inc.php';
+require_once __DIR__ . 'Core/GambioStoreLogger.inc.php';
+require_once __DIR__ . 'Core/GambioStoreConfiguration.inc.php';
 
 class GambioStoreConnectorFactory
 {

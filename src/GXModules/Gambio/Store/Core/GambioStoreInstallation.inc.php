@@ -8,7 +8,7 @@
    [http://www.gnu.org/licenses/gpl-2.0.html]
    --------------------------------------------------------------
 */
-require './Abstract/AbstractGambioStoreFileSystem.inc.php';
+require_once './Abstract/AbstractGambioStoreFileSystem.inc.php';
 
 /**
  * Class StoreInstallation

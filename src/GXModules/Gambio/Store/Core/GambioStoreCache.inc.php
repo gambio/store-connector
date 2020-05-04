@@ -9,7 +9,7 @@
    --------------------------------------------------------------
 */
 
-require 'GambioStoreDatabase.inc.php';
+require_once 'GambioStoreDatabase.inc.php';
 
 /**
  * Class GambioStoreCache
