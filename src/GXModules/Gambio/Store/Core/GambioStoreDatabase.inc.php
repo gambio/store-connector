@@ -44,7 +44,7 @@ class GambioStoreDatabase
     public static function connect()
     {
         if (self::$instance === null) {
-            require_once __DIR__ . '../../../../includes/configure.php';
+            require_once __DIR__ . '/../../../../includes/configure.php';
             
             $dsn = 'mysql:host=' . DB_SERVER . ';dbname=' . DB_DATABASE;
             
