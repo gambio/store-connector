@@ -74,7 +74,6 @@ class GambioStoreConfiguration
         if ($result === false) {
             return null;
         }
-        
         return $result['gm_value'];
     }
     
