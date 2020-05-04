@@ -182,8 +182,7 @@ class GambioStoreController extends AdminHttpViewController
     {
         $gambioToken = $this->configuration->get('GAMBIO_STORE_TOKEN');
         if (!$gambioToken) {
-            $tokenGenerator = MainFactory::create('GambioStoreTokenGenerator');
-            $gambioToken    = $tokenGenerator->generateToken();
+            $gambioToken = $this->connector->generateToken();
             $this->configuration->set('GAMBIO_STORE_TOKEN', $gambioToken);
         }
         
