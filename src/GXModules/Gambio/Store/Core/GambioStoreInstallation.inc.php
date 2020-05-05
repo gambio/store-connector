@@ -43,6 +43,17 @@ class GambioStoreInstallation extends AbstractGambioStoreFileSystem
     
     public function perform($data, $name)
     {
+        if ($this->cache->has()) {
+            return $this->cache->get();
+        }
+    
+        $this->cache->set($this->fileList['id'], json_encode(['state' => 'start', 'progress' => 0]));
+        
+        $this->install();
+    }
+    
+    private function install()
+    {
         try {
             $this->downloadToCache();
         } catch (Exception $e) {
@@ -60,18 +71,33 @@ class GambioStoreInstallation extends AbstractGambioStoreFileSystem
             $this->downloadPackageFromZipToCacheFolder();
         } catch (Exception $e) {
             $this->downLoadPackageFilesToCacheFolder();
+        } finally {
+            $this->cleanCache();
         }
     }
     
     
     private function downLoadPackageFilesToCacheFolder()
     {
+        $files = $this->fileList['includedFiles'];
+        $packageTempDirectory = $this->cacheFolder . $this->fileList['id'];
+        
+        if (!mkdir($packageTempDirectory) && !is_dir($packageTempDirectory)) {
+            throw new RuntimeException('Cannot create a folder in the cache directory. Please check permissions.');
+        }
+        
+        foreach ($files as $file) {
+            $this->curlFileDownload($file['source'], [CURLOPT_FILE => $this->cacheFolder . $file['destination']]);
+            if (hash_file('md5', $this->cacheFolder . $file['destination']) !== $file['hash']) {
+                throw new \RuntimeException('Uploaded package zip file has wrong hash.');
+            }
+        }
     }
     
     
     private function downloadPackageFromZipToCacheFolder()
     {
-        $targetFileName = $this->fileList['ic'] . '.zip';
+        $targetFileName = $this->fileList['id'] . '.zip';
         $targetFilePath = $this->cacheFolder . $targetFileName;
         $zipFile = fopen($targetFilePath, 'wb+');
     
@@ -84,10 +110,14 @@ class GambioStoreInstallation extends AbstractGambioStoreFileSystem
         
         fclose($zipFile);
         
+        if (hash_file('md5', $targetFilePath) !== $this->fileList['zip']['hash']) {
+            throw new \RuntimeException('Uploaded package zip file has wrong hash.');
+        }
+        
         $zip = new ZipArchive;
         $res = $zip->open($targetFilePath);
         if ($res === true) {
-            $zip->extractTo($this->fileList['ic']);
+            $zip->extractTo($this->fileList['id']);
             $zip->close();
         } else {
             $zip->close();
