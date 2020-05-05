@@ -9,6 +9,12 @@
    --------------------------------------------------------------
 */
 
+require_once 'GambioStoreConnector.inc.php';
+require_once 'Core/GambioStoreCompatibility.inc.php';
+require_once 'Core/GambioStoreDatabase.inc.php';
+require_once 'Core/GambioStoreLogger.inc.php';
+require_once 'Core/GambioStoreConfiguration.inc.php';
+
 /**
  * Class GambioStoreConnector
  *
@@ -39,7 +45,7 @@ class GambioStoreConnector
      * @param \GambioStoreCompatibility $compatibility
      * @param \GambioStoreLogger        $logger
      */
-    public function __construct(
+    private function __construct(
         GambioStoreConfiguration $configuration,
         GambioStoreCompatibility $compatibility,
         GambioStoreLogger $logger
@@ -47,6 +53,22 @@ class GambioStoreConnector
         $this->configuration = $configuration;
         $this->compatibility = $compatibility;
         $this->logger        = $logger;
+    }
+    
+    
+    /**
+     * Instantiates the GambioStoreConnector with its dependencies
+     *
+     * @return \GambioStoreConnector
+     */
+    public static function getInstance()
+    {
+        $database      = GambioStoreDatabase::connect();
+        $compatibility = new GambioStoreCompatibility($database);
+        $configuration = new GambioStoreConfiguration($database, $compatibility);
+        $logger        = new GambioStoreLogger();
+        
+        return new self($configuration, $compatibility, $logger);
     }
     
     
@@ -92,7 +114,7 @@ class GambioStoreConnector
     
     /**
      * Generates the Gambio Store Token for the Shop
-     * 
+     *
      * @return string
      */
     public function generateToken()

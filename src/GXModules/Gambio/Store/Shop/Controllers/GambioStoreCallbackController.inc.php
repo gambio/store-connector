@@ -9,6 +9,8 @@
    --------------------------------------------------------------
 */
 
+require_once __DIR__ . '/../../GambioStoreConnector.inc.php';
+
 /**
  * Class GambioStoreCallbackController
  *
@@ -30,8 +32,7 @@ class GambioStoreCallbackController extends HttpViewController
      */
     private function setup()
     {
-        $factory         = MainFactory::create('GambioStoreConnectorFactory');
-        $this->connector = $factory->createConnector();
+        $this->connector = GambioStoreConnector::getInstance();
     }
     
     
@@ -48,7 +49,7 @@ class GambioStoreCallbackController extends HttpViewController
             'notice'  => 'Method not implemented'
         ];
         
-        return MainFactory::create("JsonHttpControllerResponse", $response);
+        return new JsonHttpControllerResponse($response);
     }
     
     
@@ -65,7 +66,7 @@ class GambioStoreCallbackController extends HttpViewController
     
         $result = $this->connector->verifyRegistration($storeToken);
     
-        return MainFactory::create('JsonHttpControllerResponse', [
+        return new JsonHttpControllerResponse([
             'success' => $result
         ]);
     }
