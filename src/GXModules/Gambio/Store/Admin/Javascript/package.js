@@ -1,5 +1,5 @@
 /* --------------------------------------------------------------
-   package.js 2020-05-04
+   package.js 2020-05-05
    Gambio GmbH
    http://www.gambio.de
    Copyright (c) 2020 Gambio GmbH
@@ -9,20 +9,29 @@
  */
 
 /**
- * @param folderNameInsideShop
+ * Starts the activation of a theme by folder name inside shop.
+ *
+ * @param data
  */
-const activateTheme = (folderNameInsideShop) => {
+const activateTheme = async (data) => {
 	const formData = new FormData();
-	formData.append('folderNameInsideShop', folderNameInsideShop);
+	formData.append('folderNameInsideShop', data.folderNameInsideShop);
 	
-	GambioStore.callShop('./admin.php?do=GambioStoreAjax/ActivateTheme', {
-		method: 'POST',
-		body: formData
-	}).then(() => GambioStore.messenger.sendMessage('activation_succeeded'))
-		.catch(() => GambioStore.messenger.sendMessage('activation_failed'));
+	try {
+		await GambioStore.callShop('./admin.php?do=GambioStoreAjax/ActivateTheme', {
+			method: 'POST',
+			body: formData
+		});
+		GambioStore.messenger.sendMessage('activation_succeeded');
+	} catch {
+		GambioStore.messenger.sendMessage('activation_failed')
+	}
+	
 }
 
 /**
+ * Checks with a given theme name if this theme is currently active.
+ *
  * @param themeName
  * @returns {Promise<Response>}
  */
@@ -77,15 +86,21 @@ const isFilePermissionCorrect = async (data) => {
 /**
  * Uninstall a theme
  *
- * @param {String} folderNameInsideShop Theme data
+ * @param data
  */
-const uninstallPackage = (folderNameInsideShop) => {
+const uninstallPackage = async (data) => {
 	const formData = new FormData();
-	formData.append('folderNameInsideShop', folderNameInsideShop)
+	formData.append('folderNameInsideShop', data.folderNameInsideShop)
 	
-	GambioStore.callShop('admin.php?do=GambioStoreAjax/uninstallPackage', {method: 'post', body: formData})
-		.then(() => GambioStore.messenger.sendMessage('uninstall_succeeded'))
-		.catch(() => GambioStore.messenger.sendMessage('uninstall_failed', data))
+	try {
+		await GambioStore.callShop('admin.php?do=GambioStoreAjax/uninstallPackage', {
+			method: 'post',
+			body: formData
+		});
+		GambioStore.messenger.sendMessage('uninstall_succeeded');
+	} catch {
+		GambioStore.messenger.sendMessage('uninstall_failed', data);
+	}
 }
 
 /**
@@ -94,10 +109,15 @@ const uninstallPackage = (folderNameInsideShop) => {
  * @return {Promise<void>}
  */
 const startPackageInstallation = async (data) => {
+	const $installingPackageModal = $('.installing-package.modal');
+	const progressDescription = document
+		.getElementsByClassName('installing-package modal').item(0)
+		.getElementsByClassName('progress-description').item(0);
+	
 	// By checking whether a gallery object is present,
 	// we can determine if this is a theme or not.
 	try {
-		$progressDescription.text(GambioStore.translation.translate('INSTALLING_PACKAGE'));
+		progressDescription.textContent = GambioStore.translation.translate('INSTALLING_PACKAGE');
 		await installPackage(data, updateProgressCallback);
 		
 		if (data.details.gallery) {
@@ -113,7 +133,6 @@ const startPackageInstallation = async (data) => {
 	} finally {
 		updateProgressCallback({progress: 1});
 		setTimeout(() => {
-			const $installingPackageModal = $('.installing-package.modal');
 			$installingPackageModal.modal('hide');
 		}, 2000);
 	}
@@ -124,8 +143,9 @@ const startPackageInstallation = async (data) => {
  * @param progress
  */
 const updateProgressCallback = ({progress}) => {
-	const $installingPackageModal = $('.installing-package.modal');
-	const $progressBar = $installingPackageModal.find('.progress .progress-bar');
+	const progressBar = document
+		.getElementsByClassName('installing-package modal').item(0)
+		.getElementsByClassName('progress-bar').item(0);
 	
 	let progressPercentage = Math.ceil(progress * 100);
 	
@@ -135,9 +155,9 @@ const updateProgressCallback = ({progress}) => {
 		progressPercentage = 100;
 	}
 	
-	$progressBar.prop('aria-valuenow', progressPercentage);
-	$progressBar.css('width', progressPercentage + '%');
-	$progressBar.text(progressPercentage + '%');
+	progressBar['aria-valuenow'] = progressPercentage;
+	progressBar.style.width = progressPercentage + '%';
+	progressBar.textContent = progressPercentage + '%';
 };
 
 /**
@@ -148,9 +168,9 @@ const updateProgressCallback = ({progress}) => {
  */
 const install = async (data) => {
 	const $installingPackageModal = $('.installing-package.modal');
-	const $progressDescription = $installingPackageModal.find('.progress-description');
+	const progressDescription = document.getElementsByClassName('.progress-description').item(0);
 	
-	$progressDescription.text(GambioStore.translation.translate('PREPARING_PACKAGE'));
+	progressDescription.textContent = GambioStore.translation.translate('PREPARING_PACKAGE');
 	
 	updateProgressCallback({progress: 0}); // always set to 0 initially
 	$installingPackageModal.modal('show');
@@ -167,6 +187,6 @@ const install = async (data) => {
 
 window.addEventListener('DOMContentLoaded', () => {
 	GambioStore.messenger.listenToMessage('start_installation_process', install);
-	GambioStore.messenger.listenToMessage('uninstall_theme', data => uninstallPackage(data.fileName));
-	GambioStore.messenger.listenToMessage('activate_theme', data => activateTheme(data.fileName));
+	GambioStore.messenger.listenToMessage('uninstall_theme', uninstallPackage);
+	GambioStore.messenger.listenToMessage('activate_theme', activateTheme);
 });
