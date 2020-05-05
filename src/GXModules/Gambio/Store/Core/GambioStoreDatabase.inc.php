@@ -79,11 +79,7 @@ class GambioStoreDatabase
 
         $statement = $this->pdo->prepare($sql);
         
-        foreach ($parameters as $key => $value) {
-            $statement->bindParam($key, $value);
-        }
-        
-        $statement->execute();
+        $statement->execute($parameters);
         
         return $statement;
     }

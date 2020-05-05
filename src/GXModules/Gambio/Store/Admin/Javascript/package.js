@@ -7,9 +7,6 @@
    [http://www.gnu.org/licenses/gpl-2.0.html]
    --------------------------------------------------------------
  */
-import messenger from './messenger'
-import callShop from './callShop'
-import translation from './translation'
 
 /**
  * @param folderNameInsideShop
@@ -18,11 +15,11 @@ const activateTheme = (folderNameInsideShop) => {
 	const formData = new FormData();
 	formData.append('folderNameInsideShop', folderNameInsideShop);
 	
-	callShop('./admin.php?do=GambioStoreAjax/ActivateTheme', {
+	GambioStore.callShop('./admin.php?do=GambioStoreAjax/ActivateTheme', {
 		method: 'POST',
 		body: formData
-	}).then(() => messenger.sendMessage('activation_succeeded'))
-		.catch(() => messenger.sendMessage('activation_failed'));
+	}).then(() => GambioStore.messenger.sendMessage('activation_succeeded'))
+		.catch(() => GambioStore.messenger.sendMessage('activation_failed'));
 }
 
 /**
@@ -30,7 +27,7 @@ const activateTheme = (folderNameInsideShop) => {
  * @returns {Promise<Response>}
  */
 const isThemeActive = (themeName) => {
-	return callShop('admin.php?do=GambioStoreAjax/IsThemeActive&themeName=' + themeName);
+	return GambioStore.callShop('admin.php?do=GambioStoreAjax/IsThemeActive&themeName=' + themeName);
 };
 
 /**
@@ -40,14 +37,14 @@ const isThemeActive = (themeName) => {
  *
  * @param data
  * @param progressCallback {function} invoked between each installation request. Progress-Bars may hook into this.
- * @returns {Promise<unknown>} Resolves when installed. Rejects upon error.
+ * @returns {Promise<>} Resolves when installed. Rejects upon error.
  */
 const installPackage = async (data, progressCallback = () => null) => {
 	const formData = new FormData();
 	formData.append('gambioStoreData', JSON.stringify(data));
 	
 	const doPackageInstallation = async () => {
-		const response = await callShop('admin.php?do=GambioStoreAjax/InstallPackage', {
+		const response = await GambioStore.callShop('admin.php?do=GambioStoreAjax/InstallPackage', {
 			method: 'post',
 			body: formData
 		});
@@ -70,7 +67,7 @@ const isFilePermissionCorrect = async (data) => {
 	
 	formData.append('gambioStoreData', JSON.stringify(data));
 	try {
-		await callShop('admin.php?do=GambioStoreAjax/checkPermission', {method: 'post', body: formData})
+		await GambioStore.callShop('admin.php?do=GambioStoreAjax/checkPermission', {method: 'post', body: formData})
 		return true;
 	} catch {
 		return false;
@@ -86,9 +83,9 @@ const uninstallPackage = (folderNameInsideShop) => {
 	const formData = new FormData();
 	formData.append('folderNameInsideShop', folderNameInsideShop)
 	
-	callShop('admin.php?do=GambioStoreAjax/uninstallPackage', {method: 'post', body: formData})
-		.then(() => messenger.sendMessage('uninstall_succeeded'))
-		.catch(() => messenger.sendMessage('uninstall_failed', data))
+	GambioStore.callShop('admin.php?do=GambioStoreAjax/uninstallPackage', {method: 'post', body: formData})
+		.then(() => GambioStore.messenger.sendMessage('uninstall_succeeded'))
+		.catch(() => GambioStore.messenger.sendMessage('uninstall_failed', data))
 }
 
 /**
@@ -100,7 +97,7 @@ const startPackageInstallation = async (data) => {
 	// By checking whether a gallery object is present,
 	// we can determine if this is a theme or not.
 	try {
-		$progressDescription.text(translation.translate('INSTALLING_PACKAGE'));
+		$progressDescription.text(GambioStore.translation.translate('INSTALLING_PACKAGE'));
 		await installPackage(data, updateProgressCallback);
 		
 		if (data.details.gallery) {
@@ -110,12 +107,13 @@ const startPackageInstallation = async (data) => {
 			}
 		}
 		
-		messenger.sendMessage('installation_succeeded')
+		GambioStore.messenger.sendMessage('installation_succeeded')
 	} catch {
-		messenger.sendMessage('installation_failed');
+		GambioStore.messenger.sendMessage('installation_failed');
 	} finally {
 		updateProgressCallback({progress: 1});
 		setTimeout(() => {
+			const $installingPackageModal = $('.installing-package.modal');
 			$installingPackageModal.modal('hide');
 		}, 2000);
 	}
@@ -152,7 +150,7 @@ const install = async (data) => {
 	const $installingPackageModal = $('.installing-package.modal');
 	const $progressDescription = $installingPackageModal.find('.progress-description');
 	
-	$progressDescription.text(translation.translate('PREPARING_PACKAGE'));
+	$progressDescription.text(GambioStore.translation.translate('PREPARING_PACKAGE'));
 	
 	updateProgressCallback({progress: 0}); // always set to 0 initially
 	$installingPackageModal.modal('show');
@@ -160,7 +158,7 @@ const install = async (data) => {
 	const filePermission = await isFilePermissionCorrect(data);
 	
 	if (filePermission === false) {
-		messenger.sendMessage('ftp_data_requested');
+		GambioStore.messenger.sendMessage('ftp_data_requested');
 		return;
 	}
 	
@@ -168,7 +166,7 @@ const install = async (data) => {
 }
 
 window.addEventListener('DOMContentLoaded', () => {
-	messenger.listenToMessage('start_installation_process', install);
-	messenger.listenToMessage('uninstall_theme', data => uninstallPackage(data.fileName));
-	messenger.listenToMessage('activate_theme', data => activateTheme(data.fileName));
+	GambioStore.messenger.listenToMessage('start_installation_process', install);
+	GambioStore.messenger.listenToMessage('uninstall_theme', data => uninstallPackage(data.fileName));
+	GambioStore.messenger.listenToMessage('activate_theme', data => activateTheme(data.fileName));
 });

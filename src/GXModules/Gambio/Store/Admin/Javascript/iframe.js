@@ -1,6 +1,3 @@
-import translation from './translation'
-import messenger from './messenger'
-
 /**
  * Builds the Iframe into the html document with store url and language code.
  *
@@ -8,9 +5,9 @@ import messenger from './messenger'
  */
 const build = async () => {
 	const div = document.getElementById('gambio-store-iframe');
-	const storeUrl = div.dataset.url;
+	const storeUrl = div.dataset.storeUrl;
 	const iframe = document.createElement('iframe');
-	const languageCode = translation.getLanguageCode();
+	const languageCode = GambioStore.translation.getLanguageCode();
 	
 	if (storeUrl.includes('?')) {
 		iframe.src = `${storeUrl}&language=${languageCode}`;
@@ -24,7 +21,7 @@ const build = async () => {
 	iframe.style.border = 'none';
 	iframe.style.overflow = 'hidden';
 	
-	parent.appendChild(iframe);
+	div.appendChild(iframe);
 };
 
 /**
@@ -51,6 +48,6 @@ const onResponseIframeHeight = (payload) => {
  */
 window.addEventListener('DOMContentLoaded', (event) => {
 	adjustBackgroundColor();
-	messenger.listenToMessage('response_iframe_height', onResponseIframeHeight);
+	GambioStore.messenger.listenToMessage('response_iframe_height', onResponseIframeHeight);
 	build().catch();
 });

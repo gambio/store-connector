@@ -8,8 +8,6 @@
  --------------------------------------------------------------
  */
 
-import messenger from './messenger';
-
 /**
  * ## Shop
  *
@@ -24,7 +22,7 @@ import messenger from './messenger';
  * @returns {Promise<Object>}
  */
 const fetchShopInfo = () => {
-    return fetch('admin.php?do=GambioStoreAjax/collectShopInformation');
+    return GambioStore.callShop('admin.php?do=GambioStoreAjax/collectShopInformation');
 };
 
 /**
@@ -33,33 +31,37 @@ const fetchShopInfo = () => {
  * @param {Object} shopInfo Shop information data
  */
 const sendShopInfo = (shopInfo) => {
-    messenger.sendMessage('send_shop_information', {shopInfo})
+	GambioStore.messenger.sendMessage('send_shop_information', {shopInfo});
 };
 
 /**
  * Initiate messenger listeners upon a built document.
  */
 window.addEventListener('DOMContentLoaded', () => {
-    messenger.listenToMessage('update_shop_information', function() {
-        fetchShopInfo().then(sendShopInfo);
-    });
-    messenger.listenToMessage('request_shop_information', function() {
-        fetchShopInfo().then(sendShopInfo);
-    });
-    
-    messenger.listenToMessage('request_store_token', function() {
-        const storeToken = document.getElementById('gambio-store-iframe').dataset.storeToken;
-        messenger.sendMessage('send_store_token', {'storeToken': storeToken});
-    });
-    
-    messenger.listenToMessage('send_data_processing_accepted', function() {
-        window.location.href = 'admin.php?do=GambioStore/AcceptDataProcessing';
-    });
-    
-    messenger.listenToMessage('scroll_to_top', function() {
-	    window.scrollTo({
-		    top: 0,
-		    left: 0
-	    });
-    });
+	GambioStore.messenger.listenToMessage('update_shop_information', function() {
+		fetchShopInfo().then(sendShopInfo);
+	});
+	GambioStore.messenger.listenToMessage('request_shop_information', function() {
+		fetchShopInfo().then(sendShopInfo);
+	});
+	
+	GambioStore.messenger.listenToMessage('request_store_token', function() {
+		const storeToken = document.getElementById('gambio-store-iframe').dataset.storeToken;
+		GambioStore.messenger.sendMessage('send_store_token', {'storeToken': storeToken});
+	});
+	
+	GambioStore.messenger.listenToMessage('send_data_processing_accepted', function() {
+		window.location.href = 'admin.php?do=GambioStore/AcceptDataProcessing';
+	});
+	
+	GambioStore.messenger.listenToMessage('reload_page', function() {
+		window.location.reload(true);
+	})
+	
+	GambioStore.messenger.listenToMessage('scroll_to_top', function() {
+		window.scrollTo({
+			top: 0,
+			left: 0
+		});
+	});
 });

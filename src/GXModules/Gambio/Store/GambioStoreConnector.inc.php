@@ -73,15 +73,20 @@ class GambioStoreConnector
     
     
     /**
-     * Determines whether the storeToken belongs to the shop or not
+     * Determines whether this shop send the store token for registration
      *
      * @param $storeToken
      *
      * @return bool
      */
-    public function verifyStoreToken($storeToken)
+    public function verifyRegistration($storeToken)
     {
-        return $this->configuration->get('GAMBIO_STORE_TOKEN') === $storeToken;
+        $result = $this->configuration->get('GAMBIO_STORE_TOKEN') === $storeToken;
+        if ($result) {
+            $this->configuration->set('GAMBIO_STORE_IS_REGISTERED', 'true');
+        }
+        
+        return $result;
     }
     
     

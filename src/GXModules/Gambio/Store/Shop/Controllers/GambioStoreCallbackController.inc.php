@@ -59,9 +59,11 @@ class GambioStoreCallbackController extends HttpViewController
      */
     public function actionVerify()
     {
+        $this->setup();
+    
         $storeToken = $this->_getPostData('storeToken');
-        
-        $result = $this->connector->verifyStoreToken($storeToken);
+    
+        $result = $this->connector->verifyRegistration($storeToken);
     
         return MainFactory::create('JsonHttpControllerResponse', [
             'success' => $result

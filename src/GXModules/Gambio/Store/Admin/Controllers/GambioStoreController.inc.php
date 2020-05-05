@@ -98,10 +98,7 @@ class GambioStoreController extends AdminHttpViewController
     
         $data              = $this->getIFrameTemplateData('/installations');
         $assets            = $this->getIFrameAssets();
-        $contentNavigation = $this->getStoreNavigation();
-    
-        //var_dump($title, $template, $data, $assets, $contentNavigation);
-        //die();
+        $contentNavigation = $this->getStoreNavigation(false, true);
     
         return MainFactory::create('AdminLayoutHttpControllerResponse', $title, $template, $data, $assets,
             $contentNavigation);
@@ -127,15 +124,16 @@ class GambioStoreController extends AdminHttpViewController
         }
     
         $title    = new NonEmptyStringType($this->languageTextManager->get_text('PAGE_TITLE'));
-        $template = new ExistingFile(new StringType(dirname(__FILE__, 2) . '/Html/gambio_store_configuration.html'));
+        $template = new ExistingFile(new NonEmptyStringType(dirname(__FILE__, 2)
+                                                            . '/Html/gambio_store_configuration.html'));
     
         $data = MainFactory::create('KeyValueCollection', ['url' => $gambioStoreUrl]);
     
         $assets = MainFactory::create('AssetCollection', [
-            MainFactory::create('Asset', 'gambio_store . lang . inc . php')
+            MainFactory::create('Asset', 'gambio_store.lang.inc.php')
         ]);
     
-        $contentNavigation = $this->getStoreNavigation();
+        $contentNavigation = $this->getStoreNavigation(false);
     
         return MainFactory::create('AdminLayoutHttpControllerResponse', $title, $template, $data, $assets,
             $contentNavigation);
@@ -162,10 +160,10 @@ class GambioStoreController extends AdminHttpViewController
      */
     private function getGambioStoreUrl()
     {
-        $gambioUrl = (string)$this->configuration->get('GAMBIO_STORE_URL');
+        $gambioUrl = $this->configuration->get('GAMBIO_STORE_URL');
         
         // Fall back to the production Gambio Store URL if none is set.
-        if ($gambioUrl === '') {
+        if (empty($gambioUrl)) {
             $gambioUrl = 'https://store.gambio.com/a';
             $this->configuration->set('GAMBIO_STORE_URL', $gambioUrl);
         }
@@ -200,15 +198,15 @@ class GambioStoreController extends AdminHttpViewController
     {
         return MainFactory::create('AssetCollection', [
             MainFactory::create('Asset', 'gambio_store.lang.inc.php'),
-            MainFactory::create('Asset', '../GXModules/Gambio/Store/Admin/Javascript/promise_polyfill.js'),
-            MainFactory::create('Asset', '../GXModules/Gambio/Store/Admin/Javascript/fetch_polyfill.js'),
-            MainFactory::create('Asset', '../GXModules/Gambio/Store/Admin/Javascript/messenger.js'),
-            MainFactory::create('Asset', '../GXModules/Gambio/Store/Admin/Javascript/translation.js'),
-            MainFactory::create('Asset', '../GXModules/Gambio/Store/Admin/Javascript/callShop.js'),
-            MainFactory::create('Asset', '../GXModules/Gambio/Store/Admin/Javascript/iframe.js'),
-            MainFactory::create('Asset', '../GXModules/Gambio/Store/Admin/Javascript/package.js'),
-            MainFactory::create('Asset', '../GXModules/Gambio/Store/Admin/Javascript/shop.js'),
-            MainFactory::create('Asset', '../GXModules/Gambio/Store/Admin/Javascript/updateCounter.js')
+            MainFactory::create('Asset', '../GXModules/Gambio/Store/Build/Admin/Javascript/promise_polyfill.js'),
+            MainFactory::create('Asset', '../GXModules/Gambio/Store/Build/Admin/Javascript/fetch_polyfill.js'),
+            MainFactory::create('Asset', '../GXModules/Gambio/Store/Build/Admin/Javascript/messenger.js'),
+            MainFactory::create('Asset', '../GXModules/Gambio/Store/Build/Admin/Javascript/translation.js'),
+            MainFactory::create('Asset', '../GXModules/Gambio/Store/Build/Admin/Javascript/callShop.js'),
+            MainFactory::create('Asset', '../GXModules/Gambio/Store/Build/Admin/Javascript/iframe.js'),
+            MainFactory::create('Asset', '../GXModules/Gambio/Store/Build/Admin/Javascript/package.js'),
+            MainFactory::create('Asset', '../GXModules/Gambio/Store/Build/Admin/Javascript/shop.js'),
+            MainFactory::create('Asset', '../GXModules/Gambio/Store/Build/Admin/Javascript/updateCounter.js')
         ]);
     }
     
@@ -218,13 +216,13 @@ class GambioStoreController extends AdminHttpViewController
      *
      * @return mixed
      */
-    private function getStoreNavigation()
+    private function getStoreNavigation($mainPage = true, $secondaryPage = false)
     {
         $contentNavigation = MainFactory::create('ContentNavigationCollection', []);
         $contentNavigation->add(new StringType($this->languageTextManager->get_text('DOWNLOADS', 'gambio_store')),
-            new StringType('admin.php?do=GambioStore'), new BoolType(true));
+            new StringType('admin.php?do=GambioStore'), new BoolType($mainPage));
         $contentNavigation->add(new StringType($this->languageTextManager->get_text('INSTALLED_PACKAGES_AND_UPDATES',
-            'gambio_store')), new StringType('admin.php?do=GambioStore/Installations'), new BoolType(false));
+            'gambio_store')), new StringType('admin.php?do=GambioStore/Installations'), new BoolType($secondaryPage));
         
         return $contentNavigation;
     }

@@ -8,8 +8,6 @@
    --------------------------------------------------------------
  */
 
-import messenger from 'src/GXModules/Gambio/Store/Admin/JavaScript/messenger';
-
 const setUpdatesCounter = ({updatesCounter}) => {
 	const className = 'gambio-store-updates-counter';
 	
@@ -48,5 +46,5 @@ const setUpdatesCounter = ({updatesCounter}) => {
 
 
 window.addEventListener('DOMContentLoaded', function() {
-	messenger.listenToMessage('updates_counter', setUpdatesCounter);
+	GambioStore.messenger.listenToMessage('updates_counter', setUpdatesCounter);
 });

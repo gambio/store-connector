@@ -124,7 +124,7 @@ class GambioStoreConfiguration
     private function gmSet($key, $value)
     {
         $this->database->query('UPDATE gm_configuration SET gm_value = :value WHERE gm_key = :key',
-            ['value' => $value, 'key' => $key]);
+            [':value' => $value, ':key' => $key]);
     }
     
     
@@ -137,6 +137,6 @@ class GambioStoreConfiguration
     private function gxSet($key, $value)
     {
         $this->database->query('UPDATE gx_configuration SET `value` = :value WHERE `key` = :key',
-            ['value' => $value, 'key' => $key]);
+            [':value' => $value, ':key' => $key]);
     }
 }
