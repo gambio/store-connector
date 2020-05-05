@@ -1,5 +1,5 @@
 /* --------------------------------------------------------------
-   package.js 2020-05-04
+   package.js 2020-05-05
    Gambio GmbH
    http://www.gambio.de
    Copyright (c) 2020 Gambio GmbH
@@ -12,20 +12,29 @@ import callShop from './callShop'
 import translation from './translation'
 
 /**
- * @param folderNameInsideShop
+ * Starts the activation of a theme by folder name inside shop.
+ *
+ * @param data
  */
-const activateTheme = (folderNameInsideShop) => {
+const activateTheme = async (data) => {
 	const formData = new FormData();
-	formData.append('folderNameInsideShop', folderNameInsideShop);
+	formData.append('folderNameInsideShop', data.folderNameInsideShop);
 	
-	callShop('./admin.php?do=GambioStoreAjax/ActivateTheme', {
-		method: 'POST',
-		body: formData
-	}).then(() => messenger.sendMessage('activation_succeeded'))
-		.catch(() => messenger.sendMessage('activation_failed'));
+	try {
+		await callShop('./admin.php?do=GambioStoreAjax/ActivateTheme', {
+			method: 'POST',
+			body: formData
+		});
+		messenger.sendMessage('activation_succeeded');
+	} catch {
+		messenger.sendMessage('activation_failed')
+	}
+	
 }
 
 /**
+ * Checks with a given theme name if this theme is currently active.
+ *
  * @param themeName
  * @returns {Promise<Response>}
  */
@@ -40,7 +49,7 @@ const isThemeActive = (themeName) => {
  *
  * @param data
  * @param progressCallback {function} invoked between each installation request. Progress-Bars may hook into this.
- * @returns {Promise<unknown>} Resolves when installed. Rejects upon error.
+ * @returns {Promise<void>} Resolves when installed. Rejects upon error.
  */
 const installPackage = async (data, progressCallback = () => null) => {
 	const formData = new FormData();
@@ -80,15 +89,21 @@ const isFilePermissionCorrect = async (data) => {
 /**
  * Uninstall a theme
  *
- * @param {String} folderNameInsideShop Theme data
+ * @param data
  */
-const uninstallPackage = (folderNameInsideShop) => {
+const uninstallPackage = async (data) => {
 	const formData = new FormData();
-	formData.append('folderNameInsideShop', folderNameInsideShop)
+	formData.append('folderNameInsideShop', data.folderNameInsideShop)
 	
-	callShop('admin.php?do=GambioStoreAjax/uninstallPackage', {method: 'post', body: formData})
-		.then(() => messenger.sendMessage('uninstall_succeeded'))
-		.catch(() => messenger.sendMessage('uninstall_failed', data))
+	try {
+		await callShop('admin.php?do=GambioStoreAjax/uninstallPackage', {
+			method: 'post',
+			body: formData
+		});
+		messenger.sendMessage('uninstall_succeeded');
+	} catch {
+		messenger.sendMessage('uninstall_failed', data);
+	}
 }
 
 /**
@@ -97,10 +112,15 @@ const uninstallPackage = (folderNameInsideShop) => {
  * @return {Promise<void>}
  */
 const startPackageInstallation = async (data) => {
+	const $installingPackageModal = $('.installing-package.modal');
+	const progressDescription = document
+		.getElementsByClassName('installing-package modal').item(0)
+		.getElementsByClassName('progress-description').item(0);
+	
 	// By checking whether a gallery object is present,
 	// we can determine if this is a theme or not.
 	try {
-		$progressDescription.text(translation.translate('INSTALLING_PACKAGE'));
+		progressDescription.textContent = translation.translate('INSTALLING_PACKAGE');
 		await installPackage(data, updateProgressCallback);
 		
 		if (data.details.gallery) {
@@ -126,8 +146,9 @@ const startPackageInstallation = async (data) => {
  * @param progress
  */
 const updateProgressCallback = ({progress}) => {
-	const $installingPackageModal = $('.installing-package.modal');
-	const $progressBar = $installingPackageModal.find('.progress .progress-bar');
+	const progressBar = document
+		.getElementsByClassName('installing-package modal').item(0)
+		.getElementsByClassName('progress-bar').item(0);
 	
 	let progressPercentage = Math.ceil(progress * 100);
 	
@@ -137,9 +158,9 @@ const updateProgressCallback = ({progress}) => {
 		progressPercentage = 100;
 	}
 	
-	$progressBar.prop('aria-valuenow', progressPercentage);
-	$progressBar.css('width', progressPercentage + '%');
-	$progressBar.text(progressPercentage + '%');
+	progressBar['aria-valuenow'] = progressPercentage;
+	progressBar.style.width = progressPercentage + '%';
+	progressBar.textContent = progressPercentage + '%';
 };
 
 /**
@@ -150,9 +171,9 @@ const updateProgressCallback = ({progress}) => {
  */
 const install = async (data) => {
 	const $installingPackageModal = $('.installing-package.modal');
-	const $progressDescription = $installingPackageModal.find('.progress-description');
+	const progressDescription = document.getElementsByClassName('.progress-description').item(0);
 	
-	$progressDescription.text(translation.translate('PREPARING_PACKAGE'));
+	progressDescription.textContent = translation.translate('PREPARING_PACKAGE');
 	
 	updateProgressCallback({progress: 0}); // always set to 0 initially
 	$installingPackageModal.modal('show');
@@ -169,6 +190,6 @@ const install = async (data) => {
 
 window.addEventListener('DOMContentLoaded', () => {
 	messenger.listenToMessage('start_installation_process', install);
-	messenger.listenToMessage('uninstall_theme', data => uninstallPackage(data.fileName));
-	messenger.listenToMessage('activate_theme', data => activateTheme(data.fileName));
+	messenger.listenToMessage('uninstall_theme', uninstallPackage);
+	messenger.listenToMessage('activate_theme', activateTheme);
 });
