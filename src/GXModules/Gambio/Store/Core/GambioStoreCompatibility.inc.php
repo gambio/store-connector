@@ -25,7 +25,7 @@ class GambioStoreCompatibility
     /**
      *
      */
-    const RESOURCE_GM_CONFIGURATION_TABLE = 'gm_configuration';
+    const RESOURCE_GM_CONFIGURATION_TABLE = 'gx_configuration';
     
     /**
      *
@@ -60,7 +60,7 @@ class GambioStoreCompatibility
     {
         switch($resource) {
             case self::RESOURCE_GM_CONFIGURATION_TABLE:
-                return $this->doesGxConfigurationTableExists();
+                return !$this->doesGxConfigurationTableExists();
     
             case self::FEATURE_THEME_CONTROL:
                 return $this->doesFeatureThemeControlExists();
