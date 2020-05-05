@@ -26,6 +26,10 @@ class GambioStoreInstallation extends AbstractGambioStoreFileSystem
     private $cache;
     
     private $fileList;
+    /**
+     * @var string
+     */
+    private $cacheFolder;
     
     
     public function __construct($fileList, $token, $cache)
@@ -33,16 +37,25 @@ class GambioStoreInstallation extends AbstractGambioStoreFileSystem
         $this->fileList = $fileList;
         $this->token = $token;
         $this->cache = $cache;
+        $this->cacheFolder = DIR_FS_CATALOG . '/cache/';
     }
     
     
     public function perform($data, $name)
     {
-        $this->downloadToCache();
+        try {
+            $this->downloadToCache();
+        } catch (Exception $e) {
+            throw new RuntimeException($e->getMessage());
+        }
     }
     
     private function downloadToCache()
     {
+        if (! is_writable($this->cacheFolder) && ! chmod($this->cacheFolder, 0777)) {
+            throw new RuntimeException("Folder $this->cacheFolder is not writable");
+        }
+        
         try {
             $this->downloadPackageFromZipToCacheFolder();
         } catch (Exception $e) {
@@ -59,7 +72,7 @@ class GambioStoreInstallation extends AbstractGambioStoreFileSystem
     private function downloadPackageFromZipToCacheFolder()
     {
         $targetFileName = $this->fileList['ic'] . '.zip';
-        $targetFilePath = DIR_FS_CATALOG . '/cache/' . $targetFileName;
+        $targetFilePath = $this->cacheFolder . $targetFileName;
         $zipFile = fopen($targetFilePath, 'wb+');
     
         try {
