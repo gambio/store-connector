@@ -57,8 +57,7 @@ class GambioStoreController extends AdminHttpViewController
         }
         
         $title             = new NonEmptyStringType($this->languageTextManager->get_text('PAGE_TITLE'));
-        $template          = new ExistingFile(new NonEmptyStringType(dirname(__FILE__, 2)
-                                                                     . '/Templates/gambio_store.html'));
+        $template          = new ExistingFile(new NonEmptyStringType(dirname(__FILE__, 2) . '/Html/gambio_store.html'));
         $contentNavigation = MainFactory::create('ContentNavigationCollection', []);
         $assets            = $this->getIFrameAssets();
         $data              = [];
@@ -93,14 +92,17 @@ class GambioStoreController extends AdminHttpViewController
         }
     
         $title    = new NonEmptyStringType($this->languageTextManager->get_text('PAGE_TITLE'));
-        $template = new ExistingFile(new NonEmptyStringType(dirname(__FILE__, 2) . '/Templates/gambio_store.html'));
+        $template = new ExistingFile(new NonEmptyStringType(dirname(__FILE__, 2) . '/Html/gambio_store.html'));
     
         setcookie('auto_updater_admin_check', 'admin_logged_in', time() + 5 * 60, '/');
     
         $data              = $this->getIFrameTemplateData('/installations');
         $assets            = $this->getIFrameAssets();
         $contentNavigation = $this->getStoreNavigation();
-        
+    
+        //var_dump($title, $template, $data, $assets, $contentNavigation);
+        //die();
+    
         return MainFactory::create('AdminLayoutHttpControllerResponse', $title, $template, $data, $assets,
             $contentNavigation);
     }
@@ -125,8 +127,7 @@ class GambioStoreController extends AdminHttpViewController
         }
     
         $title    = new NonEmptyStringType($this->languageTextManager->get_text('PAGE_TITLE'));
-        $template = new ExistingFile(new StringType(dirname(__FILE__, 2)
-                                                    . ' / Templates / gambio_store_configuration . html'));
+        $template = new ExistingFile(new StringType(dirname(__FILE__, 2) . '/Html/gambio_store_configuration.html'));
     
         $data = MainFactory::create('KeyValueCollection', ['url' => $gambioStoreUrl]);
     
@@ -199,15 +200,15 @@ class GambioStoreController extends AdminHttpViewController
     {
         return MainFactory::create('AssetCollection', [
             MainFactory::create('Asset', 'gambio_store.lang.inc.php'),
-            MainFactory::create('Asset', 'GXModules/Gambio/Store/Admin/Scripts/promise_polyfill.js'),
-            MainFactory::create('Asset', 'GXModules/Gambio/Store/Admin/Scripts/fetch_polyfill.js'),
-            MainFactory::create('Asset', 'GXModules/Gambio/Store/Admin/Scripts/messenger.js'),
-            MainFactory::create('Asset', 'GXModules/Gambio/Store/Admin/Scripts/translation.js'),
-            MainFactory::create('Asset', 'GXModules/Gambio/Store/Admin/Scripts/callShop.js'),
-            MainFactory::create('Asset', 'GXModules/Gambio/Store/Admin/Scripts/iframe.js'),
-            MainFactory::create('Asset', 'GXModules/Gambio/Store/Admin/Scripts/package.js'),
-            MainFactory::create('Asset', 'GXModules/Gambio/Store/Admin/Scripts/shop.js'),
-            MainFactory::create('Asset', 'GXModules/Gambio/Store/Admin/Scripts/updateCounter.js')
+            MainFactory::create('Asset', '../GXModules/Gambio/Store/Admin/Javascript/promise_polyfill.js'),
+            MainFactory::create('Asset', '../GXModules/Gambio/Store/Admin/Javascript/fetch_polyfill.js'),
+            MainFactory::create('Asset', '../GXModules/Gambio/Store/Admin/Javascript/messenger.js'),
+            MainFactory::create('Asset', '../GXModules/Gambio/Store/Admin/Javascript/translation.js'),
+            MainFactory::create('Asset', '../GXModules/Gambio/Store/Admin/Javascript/callShop.js'),
+            MainFactory::create('Asset', '../GXModules/Gambio/Store/Admin/Javascript/iframe.js'),
+            MainFactory::create('Asset', '../GXModules/Gambio/Store/Admin/Javascript/package.js'),
+            MainFactory::create('Asset', '../GXModules/Gambio/Store/Admin/Javascript/shop.js'),
+            MainFactory::create('Asset', '../GXModules/Gambio/Store/Admin/Javascript/updateCounter.js')
         ]);
     }
     

@@ -6,9 +6,9 @@
 	     data-store-token="{$content.storeToken}"
 	     data-store-url="{$content.storeUrl}"
 	     data-store-language="{$content.storeLanguage}"
-		 data-store-translations="{$content.translations}">
-    </div>
+	     data-store-translations="{$content.translations|json_encode}">
+	</div>
 	
-	{include file="gambio_store_installing_package_modal.html"}
+	{include file="get_usermod:/../../../GXModules/Gambio/Store/Admin/Html/gambio_store_installing_package_modal.html"}
 </div>
 {/block}

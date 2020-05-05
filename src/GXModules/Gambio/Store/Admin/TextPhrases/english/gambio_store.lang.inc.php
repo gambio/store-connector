@@ -10,5 +10,7 @@
 */
 
 $t_language_text_section_content_array = [
-    'PAGE_TITLE' => 'Gambio Store'
+    'PAGE_TITLE'           => 'Gambio Store',
+    'PACKAGE_INSTALLATION' => 'Package Installation',
+    'PREPARING_PACKAGE'    => 'Preparing package'
 ];
