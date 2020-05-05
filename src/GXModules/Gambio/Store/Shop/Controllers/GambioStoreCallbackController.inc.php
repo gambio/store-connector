@@ -49,7 +49,7 @@ class GambioStoreCallbackController extends HttpViewController
             'notice'  => 'Method not implemented'
         ];
         
-        return MainFactory::create("JsonHttpControllerResponse", $response);
+        return new JsonHttpControllerResponse($response);
     }
     
     
@@ -66,7 +66,7 @@ class GambioStoreCallbackController extends HttpViewController
     
         $result = $this->connector->verifyRegistration($storeToken);
     
-        return MainFactory::create('JsonHttpControllerResponse', [
+        return new JsonHttpControllerResponse([
             'success' => $result
         ]);
     }

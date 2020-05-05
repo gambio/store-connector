@@ -66,7 +66,7 @@ class GambioStoreAjaxController extends AdminHttpViewController
     
         $shopInformation = $serializer->serialize($service->getShopInformation());
     
-        return MainFactory::create('JsonHttpControllerResponse', $shopInformation);
+        return new JsonHttpControllerResponse($shopInformation);
     }
     
     
@@ -81,10 +81,10 @@ class GambioStoreAjaxController extends AdminHttpViewController
         
         try {
             $response = $this->connector->installPackage($_POST);
-            
-            return MainFactory::create('JsonHttpControllerResponse', $response);
+    
+            return new JsonHttpControllerResponse($response);
         } catch (\Exception $e) {
-            return MainFactory::create('JsonHttpControllerResponse', ['success' => false]);
+            return new JsonHttpControllerResponse(['success' => false]);
         }
     }
     
@@ -101,10 +101,10 @@ class GambioStoreAjaxController extends AdminHttpViewController
         try {
             $this->connector->uninstallPackage($_POST);
         } catch (\Exception $e) {
-            return MainFactory::create('JsonHttpControllerResponse', ['success' => false]);
+            return new JsonHttpControllerResponse(['success' => false]);
         }
-        
-        return MainFactory::create('JsonHttpControllerResponse', ['success' => true]);
+    
+        return new JsonHttpControllerResponse(['success' => true]);
     }
     
     
@@ -117,8 +117,8 @@ class GambioStoreAjaxController extends AdminHttpViewController
     {
         $this->setup();
         $isAccepted = $this->configuration->get('ADMIN_FEED_ACCEPTED_SHOP_INFORMATION_DATA_PROCESSING');
-        
-        return MainFactory::create('JsonHttpControllerResponse', ['accepted' => $isAccepted]);
+    
+        return new JsonHttpControllerResponse(['accepted' => $isAccepted]);
     }
     
     
@@ -132,25 +132,25 @@ class GambioStoreAjaxController extends AdminHttpViewController
         $this->setup();
     
         if (!isset($_GET) || !isset($_GET['themeName'])) {
-            return MainFactory::create('JsonHttpControllerResponse', ['success' => false]);
+            return new JsonHttpControllerResponse(['success' => false]);
         }
     
         if (!$this->compatibility->has(GambioStoreCompatibility::FEATURE_THEME_CONTROL)) {
-            return MainFactory::create('JsonHttpControllerResponse', ['isActive' => true]);
+            return new JsonHttpControllerResponse(['isActive' => true]);
         }
-        
+    
         $themeName    = $_GET['themeName'];
         $themeControl = StaticGXCoreLoader::getThemeControl();
-        
+    
         foreach ($themeControl->getCurrentThemeHierarchy() as $theme) {
             if ($theme === $themeName) {
-                return MainFactory::create('JsonHttpControllerResponse', [
+                return new JsonHttpControllerResponse([
                     'isActive' => true
                 ]);
             }
         }
     
-        return MainFactory::create('JsonHttpControllerResponse', [
+        return new JsonHttpControllerResponse([
             'isActive' => false
         ]);
     }
@@ -168,7 +168,7 @@ class GambioStoreAjaxController extends AdminHttpViewController
         if (!isset($_POST)
             || !isset($_POST['themeStorageName'])
             || !$this->compatibility->has(GambioStoreCompatibility::FEATURE_THEME_SERVICE)) {
-            return MainFactory::create('JsonHttpControllerResponse', ['success' => false]);
+            return new JsonHttpControllerResponse(['success' => false]);
         }
     
         $themeService = StaticGXCoreLoader::getService('Theme');
@@ -177,16 +177,17 @@ class GambioStoreAjaxController extends AdminHttpViewController
         try {
             $themeService->activateTheme($themeName);
         } catch (Exception $e) {
-            return MainFactory::create('JsonHttpControllerResponse', ['success' => false]);
+            return new JsonHttpControllerResponse(['success' => false]);
         }
-        
-        return MainFactory::create('JsonHttpControllerResponse', ['success' => true]);
+    
+        return new JsonHttpControllerResponse(['success' => true]);
     }
+    
     
     public function actionCheckFilePermissions()
     {
         $success = $this->connector->checkFilePermissions($_POST);
-    
-        return MainFactory::create('JsonHttpControllerResponse', ['success' => $success]);
+        
+        return new JsonHttpControllerResponse(['success' => $success]);
     }
 }

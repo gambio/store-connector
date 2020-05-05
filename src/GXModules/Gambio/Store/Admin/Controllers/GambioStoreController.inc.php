@@ -36,8 +36,7 @@ class GambioStoreController extends AdminHttpViewController
     {
         $this->connector           = GambioStoreConnector::getInstance();
         $this->configuration       = $this->connector->getConfiguration();
-        $this->languageTextManager = MainFactory::create('LanguageTextManager', 'gambio_store',
-            $_SESSION['languages_id']);
+        $this->languageTextManager = new LanguageTextManager('gambio_store', $_SESSION['languages_id']);
     }
     
     
@@ -53,8 +52,8 @@ class GambioStoreController extends AdminHttpViewController
         if ($this->_getQueryParameter('reset-token') || $this->_getQueryParameter('reset-token') === '') {
             $this->configuration->set('GAMBIO_STORE_TOKEN', '');
             $this->configuration->set('GAMBIO_STORE_IS_REGISTERED', 'false');
-            
-            return MainFactory::create('RedirectHttpControllerResponse', './admin.php?do=GambioStore');
+    
+            return new RedirectHttpControllerResponse('./admin.php?do=GambioStore');
         }
         
         $title             = new NonEmptyStringType($this->languageTextManager->get_text('PAGE_TITLE'));
@@ -62,9 +61,9 @@ class GambioStoreController extends AdminHttpViewController
         $contentNavigation = MainFactory::create('ContentNavigationCollection', []);
         $assets            = $this->getIFrameAssets();
         $data              = [];
-        
+    
         setcookie('auto_updater_admin_check', 'admin_logged_in', time() + 5 * 60, '/');
-        
+    
         if ($this->configuration->get('ADMIN_FEED_ACCEPTED_SHOP_INFORMATION_DATA_PROCESSING') === 'false') {
             $data = $this->getIFrameTemplateData('/dataprocessing');
         } elseif ($this->configuration->get('GAMBIO_STORE_IS_REGISTERED') === 'false') {
@@ -74,8 +73,7 @@ class GambioStoreController extends AdminHttpViewController
             $data              = $this->getIFrameTemplateData('/downloads');
         }
     
-        return MainFactory::create('AdminLayoutHttpControllerResponse', $title, $template, $data, $assets,
-            $contentNavigation);
+        return new AdminLayoutHttpControllerResponse($title, $template, $data, $assets, $contentNavigation);
     }
     
     
@@ -101,8 +99,7 @@ class GambioStoreController extends AdminHttpViewController
         $assets            = $this->getIFrameAssets();
         $contentNavigation = $this->getStoreNavigation(false, true);
     
-        return MainFactory::create('AdminLayoutHttpControllerResponse', $title, $template, $data, $assets,
-            $contentNavigation);
+        return new AdminLayoutHttpControllerResponse($title, $template, $data, $assets, $contentNavigation);
     }
     
     
@@ -128,16 +125,15 @@ class GambioStoreController extends AdminHttpViewController
         $template = new ExistingFile(new NonEmptyStringType(dirname(__FILE__, 2)
                                                             . '/Html/gambio_store_configuration.html'));
     
-        $data = MainFactory::create('KeyValueCollection', ['url' => $gambioStoreUrl]);
+        $data = new KeyValueCollection(['url' => $gambioStoreUrl]);
     
-        $assets = MainFactory::create('AssetCollection', [
-            MainFactory::create('Asset', 'gambio_store.lang.inc.php')
+        $assets = new AssetCollection([
+            new Asset('gambio_store.lang.inc.php')
         ]);
     
         $contentNavigation = $this->getStoreNavigation(false);
     
-        return MainFactory::create('AdminLayoutHttpControllerResponse', $title, $template, $data, $assets,
-            $contentNavigation);
+        return new AdminLayoutHttpControllerResponse($title, $template, $data, $assets, $contentNavigation);
     }
     
     
@@ -197,17 +193,17 @@ class GambioStoreController extends AdminHttpViewController
      */
     private function getIFrameAssets()
     {
-        return MainFactory::create('AssetCollection', [
-            MainFactory::create('Asset', 'gambio_store.lang.inc.php'),
-            MainFactory::create('Asset', '../GXModules/Gambio/Store/Build/Admin/Javascript/promise_polyfill.js'),
-            MainFactory::create('Asset', '../GXModules/Gambio/Store/Build/Admin/Javascript/fetch_polyfill.js'),
-            MainFactory::create('Asset', '../GXModules/Gambio/Store/Build/Admin/Javascript/messenger.js'),
-            MainFactory::create('Asset', '../GXModules/Gambio/Store/Build/Admin/Javascript/translation.js'),
-            MainFactory::create('Asset', '../GXModules/Gambio/Store/Build/Admin/Javascript/callShop.js'),
-            MainFactory::create('Asset', '../GXModules/Gambio/Store/Build/Admin/Javascript/iframe.js'),
-            MainFactory::create('Asset', '../GXModules/Gambio/Store/Build/Admin/Javascript/package.js'),
-            MainFactory::create('Asset', '../GXModules/Gambio/Store/Build/Admin/Javascript/shop.js'),
-            MainFactory::create('Asset', '../GXModules/Gambio/Store/Build/Admin/Javascript/updateCounter.js')
+        return new AssetCollection([
+            new Asset('gambio_store.lang.inc.php'),
+            new Asset('../GXModules/Gambio/Store/Build/Admin/Javascript/promise_polyfill.js'),
+            new Asset('../GXModules/Gambio/Store/Build/Admin/Javascript/fetch_polyfill.js'),
+            new Asset('../GXModules/Gambio/Store/Build/Admin/Javascript/messenger.js'),
+            new Asset('../GXModules/Gambio/Store/Build/Admin/Javascript/translation.js'),
+            new Asset('../GXModules/Gambio/Store/Build/Admin/Javascript/callShop.js'),
+            new Asset('../GXModules/Gambio/Store/Build/Admin/Javascript/iframe.js'),
+            new Asset('../GXModules/Gambio/Store/Build/Admin/Javascript/package.js'),
+            new Asset('../GXModules/Gambio/Store/Build/Admin/Javascript/shop.js'),
+            new Asset('../GXModules/Gambio/Store/Build/Admin/Javascript/updateCounter.js')
         ]);
     }
     
@@ -237,8 +233,8 @@ class GambioStoreController extends AdminHttpViewController
     private function getIFrameTemplateData($urlPostfix)
     {
         $translations = $this->languageTextManager->get_section_array('gambio_store', $_SESSION['languages_id']);
-        
-        return MainFactory::create('KeyValueCollection', [
+    
+        return new KeyValueCollection([
             'storeUrl'      => $this->getGambioStoreUrl() . $urlPostfix,
             'storeToken'    => $this->getGambioStoreToken(),
             'storeLanguage' => $_SESSION['languages_id'],
