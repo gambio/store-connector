@@ -9,6 +9,9 @@
    --------------------------------------------------------------
 */
 require_once 'Abstract/AbstractGambioStoreFileSystem.inc.php';
+require_once 'Exceptions/FileDownloadException.inc.php';
+require_once 'Exceptions/WrongFilePermissionException.inc.php';
+require_once 'Exceptions/CreateFolderException.inc.php';
 
 /**
  * Class StoreInstallation
@@ -19,8 +22,6 @@ require_once 'Abstract/AbstractGambioStoreFileSystem.inc.php';
  */
 class GambioStoreInstallation extends AbstractGambioStoreFileSystem
 {
-    const CACHE_FOLDER = '';
-    
     private $token;
     
     private $cache;
@@ -31,12 +32,15 @@ class GambioStoreInstallation extends AbstractGambioStoreFileSystem
      */
     private $cacheFolder;
     
+    private $logger;
     
-    public function __construct($fileList, $token, $cache)
+    
+    public function __construct($fileList, $token, $cache, $logger)
     {
         $this->fileList = $fileList;
         $this->token = $token;
         $this->cache = $cache;
+        $this->logger = $logger;
         $this->cacheFolder = DIR_FS_CATALOG . '/cache/';
     }
     
@@ -48,7 +52,7 @@ class GambioStoreInstallation extends AbstractGambioStoreFileSystem
         }
     
         $this->cache->set($this->fileList['id'], json_encode(['state' => 'start', 'progress' => 0]));
-        
+    
         $this->install();
     }
     
@@ -56,42 +60,58 @@ class GambioStoreInstallation extends AbstractGambioStoreFileSystem
     {
         try {
             $this->downloadToCache();
-        } catch (Exception $e) {
-            throw new RuntimeException($e->getMessage());
+        } catch(WrongFilePermissionException $e) {
+            throw $e;
+        } catch(DownloadPackageException $e) {
+            $this->cleanCache();
+            throw $e;
         }
+        
+        $this->backup();
     }
     
     private function downloadToCache()
     {
         if (! is_writable($this->cacheFolder) && ! chmod($this->cacheFolder, 0777)) {
-            throw new RuntimeException("Folder $this->cacheFolder is not writable");
+            throw new WrongFilePermissionException("Folder $this->cacheFolder is not writable");
         }
+
+        $downloaded = $this->downloadPackageFromZipToCacheFolder() ?: $this->downLoadPackageFilesToCacheFolder();
         
-        try {
-            $this->downloadPackageFromZipToCacheFolder();
-        } catch (Exception $e) {
-            $this->downLoadPackageFilesToCacheFolder();
-        } finally {
-            $this->cleanCache();
+        if (! $downloaded) {
+            throw new DownloadPackageException('Could not download package');
         }
     }
     
     
+    /**
+     * @return bool
+     */
     private function downLoadPackageFilesToCacheFolder()
     {
         $files = $this->fileList['includedFiles'];
         $packageTempDirectory = $this->cacheFolder . $this->fileList['id'];
         
         if (!mkdir($packageTempDirectory) && !is_dir($packageTempDirectory)) {
-            throw new RuntimeException('Cannot create a folder in the cache directory. Please check permissions.');
+            $this->logger->error('Cannot create a folder in the cache directory. Please check permissions.');
+            return false;
         }
         
         foreach ($files as $file) {
-            $this->curlFileDownload($file['source'], [CURLOPT_FILE => $this->cacheFolder . $file['destination']]);
+            try {
+                $this->curlFileDownload($file['source'], [CURLOPT_FILE => $this->cacheFolder . $file['destination']]);
+            } catch (CurlFileDownloadException $e) {
+                $this->logger->error($e->getMessage());
+                return false;
+            }
+            
             if (hash_file('md5', $this->cacheFolder . $file['destination']) !== $file['hash']) {
-                throw new \RuntimeException('Uploaded package zip file has wrong hash.');
+                $this->logger->error('Cannot create a folder in the cache directory. Please check permissions.');
+                return false;
             }
         }
+        
+        return true;
     }
     
     
@@ -103,26 +123,27 @@ class GambioStoreInstallation extends AbstractGambioStoreFileSystem
     
         try {
             $this->curlFileDownload($targetFilePath, [CURLOPT_FILE => $zipFile]);
-        } catch (Exception $e) {
+        } catch (CurlFileDownloadException $e) {
             fclose($zipFile);
-            throw new \RuntimeException($e->getMessage());
+            $this->logger->error($e->getMessage());
         }
         
         fclose($zipFile);
         
         if (hash_file('md5', $targetFilePath) !== $this->fileList['zip']['hash']) {
-            throw new \RuntimeException('Uploaded package zip file has wrong hash.');
+            $this->logger->error('Uploaded package zip file has wrong hash.');
         }
         
         $zip = new ZipArchive;
         $res = $zip->open($targetFilePath);
         if ($res === true) {
             $zip->extractTo($this->fileList['id']);
-            $zip->close();
         } else {
-            $zip->close();
-            throw new \RuntimeException('Cannot extract zip archive');
+            $this->logger->error('Cannot extract zip archive for id ' . $this->fileList['id']);
         }
+    
+        $zip->close();
+        return true;
     }
     
     public function curlFileDownload($url, $options = [])
@@ -141,7 +162,7 @@ class GambioStoreInstallation extends AbstractGambioStoreFileSystem
         curl_close($ch);
 
         if ($curl_success === false) {
-            throw new \RuntimeException(sprintf('%s - %s', $curl_errno, $curl_error));
+            throw new CurlFileDownloadException(sprintf('%s - %s', $curl_errno, $curl_error));
         }
     }
 }
