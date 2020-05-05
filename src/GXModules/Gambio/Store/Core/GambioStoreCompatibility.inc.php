@@ -74,7 +74,7 @@ class GambioStoreCompatibility
     
     private function doesGxConfigurationTableExists()
     {
-        $sql = 'SELECT COUNT(*) FROM information_schema.tables WHERE table_schema = :database AND table_name = :table_name;';
+        $sql = 'SELECT * FROM information_schema.tables WHERE table_schema = :database AND table_name = :table_name;';
 
         $query = $this->database->query($sql, [':database' => DB_DATABASE, ':table_name' => self::RESOURCE_GM_CONFIGURATION_TABLE]);
         

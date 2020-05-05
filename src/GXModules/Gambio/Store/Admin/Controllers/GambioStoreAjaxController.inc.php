@@ -9,6 +9,8 @@
    --------------------------------------------------------------
 */
 
+require_once __DIR__ . '/../../GambioStoreConnector.inc.php';
+
 use Gambio\AdminFeed\Services\ShopInformation\ShopInformationFactory;
 
 /**
@@ -43,8 +45,7 @@ class GambioStoreAjaxController extends AdminHttpViewController
      */
     private function setup()
     {
-        $factory             = MainFactory::create('GambioStoreConnectorFactory');
-        $this->connector     = $factory->createConnector();
+        $this->connector     = GambioStoreConnector::getInstance();
         $this->configuration = $this->connector->getConfiguration();
         $this->compatibility = $this->connector->getCompatibility();
     }

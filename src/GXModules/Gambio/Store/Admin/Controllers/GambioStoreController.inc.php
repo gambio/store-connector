@@ -9,6 +9,8 @@
    --------------------------------------------------------------
 */
 
+require_once __DIR__ . '/../../GambioStoreConnector.inc.php';
+
 class GambioStoreController extends AdminHttpViewController
 {
     /**
@@ -32,8 +34,7 @@ class GambioStoreController extends AdminHttpViewController
      */
     private function setup()
     {
-        $factory                   = MainFactory::create('GambioStoreConnectorFactory');
-        $this->connector           = $factory->createConnector();
+        $this->connector           = GambioStoreConnector::getInstance();
         $this->configuration       = $this->connector->getConfiguration();
         $this->languageTextManager = MainFactory::create('LanguageTextManager', 'gambio_store',
             $_SESSION['languages_id']);
@@ -72,7 +73,7 @@ class GambioStoreController extends AdminHttpViewController
             $contentNavigation = $this->getStoreNavigation();
             $data              = $this->getIFrameTemplateData('/downloads');
         }
-        
+    
         return MainFactory::create('AdminLayoutHttpControllerResponse', $title, $template, $data, $assets,
             $contentNavigation);
     }
