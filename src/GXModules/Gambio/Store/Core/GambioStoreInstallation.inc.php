@@ -26,6 +26,10 @@ class GambioStoreInstallation extends AbstractGambioStoreFileSystem
     private $cache;
     
     private $fileList;
+    /**
+     * @var string
+     */
+    private $cacheFolder;
     
     
     public function __construct($fileList, $token, $cache)
@@ -33,29 +37,81 @@ class GambioStoreInstallation extends AbstractGambioStoreFileSystem
         $this->fileList = $fileList;
         $this->token = $token;
         $this->cache = $cache;
+        $this->cacheFolder = DIR_FS_CATALOG . '/cache/';
     }
     
     
     public function perform($data, $name)
     {
-        if ($this->cache->has()) {
-            return $this->cache->get();
+        try {
+            $this->downloadToCache();
+        } catch (Exception $e) {
+            throw new RuntimeException($e->getMessage());
+        }
+    }
+    
+    private function downloadToCache()
+    {
+        if (! is_writable($this->cacheFolder) && ! chmod($this->cacheFolder, 0777)) {
+            throw new RuntimeException("Folder $this->cacheFolder is not writable");
         }
         
         try {
-            $this->downloadZipToCache();
+            $this->downloadPackageFromZipToCacheFolder();
         } catch (Exception $e) {
-            $this->downLoadFilesToCache();
+            $this->downLoadPackageFilesToCacheFolder();
+        }
+    }
+    
+    
+    private function downLoadPackageFilesToCacheFolder()
+    {
+    }
+    
+    
+    private function downloadPackageFromZipToCacheFolder()
+    {
+        $targetFileName = $this->fileList['ic'] . '.zip';
+        $targetFilePath = $this->cacheFolder . $targetFileName;
+        $zipFile = fopen($targetFilePath, 'wb+');
+    
+        try {
+            $this->curlFileDownload($targetFilePath, [CURLOPT_FILE => $zipFile]);
+        } catch (Exception $e) {
+            fclose($zipFile);
+            throw new \RuntimeException($e->getMessage());
         }
         
-        $this->backup();
+        fclose($zipFile);
         
-        try {
-            $this->movePackageToDestination();
-        } catch (Exception $e) {
-            $this->restoreBackup();
-        } finally {
-            $this->cleanCache();
+        $zip = new ZipArchive;
+        $res = $zip->open($targetFilePath);
+        if ($res === true) {
+            $zip->extractTo($this->fileList['ic']);
+            $zip->close();
+        } else {
+            $zip->close();
+            throw new \RuntimeException('Cannot extract zip archive');
+        }
+    }
+    
+    public function curlFileDownload($url, $options = [])
+    {
+        $curlOptions = array_merge($options, [
+            CURLOPT_URL            => $url,
+            CURLOPT_HTTPHEADER     => ["X-STORE-TOKEN: $this->token"]
+        ]);
+    
+        $ch             = curl_init();
+        curl_setopt_array($ch, $curlOptions);
+        $curl_success = curl_exec($ch);
+        $curl_errno   = curl_errno($ch);
+        $curl_error   = curl_error($ch);
+    
+        curl_close($ch);
+
+        if ($curl_success === false) {
+            throw new \RuntimeException(sprintf('%s - %s', $curl_errno, $curl_error));
         }
     }
 }

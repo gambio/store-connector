@@ -12,6 +12,8 @@
 
 class AbstractGambioStoreFileSystem
 {
+    const CACHE_FOLDER = '';
+    
     /**
      * Checks the writing permissions of all needed directories for an update by a given update files directory.
      *
