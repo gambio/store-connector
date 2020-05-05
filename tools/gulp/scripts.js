@@ -67,8 +67,8 @@ module.exports = function(gulp, $) {
 				.filter(file => fs.statSync(path.join('src/GXModules/', vendorName, file)).isDirectory());
 			
 			for (let moduleName of moduleNames) {
-			    const src = path.join(variant, 'GXModules', vendorName, moduleName);
-			    const dest = path.join(variant, 'GXModules', vendorName, moduleName, 'Build');
+			    const src = path.join('src', 'GXModules', vendorName, moduleName);
+			    const dest = path.join('src', 'GXModules', vendorName, moduleName, 'Build');
 				compilations.push(compile(src, dest));
 			}
 		}
