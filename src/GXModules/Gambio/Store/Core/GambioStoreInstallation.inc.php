@@ -67,7 +67,12 @@ class GambioStoreInstallation extends AbstractGambioStoreFileSystem
             throw $e;
         }
         
-        $this->backup();
+        $this->copyFilesFromCacheFolder();
+    }
+    
+    private function copyFilesFromCacheFolder()
+    {
+    
     }
     
     private function downloadToCache()
@@ -126,12 +131,14 @@ class GambioStoreInstallation extends AbstractGambioStoreFileSystem
         } catch (CurlFileDownloadException $e) {
             fclose($zipFile);
             $this->logger->error($e->getMessage());
+            return false;
         }
         
         fclose($zipFile);
         
         if (hash_file('md5', $targetFilePath) !== $this->fileList['zip']['hash']) {
             $this->logger->error('Uploaded package zip file has wrong hash.');
+            return false;
         }
         
         $zip = new ZipArchive;
@@ -140,9 +147,12 @@ class GambioStoreInstallation extends AbstractGambioStoreFileSystem
             $zip->extractTo($this->fileList['id']);
         } else {
             $this->logger->error('Cannot extract zip archive for id ' . $this->fileList['id']);
+            $zip->close();
+            return false;
         }
     
         $zip->close();
+        
         return true;
     }
     
