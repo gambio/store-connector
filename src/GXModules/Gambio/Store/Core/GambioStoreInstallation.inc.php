@@ -59,7 +59,7 @@ class GambioStoreInstallation extends AbstractGambioStoreFileSystem
     private function install()
     {
         try {
-            $this->downloadToCache();
+            $this->downloadToCacheFolder();
         } catch(WrongFilePermissionException $e) {
             throw $e;
         } catch(DownloadPackageException $e) {
@@ -75,7 +75,7 @@ class GambioStoreInstallation extends AbstractGambioStoreFileSystem
     
     }
     
-    private function downloadToCache()
+    private function downloadToCacheFolder()
     {
         if (! is_writable($this->cacheFolder) && ! chmod($this->cacheFolder, 0777)) {
             throw new WrongFilePermissionException("Folder $this->cacheFolder is not writable");
@@ -103,15 +103,18 @@ class GambioStoreInstallation extends AbstractGambioStoreFileSystem
         }
         
         foreach ($files as $file) {
+    
+            $destinationFilePath = $this->cacheFolder . $file['destination'];
+            
             try {
-                $this->curlFileDownload($file['source'], [CURLOPT_FILE => $this->cacheFolder . $file['destination']]);
+                $this->curlFileDownload($file['source'], [CURLOPT_FILE => $destinationFilePath]);
             } catch (CurlFileDownloadException $e) {
                 $this->logger->error($e->getMessage());
                 return false;
             }
             
-            if (hash_file('md5', $this->cacheFolder . $file['destination']) !== $file['hash']) {
-                $this->logger->error('Cannot create a folder in the cache directory. Please check permissions.');
+            if (hash_file('md5', $destinationFilePath) !== $file['hash']) {
+                $this->logger->error('File hash check fails for file ' . $destinationFilePath);
                 return false;
             }
         }
