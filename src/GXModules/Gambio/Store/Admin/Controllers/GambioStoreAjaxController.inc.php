@@ -38,6 +38,11 @@ class GambioStoreAjaxController extends AdminHttpViewController
      */
     private $compatibility;
     
+    /**
+     * @var \inc
+     */
+    private $themes;
+    
     
     /**
      * Sets up this class avoiding the constructor.
@@ -48,6 +53,7 @@ class GambioStoreAjaxController extends AdminHttpViewController
         $this->connector     = GambioStoreConnector::getInstance();
         $this->configuration = $this->connector->getConfiguration();
         $this->compatibility = $this->connector->getCompatibility();
+        $this->themes        = $this->connector->getThemes();
     }
     
     
@@ -166,20 +172,13 @@ class GambioStoreAjaxController extends AdminHttpViewController
         $this->setup();
     
         if (!isset($_POST)
-            || !isset($_POST['themeStorageName'])
-            || !$this->compatibility->has(GambioStoreCompatibility::FEATURE_THEME_SERVICE)) {
+            || !isset($_POST['themeStorageName'])) {
             return new JsonHttpControllerResponse(['success' => false]);
         }
     
-        $themeService = StaticGXCoreLoader::getService('Theme');
-        $themeName    = $_POST['themeStorageName'];
+        $themeName = $_POST['themeStorageName'];
+        $result    = $this->themes->activateTheme($themeName);
     
-        try {
-            $themeService->activateTheme($themeName);
-        } catch (Exception $e) {
-            return new JsonHttpControllerResponse(['success' => false]);
-        }
-    
-        return new JsonHttpControllerResponse(['success' => true]);
+        return new JsonHttpControllerResponse(['success' => $result]);
     }
 }
