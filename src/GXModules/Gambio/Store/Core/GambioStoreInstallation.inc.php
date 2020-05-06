@@ -45,10 +45,10 @@ class GambioStoreInstallation extends AbstractGambioStoreFileSystem
     }
     
     
-    public function perform($data, $name)
+    public function perform()
     {
-        if ($this->cache->has()) {
-            return $this->cache->get();
+        if ($this->cache->has($this->fileList['id'])) {
+            return $this->cache->get($this->fileList['id']);
         }
     
         $this->cache->set($this->fileList['id'], json_encode(['state' => 'start', 'progress' => 0]));
@@ -60,14 +60,13 @@ class GambioStoreInstallation extends AbstractGambioStoreFileSystem
     {
         try {
             $this->downloadToCacheFolder();
-        } catch(WrongFilePermissionException $e) {
+            $this->copyFilesFromCacheFolder();
+        } catch (WrongFilePermissionException $e) {
             throw $e;
-        } catch(DownloadPackageException $e) {
+        } catch (DownloadPackageException $e) {
             $this->cleanCache();
             throw $e;
         }
-        
-        $this->copyFilesFromCacheFolder();
     }
     
     private function copyFilesFromCacheFolder()
@@ -78,14 +77,19 @@ class GambioStoreInstallation extends AbstractGambioStoreFileSystem
             $backupFile = $this->cacheFolder . '/backup/' . $file['destination'] . '.bak';
             $newPackageFile = $this->cacheFolder . '/' . $this->fileList['id'] . $file['destination'];
     
-            // Backup installed file to cache folder.
-            if (file_exists($shopFile)) {
-                $this->fileCopy($shopFile, $backupFile);
-            }
-            
-            // Copy new file to shop
-            if (file_exists($newPackageFile)) {
-                $this->fileCopy($newPackageFile, $shopFile);
+            try {
+                // Backup installed file to cache folder.
+                if (file_exists($shopFile)) {
+                    $this->fileCopy($shopFile, $backupFile);
+                }
+    
+                // Copy new file to shop
+                if (file_exists($newPackageFile)) {
+                    $this->fileCopy($newPackageFile, $shopFile);
+                }
+            } catch (Exception $e) {
+                $this->restoreBackup();
+                throw $e;
             }
         }
     }
@@ -114,10 +118,6 @@ class GambioStoreInstallation extends AbstractGambioStoreFileSystem
         }
     }
     
-    
-    /**
-     * @return bool
-     */
     private function downLoadPackageFilesToCacheFolder()
     {
         $files = $this->fileList['includedFiles'];
@@ -147,7 +147,6 @@ class GambioStoreInstallation extends AbstractGambioStoreFileSystem
         
         return true;
     }
-    
     
     private function downloadPackageFromZipToCacheFolder()
     {
@@ -202,6 +201,18 @@ class GambioStoreInstallation extends AbstractGambioStoreFileSystem
 
         if ($curl_success === false) {
             throw new CurlFileDownloadException(sprintf('%s - %s', $curl_errno, $curl_error));
+        }
+    }
+    
+    public function restoreBackup()
+    {
+        foreach ($this->fileList as $file) {
+            $shopFile = DIR_FS_CATALOG . '/' . $file['destination'];
+            $backupFile = $this->cacheFolder . '/backup/' . $file['destination'] . '.bak';
+    
+            if (file_exists($shopFile)) {
+                $this->fileCopy($backupFile, $shopFile);
+            }
         }
     }
 }
