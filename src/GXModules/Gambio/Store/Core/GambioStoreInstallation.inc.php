@@ -72,7 +72,33 @@ class GambioStoreInstallation extends AbstractGambioStoreFileSystem
     
     private function copyFilesFromCacheFolder()
     {
+        foreach ($this->fileList as $file) {
+            
+            $shopFile = DIR_FS_CATALOG . '/' . $file['destination'];
+            $backupFile = $this->cacheFolder . '/backup/' . $file['destination'] . '.bak';
+            $newPackageFile = $this->cacheFolder . '/' . $this->fileList['id'] . $file['destination'];
     
+            // Backup installed file to cache folder.
+            if (file_exists($shopFile)) {
+                $this->fileCopy($shopFile, $backupFile);
+            }
+            
+            // Copy new file to shop
+            if (file_exists($newPackageFile)) {
+                $this->fileCopy($newPackageFile, $shopFile);
+            }
+        }
+    }
+    
+    private function fileCopy($source, $destination)
+    {
+        $dir = dirname($destination);
+    
+        if (!file_exists($dir) && !mkdir($dir, 0755, true) && !is_dir($dir)) {
+            throw new \RuntimeException(sprintf('Directory "%s" was not created', $dir));
+        }
+    
+        copy($source, $destination);
     }
     
     private function downloadToCacheFolder()
