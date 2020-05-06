@@ -144,8 +144,10 @@ class GambioStoreController extends AdminHttpViewController
      */
     public function actionAcceptDataProcessing()
     {
+        $this->setup();
+    
         $this->configuration->set('ADMIN_FEED_ACCEPTED_SHOP_INFORMATION_DATA_PROCESSING', 'true');
-        
+    
         return $this->actionDefault();
     }
     
