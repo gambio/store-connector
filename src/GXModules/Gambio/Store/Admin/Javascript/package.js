@@ -51,7 +51,7 @@ const isThemeActive = (themeName) => {
 const installPackage = async (data, progressCallback = () => null) => {
 	const formData = new FormData();
 	formData.append('gambioStoreData', JSON.stringify(data));
-	
+
 	const doPackageInstallation = async () => {
 		const response = await GambioStore.callShop('admin.php?do=GambioStoreAjax/InstallPackage', {
 			method: 'post',
@@ -62,7 +62,11 @@ const installPackage = async (data, progressCallback = () => null) => {
 		if (response.done !== true) {
 			await doPackageInstallation;
 		}
-	}
+        
+        return true;
+    }
+
+    await doPackageInstallation();
 }
 
 /**
@@ -117,7 +121,7 @@ const startPackageInstallation = async (data) => {
 	// By checking whether a gallery object is present,
 	// we can determine if this is a theme or not.
 	try {
-		progressDescription.textContent = GambioStore.translation.translate('INSTALLING_PACKAGE');
+        // progressDescription.textContent = GambioStore.translation.translate('INSTALLING_PACKAGE');
 		await installPackage(data, updateProgressCallback);
 		
 		if (data.details.gallery) {
@@ -168,11 +172,12 @@ const updateProgressCallback = ({progress}) => {
  */
 const install = async (data) => {
 	const $installingPackageModal = $('.installing-package.modal');
-	const progressDescription = document.getElementsByClassName('.progress-description').item(0);
+	// const progressDescription = document.getElementsByClassName('.progress-description').item(0);
 	
-	progressDescription.textContent = GambioStore.translation.translate('PREPARING_PACKAGE');
-	
+	// progressDescription.textContent = GambioStore.translation.translate('PREPARING_PACKAGE');
+
 	updateProgressCallback({progress: 0}); // always set to 0 initially
+
 	$installingPackageModal.modal('show');
 	await startPackageInstallation(data);
 }

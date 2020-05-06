@@ -156,7 +156,7 @@ class GambioStoreConnector
             $packageData,
             $this->configuration->get('GAMBIO_STORE_TOKEN'),
             $cache,
-            $this->logger,
+            $this->logger
         );
     
         $installaton->perform();
