@@ -14,6 +14,7 @@ require_once 'Core/GambioStoreCompatibility.inc.php';
 require_once 'Core/GambioStoreDatabase.inc.php';
 require_once 'Core/GambioStoreLogger.inc.php';
 require_once 'Core/GambioStoreConfiguration.inc.php';
+require_once 'Core/GambioStoreThemes.inc.php';
 
 /**
  * Class GambioStoreConnector
@@ -37,6 +38,11 @@ class GambioStoreConnector
      */
     private $logger;
     
+    /**
+     * @var GambioStoreThemes
+     */
+    private $themes;
+    
     
     /**
      * GambioStoreConnector constructor.
@@ -44,15 +50,18 @@ class GambioStoreConnector
      * @param \GambioStoreConfiguration $configuration
      * @param \GambioStoreCompatibility $compatibility
      * @param \GambioStoreLogger        $logger
+     * @param \GambioStoreThemes        $themes
      */
     private function __construct(
         GambioStoreConfiguration $configuration,
         GambioStoreCompatibility $compatibility,
-        GambioStoreLogger $logger
+        GambioStoreLogger $logger,
+        GambioStoreThemes $themes
     ) {
         $this->configuration = $configuration;
         $this->compatibility = $compatibility;
         $this->logger        = $logger;
+        $this->themes        = $themes;
     }
     
     
@@ -67,8 +76,9 @@ class GambioStoreConnector
         $compatibility = new GambioStoreCompatibility($database);
         $configuration = new GambioStoreConfiguration($database, $compatibility);
         $logger        = new GambioStoreLogger();
-        
-        return new self($configuration, $compatibility, $logger);
+        $themes        = new GambioStoreThemes($compatibility);
+    
+        return new self($configuration, $compatibility, $logger, $themes);
     }
     
     
@@ -91,6 +101,17 @@ class GambioStoreConnector
     public function getCompatibility()
     {
         return $this->compatibility;
+    }
+    
+    
+    /**
+     * Returns the class responsible for all themes actions in the shop
+     *
+     * @return \GambioStoreThemes
+     */
+    public function getThemes()
+    {
+        return $this->themes;
     }
     
     
