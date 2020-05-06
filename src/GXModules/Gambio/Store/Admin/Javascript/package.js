@@ -76,7 +76,7 @@ const isFilePermissionCorrect = async (data) => {
 	
 	formData.append('gambioStoreData', JSON.stringify(data));
 	try {
-		await GambioStore.callShop('admin.php?do=GambioStoreAjax/checkPermission', {method: 'post', body: formData})
+		await GambioStore.callShop('admin.php?do=GambioStoreAjax/CheckFilePermissions', {method: 'post', body: formData})
 		return true;
 	} catch {
 		return false;
@@ -174,14 +174,6 @@ const install = async (data) => {
 	
 	updateProgressCallback({progress: 0}); // always set to 0 initially
 	$installingPackageModal.modal('show');
-	
-	const filePermission = await isFilePermissionCorrect(data);
-	
-	if (filePermission === false) {
-		GambioStore.messenger.sendMessage('ftp_data_requested');
-		return;
-	}
-	
 	await startPackageInstallation(data);
 }
 
