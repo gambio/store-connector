@@ -117,22 +117,19 @@ module.exports = (gulp, $) => {
 			'chmod -R 777 shop/src'
 		]
 			.forEach(command => execSync(command, {cwd: clonePath}));
-
+		
 		[
-			'git clone git@sources.gambio-server.net:gambio-hub/shop-installer.git shop/shop-installer',
+			'git clone git@sources.gambio-server.net:interne-toolkueche/shop-installer.git shop/shop-installer',
 			'cd shop/shop-installer && yarn'
 		]
 			.forEach(command => execSync(command, {cwd: clonePath}));
-
-		replace(clonePath + '/shop/shop-installer/cypress/fixtures/database.json', {
-			branch: shopBranchName
+		
+		replace(clonePath + '/install.sh', {
+			BRANCH_NAME: shopBranchName,
+			SHOP_URL: 'http://172.17.0.1:' + serverPort + '/gambio_installer/'
 		});
-
-		replace(clonePath + '/shop/shop-installer/cypress/integration/installation.js', {
-			SHOP_URL: 'http://172.17.0.1:'+serverPort
-		});
-
-
+		
+		
 		const usage = `
 The shop clone was completed successfully!
 

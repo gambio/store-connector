@@ -35,7 +35,7 @@ install_shop() {
 
 	cd $CURRENT_PATH/shop/shop-installer
 
-	./node_modules/.bin/cypress run --spec "cypress/integration/installation.js"
+	./bin/run {{SHOP_URL}} store-connector-mysql-{{BRANCH_NAME}} gxdev gxdev gxdev
 }
 
 move_swap_url_script() {
