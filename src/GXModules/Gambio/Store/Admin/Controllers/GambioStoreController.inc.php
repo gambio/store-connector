@@ -64,11 +64,11 @@ class GambioStoreController extends AdminHttpViewController
     
         setcookie('auto_updater_admin_check', 'admin_logged_in', time() + 5 * 60, '/');
     
-        if ($this->configuration->get('ADMIN_FEED_ACCEPTED_SHOP_INFORMATION_DATA_PROCESSING') === 'false') {
+        if ($this->configuration->get('GAMBIO_STORE_ACCEPTED_DATA_PROCESSING') === 'false') {
             $data = $this->getIFrameTemplateData('/dataprocessing');
         } elseif ($this->configuration->get('GAMBIO_STORE_IS_REGISTERED') === 'false') {
             $data = $this->getIFrameTemplateData('/register');
-        } elseif ($this->configuration->get('ADMIN_FEED_ACCEPTED_SHOP_INFORMATION_DATA_PROCESSING') === 'true') {
+        } elseif ($this->configuration->get('GAMBIO_STORE_ACCEPTED_DATA_PROCESSING') === 'true') {
             $contentNavigation = $this->getStoreNavigation();
             $data              = $this->getIFrameTemplateData('/downloads');
         }
@@ -86,7 +86,7 @@ class GambioStoreController extends AdminHttpViewController
     {
         $this->setup();
     
-        if ($this->configuration->get('ADMIN_FEED_ACCEPTED_SHOP_INFORMATION_DATA_PROCESSING') !== 'true') {
+        if ($this->configuration->get('GAMBIO_STORE_ACCEPTED_DATA_PROCESSING') !== 'true') {
             return $this->actionDefault();
         }
     
@@ -146,7 +146,7 @@ class GambioStoreController extends AdminHttpViewController
     {
         $this->setup();
     
-        $this->configuration->set('ADMIN_FEED_ACCEPTED_SHOP_INFORMATION_DATA_PROCESSING', 'true');
+        $this->configuration->set('GAMBIO_STORE_ACCEPTED_DATA_PROCESSING', 'true');
     
         return $this->actionDefault();
     }

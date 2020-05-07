@@ -124,7 +124,7 @@ class GambioStoreAjaxController extends AdminHttpViewController
     public function actionIsDataProcessingAccepted()
     {
         $this->setup();
-        $isAccepted = $this->configuration->get('ADMIN_FEED_ACCEPTED_SHOP_INFORMATION_DATA_PROCESSING');
+        $isAccepted = $this->configuration->get('GAMBIO_STORE_ACCEPTED_DATA_PROCESSING');
     
         return new JsonHttpControllerResponse(['accepted' => $isAccepted]);
     }

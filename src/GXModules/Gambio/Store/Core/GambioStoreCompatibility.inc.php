@@ -25,7 +25,7 @@ class GambioStoreCompatibility
     /**
      *
      */
-    const RESOURCE_GM_CONFIGURATION_TABLE = 'gx_configuration';
+    const RESOURCE_GM_CONFIGURATION_TABLE = 'gx_configurations';
     
     /**
      *
