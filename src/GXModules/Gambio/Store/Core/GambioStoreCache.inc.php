@@ -90,6 +90,8 @@ class GambioStoreCache
     
         $query = $this->database->query($sql, [':cache_key' => $key]);
     
-        return (bool) $query->rowCount();
+        $count = (int) $query->fetchColumn();
+    
+        return $count > 0;
     }
 }

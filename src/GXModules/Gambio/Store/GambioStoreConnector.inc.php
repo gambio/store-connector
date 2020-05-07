@@ -159,6 +159,6 @@ class GambioStoreConnector
             $this->logger
         );
     
-        $installaton->perform();
+        return $installaton->perform();
     }
 }

@@ -12,68 +12,58 @@
 
 class AbstractGambioStoreFileSystem
 {
-    const CACHE_FOLDER = '';
-    
     /**
      * Checks the writing permissions of all needed directories for an update by a given update files directory.
      *
      * @param array $fileList
      *
-     * @return array
+     * @return bool
      */
     public function checkFilesPermissionsWithFileList(array $fileList)
     {
-        $wrongPermittedFiles = [];
-        $checkDirectories = [];
-        
+        $wrongPermissions = [];
+    
         foreach ($fileList as $shopFile) {
-            $shopTestFile = $shopFile . '.permission_check';
-            $shopTestDir = dirname($shopTestFile);
+        
+            $fileToCheck = DIR_FS_CATALOG . $shopFile;
+            $dirToCheck = dirname($fileToCheck);
             
-            if (in_array($shopTestDir, $checkDirectories)) {
-                continue;
-            }
-            $checkDirectories[] = $shopTestDir;
-            
-            if (((!file_exists($shopTestDir) || !is_dir($shopTestDir)) && $this->createDirectory($shopTestDir) === false)
-                || (file_exists($shopTestDir) && is_dir($shopTestDir) && !is_writeable($shopTestDir))) {
-                $wrongPermittedFiles[] = $shopTestDir;
-                continue;
+            if (file_exists($fileToCheck) && ! is_writable($fileToCheck)) {
+                $wrongPermissions[] = $fileToCheck;
             }
             
-            $fileOpen = @fopen($shopTestFile, 'w');
-            $fileWritten = @fwrite($fileOpen, 'permission test');
-            $fileClosed = @fclose($fileOpen);
             
-            $this->deleteFile($shopTestFile);
-            if ($fileOpen === false || $fileWritten === false || $fileClosed === false
-                || (file_exists($shopFile)
-                    && !is_writable($shopFile)
-                    && !is_writable($shopTestDir))) {
-                $wrongPermittedFiles[] = $shopTestDir;
+            // If directory exists - check if it's writable
+            if (file_exists($dirToCheck) && is_dir($dirToCheck)) {
+                if (! is_writable($dirToCheck)) {
+                    $wrongPermissions[] = $dirToCheck;
+                }
+            } else {
+                // No folder found. Try to create folder...
+                if (mkdir($dirToCheck, 0777, true) || is_dir($dirToCheck)) {
+                    if (! is_writable($dirToCheck)) {
+                        $wrongPermissions[] = $dirToCheck;
+                    }
+                    
+                    @unlink($dirToCheck);
+                } else {
+                    $wrongPermissions[] = $dirToCheck;
+                }
             }
         }
         
-        $this->createDebugLog('[UpdateHelper] Check file permissions for a file list', [
-            'fileList' => $fileList,
-            'wrongPermittedFiles' => $wrongPermittedFiles,
-        ]);
+        return (bool)$wrongPermissions;
+    }
+
+    
+    protected function fileCopy($source, $destination)
+    {
+        $dir = dirname($destination);
         
-        return $wrongPermittedFiles;
-    }
-    
-    public function backup()
-    {
-    
-    }
-    
-    public function restoreBackup()
-    {
-    
-    }
-    
-    public function cleanCache()
-    {
-    
+        if (!file_exists($dir) && !mkdir($dir, 0755, true) && !is_dir($dir)) {
+            throw new \RuntimeException(sprintf('Directory "%s" was not created', $dir));
+        }
+        
+        return copy($source, $destination);
     }
 }

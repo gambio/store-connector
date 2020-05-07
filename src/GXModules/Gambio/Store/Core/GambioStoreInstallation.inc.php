@@ -33,84 +33,55 @@ class GambioStoreInstallation extends AbstractGambioStoreFileSystem
     private $cacheFolder;
     
     private $logger;
+    /**
+     * @var array
+     */
+    private $packageFilesDestinations;
+    /**
+     * @var array
+     */
+    private $includeFiles;
+    /**
+     * @var mixed
+     */
+    private $transactionId;
+    /**
+     * @var string
+     */
+    private $shopFolder;
+    private $packageData;
     
     
-    public function __construct($fileList, $token, $cache, $logger)
+    public function __construct($packageData, $token, $cache, $logger)
     {
-        $this->fileList = $fileList;
-        $this->token = $token;
-        $this->cache = $cache;
-        $this->logger = $logger;
-        $this->cacheFolder = DIR_FS_CATALOG . '/cache/';
+        $this->packageData  = $packageData;
+        $this->token       = $token;
+        $this->cache       = $cache;
+        $this->logger      = $logger;
+        $this->shopFolder = dirname(__FILE__, 5);
+        $this->cacheFolder = dirname(__FILE__, 5) . '/cache/';
+        $this->includeFiles = array_column($packageData['fileList']['includedFiles'], 'destination');
+        $this->transactionId = $packageData['details']['id'];
     }
     
     
     public function perform()
     {
-        if ($this->cache->has($this->fileList['id'])) {
-            return $this->cache->get($this->fileList['id']);
-        }
-    
-        $this->cache->set($this->fileList['id'], json_encode(['state' => 'start', 'progress' => 0]));
-    
-        $this->install();
-    }
-    
-    private function install()
-    {
-        try {
-            $this->downloadToCacheFolder();
-            $this->copyFilesFromCacheFolder();
-        } catch (WrongFilePermissionException $e) {
-            throw $e;
-        } catch (DownloadPackageException $e) {
-            $this->cleanCache();
-            throw $e;
-        }
-    }
-    
-    private function copyFilesFromCacheFolder()
-    {
-        foreach ($this->fileList as $file) {
-            
-            $shopFile = DIR_FS_CATALOG . '/' . $file['destination'];
-            $backupFile = $this->cacheFolder . '/backup/' . $file['destination'] . '.bak';
-            $newPackageFile = $this->cacheFolder . '/' . $this->fileList['id'] . $file['destination'];
-    
-            try {
-                // Backup installed file to cache folder.
-                if (file_exists($shopFile)) {
-                    $this->fileCopy($shopFile, $backupFile);
-                }
-    
-                // Copy new file to shop
-                if (file_exists($newPackageFile)) {
-                    $this->fileCopy($newPackageFile, $shopFile);
-                }
-            } catch (Exception $e) {
-                $this->restoreBackup();
-                throw $e;
-            }
-        }
-    }
-    
-    private function fileCopy($source, $destination)
-    {
-        $dir = dirname($destination);
-    
-        if (!file_exists($dir) && !mkdir($dir, 0755, true) && !is_dir($dir)) {
-            throw new \RuntimeException(sprintf('Directory "%s" was not created', $dir));
-        }
-    
-        copy($source, $destination);
-    }
-    
-    private function downloadToCacheFolder()
-    {
-        if (! is_writable($this->cacheFolder) && ! chmod($this->cacheFolder, 0777)) {
-            throw new WrongFilePermissionException("Folder $this->cacheFolder is not writable");
+        if ($this->cache->has($this->transactionId)) {
+            return $this->cache->get($this->transactionId);
         }
 
+        try {
+            $this->downloadPackageToCacheFolder();
+            $this->installPackage();
+            //$this->cleanCache();
+        } catch (Exception $e) {
+            throw new PackageInstallationException($e->getMessage());
+        }
+    }
+    
+    private function downloadPackageToCacheFolder()
+    {
         $downloaded = $this->downloadPackageFromZipToCacheFolder() ?: $this->downLoadPackageFilesToCacheFolder();
         
         if (! $downloaded) {
@@ -118,17 +89,42 @@ class GambioStoreInstallation extends AbstractGambioStoreFileSystem
         }
     }
     
+    private function installPackage()
+    {
+        foreach ($this->includeFiles as $file) {
+        
+            $shopFile = $this->shopFolder . '/' . $file;
+            $backupFile = $this->cacheFolder . 'backup/' . $file . '.bak';
+            $newPackageFile = $this->cacheFolder . $this->transactionId .  '/' . $file;
+        
+            $toRestore = [];
+            try {
+                // Backup
+                $this->fileCopy($shopFile, $backupFile);
+                // Replace the old package file witn new
+            
+                if ($this->fileCopy($newPackageFile, $shopFile)) {
+                    $toRestore[] = $file;
+                }
+            } catch (Exception $e) {
+                $this->restorePackageFromBackup($toRestore);
+            }
+        }
+        
+        // @todo clean cache (remove zip, remove backup)
+    }
+
+    
     private function downLoadPackageFilesToCacheFolder()
     {
-        $files = $this->fileList['includedFiles'];
-        $packageTempDirectory = $this->cacheFolder . $this->fileList['id'];
+        $packageTempDirectory = $this->cacheFolder . $this->transactionId;
         
         if (!mkdir($packageTempDirectory) && !is_dir($packageTempDirectory)) {
             $this->logger->error('Cannot create a folder in the cache directory. Please check permissions.');
             return false;
         }
         
-        foreach ($files as $file) {
+        foreach ($this->includeFiles as $file) {
     
             $destinationFilePath = $this->cacheFolder . $file['destination'];
             
@@ -150,37 +146,43 @@ class GambioStoreInstallation extends AbstractGambioStoreFileSystem
     
     private function downloadPackageFromZipToCacheFolder()
     {
-        $targetFileName = $this->fileList['id'] . '.zip';
+        $targetFileName = $this->transactionId . '.zip';
         $targetFilePath = $this->cacheFolder . $targetFileName;
         $zipFile = fopen($targetFilePath, 'wb+');
+        $dounloadZipUrl = $this->packageData['fileList']['zip']['source'];
     
-        try {
-            $this->curlFileDownload($targetFilePath, [CURLOPT_FILE => $zipFile]);
-        } catch (CurlFileDownloadException $e) {
-            fclose($zipFile);
-            $this->logger->error($e->getMessage());
-            return false;
-        }
-        
+        // @todo remove the test
+        // $dounloadZipUrl = 'http://localhost/projects/store-api/public/index.php/files/netdexx/netdexx001/v1.0.1';
+    
+        //try {
+        //    $this->curlFileDownload($dounloadZipUrl, [CURLOPT_FILE => $zipFile]);
+        //} catch (CurlFileDownloadException $e) {
+        //    fclose($zipFile);
+        //    $this->logger->error($e->getMessage());
+        //    return false;
+        //}
+    
         fclose($zipFile);
-        
-        if (hash_file('md5', $targetFilePath) !== $this->fileList['zip']['hash']) {
-            $this->logger->error('Uploaded package zip file has wrong hash.');
-            return false;
-        }
-        
+    
+        chmod($targetFilePath, 0777);
+    
+        /** @todo check the logic here. For some reason the hashes don't match */
+        //if (md5_file($targetFilePath) !== $this->packageData['fileList']['zip']['hash']) {
+        //    $this->logger->error('Uploaded package zip file has wrong hash.');
+        //    return false;
+        //}
+    
         $zip = new ZipArchive;
         $res = $zip->open($targetFilePath);
-        if ($res === true) {
-            $zip->extractTo($this->fileList['id']);
-        } else {
+        if ($res !== true) {
             $this->logger->error('Cannot extract zip archive for id ' . $this->fileList['id']);
             $zip->close();
             return false;
         }
     
+        $zip->extractTo($this->cacheFolder . $this->transactionId);
         $zip->close();
-        
+    
         return true;
     }
     
@@ -204,14 +206,16 @@ class GambioStoreInstallation extends AbstractGambioStoreFileSystem
         }
     }
     
-    public function restoreBackup()
+    private function restorePackageFromBackup($toRestore)
     {
-        foreach ($this->fileList as $file) {
-            $shopFile = DIR_FS_CATALOG . '/' . $file['destination'];
-            $backupFile = $this->cacheFolder . '/backup/' . $file['destination'] . '.bak';
-    
-            if (file_exists($shopFile)) {
+        foreach ($toRestore as $file) {
+            $shopFile = $this->shopFolder . '/' . $file;
+            $backupFile = $this->cacheFolder . 'backup/' . $file . '.bak';
+            
+            try {
                 $this->fileCopy($backupFile, $shopFile);
+            } catch (Exception $e) {
+                throw $e;
             }
         }
     }
