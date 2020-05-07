@@ -30,5 +30,10 @@ if (!$configuration->has('GAMBIO_STORE_IS_REGISTERED')) {
 }
 
 if (!$configuration->has('GAMBIO_STORE_ACCEPTED_DATA_PROCESSING')) {
-    $configuration->create('GAMBIO_STORE_ACCEPTED_DATA_PROCESSING', 'false');
+    if ($configuration->has('ADMIN_FEED_ACCEPTED_SHOP_INFORMATION_DATA_PROCESSING')) {
+        $value = $configuration->get('ADMIN_FEED_ACCEPTED_SHOP_INFORMATION_DATA_PROCESSING');
+        $configuration->create('GAMBIO_STORE_ACCEPTED_DATA_PROCESSING', $value);
+    } else {
+        $configuration->create('GAMBIO_STORE_ACCEPTED_DATA_PROCESSING', 'false');
+    }
 }
