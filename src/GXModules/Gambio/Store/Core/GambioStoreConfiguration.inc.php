@@ -87,7 +87,8 @@ class GambioStoreConfiguration
      */
     private function gxGet($key)
     {
-        $statement = $this->database->query('SELECT `value` FROM gx_configuration WHERE `key` = :key', ['key' => $key]);
+        $statement = $this->database->query('SELECT `value` FROM gx_configurations WHERE `key` = :key',
+            ['key' => $key]);
         
         $result = $statement->fetch(PDO::FETCH_ASSOC);
         
@@ -136,7 +137,7 @@ class GambioStoreConfiguration
      */
     private function gxSet($key, $value)
     {
-        $this->database->query('UPDATE gx_configuration SET `value` = :value WHERE `key` = :key',
+        $this->database->query('UPDATE gx_configurations SET `value` = :value WHERE `key` = :key',
             [':value' => $value, ':key' => $key]);
     }
 }
