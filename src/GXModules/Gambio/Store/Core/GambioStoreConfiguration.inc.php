@@ -88,7 +88,7 @@ class GambioStoreConfiguration
     private function gxGet($key)
     {
         $statement = $this->database->query('SELECT `value` FROM gx_configurations WHERE `key` = :key',
-            ['key' => $key]);
+            ['key' => 'gm_configuration/' . $key]);
         
         $result = $statement->fetch(PDO::FETCH_ASSOC);
         
@@ -138,6 +138,101 @@ class GambioStoreConfiguration
     private function gxSet($key, $value)
     {
         $this->database->query('UPDATE gx_configurations SET `value` = :value WHERE `key` = :key',
+            [':value' => $value, ':key' => 'gm_configuration/' . $key]);
+    }
+    
+    
+    /**
+     * Checks if it has the configuration key.
+     *
+     * @param string $key
+     *
+     * @return bool
+     */
+    public function has($key)
+    {
+        if ($this->compatibility->has(GambioStoreCompatibility::RESOURCE_GM_CONFIGURATION_TABLE)) {
+            return $this->gmHas($key);
+        } else {
+            return $this->gxHas($key);
+        }
+    }
+    
+    
+    /**
+     * Checks if gm configuration has the key
+     *
+     * @param $key
+     *
+     * @return bool
+     */
+    private function gmHas($key)
+    {
+        $statement = $this->database->query('SELECT gm_value FROM gm_configuration WHERE gm_key = :key',
+            [':key' => $key]);
+        
+        $result = $statement->fetch(PDO::FETCH_ASSOC);
+        
+        return !($result === false);
+    }
+    
+    
+    /**
+     * Checks if gx configurations has the key
+     *
+     * @param $key
+     *
+     * @return bool
+     */
+    private function gxHas($key)
+    {
+        $statement = $this->database->query('SELECT `value` FROM gx_configuration WHERE `key` = :key',
+            [':key' => 'gm_configuration/' . $key]);
+        
+        $result = $statement->fetch(PDO::FETCH_ASSOC);
+        
+        return !($result === false);
+    }
+    
+    
+    /**
+     * Creates the configuration value with the provided key.
+     *
+     * @param string $key
+     * @param string $value
+     */
+    public function create($key, $value)
+    {
+        if ($this->compatibility->has(GambioStoreCompatibility::RESOURCE_GM_CONFIGURATION_TABLE)) {
+            $this->gmCreate($key, $value);
+        } else {
+            $this->gxCreate($key, $value);
+        }
+    }
+    
+    
+    /**
+     * Creates the value from gm configurations
+     *
+     * @param $key
+     * @param $value
+     */
+    private function gmCreate($key, $value)
+    {
+        $this->database->query('INSERT INTO gm_configuration (gm_key, gm_value) VALUES (:key, :value)',
             [':value' => $value, ':key' => $key]);
+    }
+    
+    
+    /**
+     * Creates the value from gx configurations
+     *
+     * @param $key
+     * @param $value
+     */
+    private function gxCreate($key, $value)
+    {
+        $this->database->query('INSERT INTO gx_configurations (`key`, `value`) VALUES (:key, :value)',
+            [':value' => $value, ':key' => 'gm_configuration/' . $key]);
     }
 }
