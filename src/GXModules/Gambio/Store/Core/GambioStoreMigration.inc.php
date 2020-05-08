@@ -48,7 +48,11 @@ class GambioStoreMigration
     public function up()
     {
         foreach ($this->up as $item) {
-            require_once $item;
+            try {
+                require_once $item;
+            } catch (Exception $exception) {
+                throw new UpMigrationException('Up migration throws a error at this item :', 0, $item);
+            }
         }
     }
     
@@ -61,7 +65,11 @@ class GambioStoreMigration
     public function down()
     {
         foreach ($this->down as $item) {
-            require_once $item;
+            try {
+                require_once $item;
+            } catch (Exception $exception) {
+                throw new DownMigrationException('Down migration throws a error at this item :', 0, $item);
+            }
         }
     }
 }
