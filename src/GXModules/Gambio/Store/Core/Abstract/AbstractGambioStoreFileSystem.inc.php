@@ -25,7 +25,7 @@ class AbstractGambioStoreFileSystem
     
         foreach ($fileList as $shopFile) {
         
-            $fileToCheck = DIR_FS_CATALOG . $shopFile;
+            $fileToCheck = $this->getShopFolder() . $shopFile;
             $dirToCheck = dirname($fileToCheck);
             
             if (file_exists($fileToCheck) && ! is_writable($fileToCheck)) {
@@ -54,16 +54,28 @@ class AbstractGambioStoreFileSystem
         
         return (bool)$wrongPermissions;
     }
-
     
-    protected function fileCopy($source, $destination)
+    
+    protected function fileCopy($source, $destination, $strict = false)
     {
+        if (! file_exists($source)) {
+            if ($strict) {
+                throw new \RuntimeException('No such file: ' . $source);
+            }
+            
+            return false;
+        }
+        
         $dir = dirname($destination);
         
-        if (!file_exists($dir) && !mkdir($dir, 0755, true) && !is_dir($dir)) {
+        if (!file_exists($dir) && !mkdir($dir, 0777, true) && !is_dir($dir) && chmod($dir, 0755)) {
             throw new \RuntimeException(sprintf('Directory "%s" was not created', $dir));
         }
         
-        return copy($source, $destination);
+        if (! copy($source, $destination)) {
+            throw new \RuntimeException("Couldn't copy file " . $source);
+        }
+        
+        return true;
     }
 }

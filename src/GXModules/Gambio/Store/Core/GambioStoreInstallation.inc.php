@@ -47,7 +47,7 @@ class GambioStoreInstallation extends AbstractGambioStoreFileSystem
         return $this->packageData['details']['id'];
     }
 
-    private function getShopFolder()
+    protected function getShopFolder()
     {
         return dirname(__FILE__, 5);
     }
@@ -62,7 +62,6 @@ class GambioStoreInstallation extends AbstractGambioStoreFileSystem
         return array_column($this->packageData['fileList']['includedFiles'], 'destination');
     }
     
-    
     public function perform()
     {
         if ($this->cache->has($this->getTransactionId())) {
@@ -72,7 +71,6 @@ class GambioStoreInstallation extends AbstractGambioStoreFileSystem
         try {
             $this->downloadPackageToCacheFolder();
             $this->installPackage();
-            //$this->cleanCache();
         } catch (Exception $e) {
             throw new PackageInstallationException($e->getMessage());
         }
@@ -111,7 +109,6 @@ class GambioStoreInstallation extends AbstractGambioStoreFileSystem
         
         // @todo clean cache (remove zip, remove backup)
     }
-
     
     private function downLoadPackageFilesToCacheFolder()
     {
