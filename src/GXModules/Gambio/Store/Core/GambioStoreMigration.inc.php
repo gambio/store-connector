@@ -51,7 +51,7 @@ class GambioStoreMigration
             try {
                 require_once $item;
             } catch (Exception $exception) {
-                throw new UpMigrationException('Up migration throws a error at this item :', 0, $item);
+                throw new UpMigrationException('Up migration failed. File: ', 0, $item);
             }
         }
     }
@@ -68,7 +68,7 @@ class GambioStoreMigration
             try {
                 require_once $item;
             } catch (Exception $exception) {
-                throw new DownMigrationException('Down migration throws a error at this item :', 0, $item);
+                throw new DownMigrationException('Down migration failed. File: ', 0, $item);
             }
         }
     }
