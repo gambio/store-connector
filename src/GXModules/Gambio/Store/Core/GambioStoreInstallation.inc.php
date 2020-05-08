@@ -27,11 +27,11 @@ class GambioStoreInstallation extends AbstractGambioStoreFileSystem
     
     private $cache;
     
-    private $fileList;
-    
     private $logger;
 
     private $packageData;
+    
+    private $toRestore = [];
     
     
     public function __construct($packageData, $token, $cache, $logger)
@@ -92,18 +92,17 @@ class GambioStoreInstallation extends AbstractGambioStoreFileSystem
             $shopFile = $this->getShopFolder() . '/' . $file;
             $backupFile = $this->getCacheFolder() . 'backup/' . $file . '.bak';
             $newPackageFile = $this->getCacheFolder() . $this->getTransactionId() .  '/' . $file;
-        
-            $toRestore = [];
+
             try {
                 // Backup
                 $this->fileCopy($shopFile, $backupFile);
 
                 // Replace the old package file with new
                 if ($this->fileCopy($newPackageFile, $shopFile)) {
-                    $toRestore[] = $file;
+                    $this->toRestore[] = $file;
                 }
             } catch (Exception $e) {
-                $this->restorePackageFromBackup($toRestore);
+                $this->restorePackageFromBackup($this->toRestore);
             }
         }
         
@@ -144,17 +143,16 @@ class GambioStoreInstallation extends AbstractGambioStoreFileSystem
         $targetFileName = $this->getTransactionId() . '.zip';
         $targetFilePath = $this->getCacheFolder() . $targetFileName;
         $zipFile = fopen($targetFilePath, 'wb+');
-        $dounloadZipUrl = $this->packageData['fileList']['zip']['source'];
+        $downloadZipUrl = $this->packageData['fileList']['zip']['source'];
     
         try {
-            $this->curlFileDownload($dounloadZipUrl, [CURLOPT_FILE => $zipFile]);
+            $this->curlFileDownload($downloadZipUrl, [CURLOPT_FILE => $zipFile]);
         } catch (CurlFileDownloadException $e) {
-            fclose($zipFile);
             $this->logger->error($e->getMessage());
             return false;
+        } finally {
+            fclose($zipFile);
         }
-    
-        fclose($zipFile);
     
         chmod($targetFilePath, 0777);
     
@@ -167,7 +165,7 @@ class GambioStoreInstallation extends AbstractGambioStoreFileSystem
         $zip = new ZipArchive;
         $res = $zip->open($targetFilePath);
         if ($res !== true) {
-            $this->logger->error('Cannot extract zip archive for id ' . $this->fileList['id']);
+            $this->logger->error('Cannot extract zip archive for id ' . $this->getTransactionId());
             $zip->close();
             return false;
         }

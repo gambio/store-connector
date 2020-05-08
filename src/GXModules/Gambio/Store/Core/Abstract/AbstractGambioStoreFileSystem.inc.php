@@ -68,7 +68,7 @@ class AbstractGambioStoreFileSystem
         
         $dir = dirname($destination);
         
-        if (!file_exists($dir) && !mkdir($dir, 0777, true) && !is_dir($dir) && chmod($dir, 0755)) {
+        if (!file_exists($dir) && !mkdir($dir, 0777, true) && !is_dir($dir) && chmod($dir, 0777)) {
             throw new \RuntimeException(sprintf('Directory "%s" was not created', $dir));
         }
         
