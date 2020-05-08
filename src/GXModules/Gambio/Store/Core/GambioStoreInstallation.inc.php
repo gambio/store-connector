@@ -146,16 +146,13 @@ class GambioStoreInstallation extends AbstractGambioStoreFileSystem
         $zipFile = fopen($targetFilePath, 'wb+');
         $dounloadZipUrl = $this->packageData['fileList']['zip']['source'];
     
-        // @todo remove the test
-        // $dounloadZipUrl = 'http://localhost/projects/store-api/public/index.php/files/netdexx/netdexx001/v1.0.1';
-    
-        //try {
-        //    $this->curlFileDownload($dounloadZipUrl, [CURLOPT_FILE => $zipFile]);
-        //} catch (CurlFileDownloadException $e) {
-        //    fclose($zipFile);
-        //    $this->logger->error($e->getMessage());
-        //    return false;
-        //}
+        try {
+            $this->curlFileDownload($dounloadZipUrl, [CURLOPT_FILE => $zipFile]);
+        } catch (CurlFileDownloadException $e) {
+            fclose($zipFile);
+            $this->logger->error($e->getMessage());
+            return false;
+        }
     
         fclose($zipFile);
     
@@ -183,10 +180,10 @@ class GambioStoreInstallation extends AbstractGambioStoreFileSystem
     
     public function curlFileDownload($url, $options = [])
     {
-        $curlOptions = array_merge($options, [
+        $curlOptions = $options + [
             CURLOPT_URL            => $url,
             CURLOPT_HTTPHEADER     => ["X-STORE-TOKEN: $this->token"]
-        ]);
+        ];
     
         $ch             = curl_init();
         curl_setopt_array($ch, $curlOptions);
