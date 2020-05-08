@@ -25,12 +25,12 @@ class WrongFilePermissionException extends Exception
      *
      * @param string          $message
      * @param array           $content
-     * @param \Throwable|null $previous
+     * @param \Exception|null $previous
      */
     public function __construct(
         $message = "",
         array $content = [],
-        Throwable $previous = null
+        Exception $previous = null
     ) {
         parent::__construct($message, 0, $previous);
         $this->content = $content;
