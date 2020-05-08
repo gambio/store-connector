@@ -50,7 +50,7 @@ class GambioStoreMigration
         foreach ($this->up as $item) {
             try {
                 require_once $item;
-            } catch (Exception $exception) {
+            } catch (\Exception $exception) {
                 throw new UpMigrationException('Up migration failed. File: ', 0, $item);
             }
         }
@@ -67,7 +67,7 @@ class GambioStoreMigration
         foreach ($this->down as $item) {
             try {
                 require_once $item;
-            } catch (Exception $exception) {
+            } catch (\Exception $exception) {
                 throw new DownMigrationException('Down migration failed. File: ', 0, $item);
             }
         }
