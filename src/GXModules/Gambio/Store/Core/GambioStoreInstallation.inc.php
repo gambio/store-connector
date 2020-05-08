@@ -12,6 +12,7 @@ require_once 'Abstract/AbstractGambioStoreFileSystem.inc.php';
 require_once 'Exceptions/FileDownloadException.inc.php';
 require_once 'Exceptions/WrongFilePermissionException.inc.php';
 require_once 'Exceptions/CreateFolderException.inc.php';
+require_once 'Exceptions/PackageInstallationException.inc.php';
 
 /**
  * Class StoreInstallation
@@ -27,28 +28,9 @@ class GambioStoreInstallation extends AbstractGambioStoreFileSystem
     private $cache;
     
     private $fileList;
-    /**
-     * @var string
-     */
-    private $cacheFolder;
     
     private $logger;
-    /**
-     * @var array
-     */
-    private $packageFilesDestinations;
-    /**
-     * @var array
-     */
-    private $includeFiles;
-    /**
-     * @var mixed
-     */
-    private $transactionId;
-    /**
-     * @var string
-     */
-    private $shopFolder;
+
     private $packageData;
     
     
@@ -58,17 +40,33 @@ class GambioStoreInstallation extends AbstractGambioStoreFileSystem
         $this->token       = $token;
         $this->cache       = $cache;
         $this->logger      = $logger;
-        $this->shopFolder = dirname(__FILE__, 5);
-        $this->cacheFolder = dirname(__FILE__, 5) . '/cache/';
-        $this->includeFiles = array_column($packageData['fileList']['includedFiles'], 'destination');
-        $this->transactionId = $packageData['details']['id'];
+    }
+
+    private function getTransactionId()
+    {
+        return $this->packageData['details']['id'];
+    }
+
+    private function getShopFolder()
+    {
+        return dirname(__FILE__, 5);
+    }
+
+    private function getCacheFolder()
+    {
+        return $this->getShopFolder() . '/cache/';
+    }
+
+    private function getPackageFilesDestinations()
+    {
+        return array_column($this->packageData['fileList']['includedFiles'], 'destination');
     }
     
     
     public function perform()
     {
-        if ($this->cache->has($this->transactionId)) {
-            return $this->cache->get($this->transactionId);
+        if ($this->cache->has($this->getTransactionId())) {
+            return $this->cache->get($this->getTransactionId());
         }
 
         try {
@@ -91,18 +89,18 @@ class GambioStoreInstallation extends AbstractGambioStoreFileSystem
     
     private function installPackage()
     {
-        foreach ($this->includeFiles as $file) {
+        foreach ($this->getPackageFilesDestinations() as $file) {
         
-            $shopFile = $this->shopFolder . '/' . $file;
-            $backupFile = $this->cacheFolder . 'backup/' . $file . '.bak';
-            $newPackageFile = $this->cacheFolder . $this->transactionId .  '/' . $file;
+            $shopFile = $this->getShopFolder() . '/' . $file;
+            $backupFile = $this->getCacheFolder() . 'backup/' . $file . '.bak';
+            $newPackageFile = $this->getCacheFolder() . $this->getTransactionId() .  '/' . $file;
         
             $toRestore = [];
             try {
                 // Backup
                 $this->fileCopy($shopFile, $backupFile);
-                // Replace the old package file witn new
-            
+
+                // Replace the old package file with new
                 if ($this->fileCopy($newPackageFile, $shopFile)) {
                     $toRestore[] = $file;
                 }
@@ -117,16 +115,16 @@ class GambioStoreInstallation extends AbstractGambioStoreFileSystem
     
     private function downLoadPackageFilesToCacheFolder()
     {
-        $packageTempDirectory = $this->cacheFolder . $this->transactionId;
+        $packageTempDirectory = $this->getCacheFolder() . $this->getTransactionId();
         
         if (!mkdir($packageTempDirectory) && !is_dir($packageTempDirectory)) {
             $this->logger->error('Cannot create a folder in the cache directory. Please check permissions.');
             return false;
         }
         
-        foreach ($this->includeFiles as $file) {
+        foreach ($this->getPackageFilesDestinations() as $file) {
     
-            $destinationFilePath = $this->cacheFolder . $file['destination'];
+            $destinationFilePath = $this->getCacheFolder() . $file['destination'];
             
             try {
                 $this->curlFileDownload($file['source'], [CURLOPT_FILE => $destinationFilePath]);
@@ -146,8 +144,8 @@ class GambioStoreInstallation extends AbstractGambioStoreFileSystem
     
     private function downloadPackageFromZipToCacheFolder()
     {
-        $targetFileName = $this->transactionId . '.zip';
-        $targetFilePath = $this->cacheFolder . $targetFileName;
+        $targetFileName = $this->getTransactionId() . '.zip';
+        $targetFilePath = $this->getCacheFolder() . $targetFileName;
         $zipFile = fopen($targetFilePath, 'wb+');
         $dounloadZipUrl = $this->packageData['fileList']['zip']['source'];
     
@@ -180,7 +178,7 @@ class GambioStoreInstallation extends AbstractGambioStoreFileSystem
             return false;
         }
     
-        $zip->extractTo($this->cacheFolder . $this->transactionId);
+        $zip->extractTo($this->getCacheFolder() . $this->getTransactionId());
         $zip->close();
     
         return true;
@@ -209,8 +207,8 @@ class GambioStoreInstallation extends AbstractGambioStoreFileSystem
     private function restorePackageFromBackup($toRestore)
     {
         foreach ($toRestore as $file) {
-            $shopFile = $this->shopFolder . '/' . $file;
-            $backupFile = $this->cacheFolder . 'backup/' . $file . '.bak';
+            $shopFile = $this->getShopFolder() . '/' . $file;
+            $backupFile = $this->getCacheFolder() . 'backup/' . $file . '.bak';
             
             try {
                 $this->fileCopy($backupFile, $shopFile);
