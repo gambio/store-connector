@@ -39,7 +39,7 @@ class GambioStoreAjaxController extends AdminHttpViewController
     private $compatibility;
     
     /**
-     * @var \inc
+     * @var \GambioStoreThemes
      */
     private $themes;
     

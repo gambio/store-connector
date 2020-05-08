@@ -52,9 +52,9 @@ class GambioStoreThemes
         
         try {
             $themeService->activateTheme($themeName);
-            
+    
             return true;
-        } catch (Exception $e) {
+        } catch (\Exception $e) {
             return false;
         }
     }
