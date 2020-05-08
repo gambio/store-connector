@@ -58,7 +58,7 @@ class GambioStoreRemoval extends AbstractGambioStoreFileSystem
             foreach ($this->fileList as $file) {
                 @unlink($file);
             }
-        } catch (Exception $exception) {
+        } catch (\Exception $exception) {
             $this->restoreBackup();
             throw new RuntimeException('Removing of package failed, because of : ', 0, $exception);
         }

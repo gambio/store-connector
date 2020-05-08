@@ -35,7 +35,7 @@ class GambioStoreConfiguration
      * @param \GambioStoreDatabase      $database
      * @param \GambioStoreCompatibility $compatibility
      */
-    public function __construct(\GambioStoreDatabase $database, \GambioStoreCompatibility $compatibility)
+    public function __construct(GambioStoreDatabase $database, GambioStoreCompatibility $compatibility)
     {
         $this->database      = $database;
         $this->compatibility = $compatibility;
