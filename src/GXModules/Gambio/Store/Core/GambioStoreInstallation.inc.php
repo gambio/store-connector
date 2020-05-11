@@ -76,11 +76,14 @@ class GambioStoreInstallation extends AbstractGambioStoreFileSystem
         } finally {
             $this->cleanCache();
         }
+        
+        return ['success' => true];
     }
     
     private function downloadPackageToCacheFolder()
     {
-        $downloaded = $this->downloadPackageFromZipToCacheFolder() ?: $this->downLoadPackageFilesToCacheFolder();
+        //$downloaded = $this->downloadPackageFromZipToCacheFolder() ?: $this->downLoadPackageFilesToCacheFolder();
+        $downloaded = $this->downLoadPackageFilesToCacheFolder();
         
         if (! $downloaded) {
             throw new DownloadPackageException('Could not download package');
@@ -112,25 +115,24 @@ class GambioStoreInstallation extends AbstractGambioStoreFileSystem
     {
         $packageTempDirectory = $this->getCacheFolder() . $this->getTransactionId();
         
-        if (!mkdir($packageTempDirectory) && !is_dir($packageTempDirectory)) {
-            $this->logger->error('Cannot create a folder in the cache directory. Please check permissions.');
-            return false;
-        }
-        
-        foreach ($this->getPackageFilesDestinations() as $file) {
-    
-            $destinationFilePath = $this->getCacheFolder() . $file['destination'];
+        foreach ($this->packageData['fileList']['includedFiles'] as $file) {
             
-            try {
-                $this->curlFileDownload($file['source'], [CURLOPT_FILE => $destinationFilePath]);
-            } catch (CurlFileDownloadException $e) {
-                $this->logger->error($e->getMessage());
+            $destinationFilePath = $packageTempDirectory . '/' . $file['destination'];
+            $destinationFileDirectory = dirname($destinationFilePath);
+            if (!file_exists($destinationFileDirectory) && !mkdir($destinationFileDirectory, 0777, true) && !is_dir($destinationFileDirectory)) {
+                $this->logger->error('Cannot create a folder in the cache directory. Please check permissions.');
                 return false;
             }
             
-            if (hash_file('md5', $destinationFilePath) !== $file['hash']) {
-                $this->logger->error('File hash check fails for file ' . $destinationFilePath);
+            $destinationFile = fopen($destinationFilePath, 'wb+');
+            
+            try {
+                $this->curlFileDownload($file['source'], [CURLOPT_FILE => $destinationFile]);
+            } catch (CurlFileDownloadException $e) {
+                $this->logger->error($e->getMessage());
                 return false;
+            } finally {
+                fclose($destinationFile);
             }
         }
         
@@ -216,6 +218,11 @@ class GambioStoreInstallation extends AbstractGambioStoreFileSystem
     
     private function cleanCache()
     {
-    
+        $targetFileName = $this->getTransactionId() . '.zip';
+        $targetFilePath = $this->getCacheFolder() . $targetFileName;
+        file_exists($targetFilePath) and $this->deleteFileOrFolder($targetFilePath);
+
+        $targetFilePath = $this->getCacheFolder() . $this->getTransactionId();
+        file_exists($targetFilePath) and $this->deleteFileOrFolder($targetFilePath);
     }
 }

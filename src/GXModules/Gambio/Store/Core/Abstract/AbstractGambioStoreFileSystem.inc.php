@@ -78,4 +78,15 @@ class AbstractGambioStoreFileSystem
         
         return true;
     }
+    
+    
+    protected function deleteFileOrFolder($dir)
+    {
+        $files = array_diff(scandir($dir), ['.','..']);
+        foreach ($files as $file) {
+            is_dir("$dir/$file") ? $this->deleteFileOrFolder("$dir/$file") : @unlink("$dir/$file");
+        }
+    
+        return rmdir($dir);
+    }
 }
