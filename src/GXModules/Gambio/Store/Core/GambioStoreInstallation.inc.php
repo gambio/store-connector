@@ -73,6 +73,8 @@ class GambioStoreInstallation extends AbstractGambioStoreFileSystem
             $this->installPackage();
         } catch (Exception $e) {
             throw new PackageInstallationException($e->getMessage());
+        } finally {
+            $this->cleanCache();
         }
     }
     
@@ -88,25 +90,22 @@ class GambioStoreInstallation extends AbstractGambioStoreFileSystem
     private function installPackage()
     {
         foreach ($this->getPackageFilesDestinations() as $file) {
-        
             $shopFile = $this->getShopFolder() . '/' . $file;
             $backupFile = $this->getCacheFolder() . 'backup/' . $file . '.bak';
             $newPackageFile = $this->getCacheFolder() . $this->getTransactionId() .  '/' . $file;
 
             try {
                 // Backup
-                $this->fileCopy($shopFile, $backupFile);
-
-                // Replace the old package file with new
-                if ($this->fileCopy($newPackageFile, $shopFile)) {
+                if ($this->fileCopy($shopFile, $backupFile)) {
                     $this->toRestore[] = $file;
                 }
+
+                // Replace the old package file with new
+                $this->fileCopy($newPackageFile, $shopFile);
             } catch (Exception $e) {
                 $this->restorePackageFromBackup($this->toRestore);
             }
         }
-        
-        // @todo clean cache (remove zip, remove backup)
     }
     
     private function downLoadPackageFilesToCacheFolder()
@@ -198,15 +197,25 @@ class GambioStoreInstallation extends AbstractGambioStoreFileSystem
     
     private function restorePackageFromBackup($toRestore)
     {
-        foreach ($toRestore as $file) {
+        foreach ($this->getPackageFilesDestinations() as $file) {
+    
             $shopFile = $this->getShopFolder() . '/' . $file;
             $backupFile = $this->getCacheFolder() . 'backup/' . $file . '.bak';
             
-            try {
-                $this->fileCopy($backupFile, $shopFile);
-            } catch (Exception $e) {
-                throw $e;
+            if (in_array($file, $toRestore, true)) {
+                try {
+                    $this->fileCopy($backupFile, $shopFile);
+                } catch (Exception $e) {
+                    throw $e;
+                }
+            } else {
+                @unlink($shopFile);
             }
         }
+    }
+    
+    private function cleanCache()
+    {
+    
     }
 }
