@@ -56,7 +56,9 @@ class GambioStoreRemoval extends AbstractGambioStoreFileSystem
         // $this->createBackup($this->fileList);
         try {
             foreach ($this->fileList as $file) {
-                @unlink($file);
+                 if(!@unlink($file)){
+                  throw new \RuntimeException();
+                 }
             }
         } catch (\Exception $exception) {
             $this->restoreBackup();
