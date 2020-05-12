@@ -13,7 +13,7 @@
 /**
  * Gulp Archive Task
  *
- * This task will create a zip archive with all connector variants.
+ * This task will create a zip archive with the connector files.
  *
  * @param {Gulp} gulp Gulp Instance
  * @param {Object} $ Contains the automatically loaded gulp plugins.
