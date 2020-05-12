@@ -68,7 +68,7 @@ class AbstractGambioStoreFileSystem
         
         $dir = dirname($destination);
         
-        if (!file_exists($dir) && !mkdir($dir, 0777, true) && !is_dir($dir) && chmod($dir, 0755)) {
+        if (!file_exists($dir) && !mkdir($dir, 0777, true) && !is_dir($dir) && chmod($dir, 0777)) {
             throw new \RuntimeException(sprintf('Directory "%s" was not created', $dir));
         }
         
@@ -77,5 +77,16 @@ class AbstractGambioStoreFileSystem
         }
         
         return true;
+    }
+    
+    
+    protected function deleteFileOrFolder($dir)
+    {
+        $files = array_diff(scandir($dir), ['.','..']);
+        foreach ($files as $file) {
+            is_dir("$dir/$file") ? $this->deleteFileOrFolder("$dir/$file") : @unlink("$dir/$file");
+        }
+    
+        return rmdir($dir);
     }
 }
