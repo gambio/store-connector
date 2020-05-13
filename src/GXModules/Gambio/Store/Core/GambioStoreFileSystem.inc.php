@@ -12,6 +12,7 @@ require_once 'Exceptions/FileSystemExceptions/FileNotFoundException.inc.php';
 require_once 'Exceptions/FileSystemExceptions/FileRenameException.inc.php';
 require_once 'Exceptions/FileSystemExceptions/FileMoveException.inc.php';
 require_once 'Exceptions/FileSystemExceptions/CreateDirectoryException.inc.php';
+require_once 'Exceptions/FileSystemExceptions/FileRemoveException.inc.php';
 
 class GambioStoreFileSystem
 {
@@ -131,6 +132,29 @@ class GambioStoreFileSystem
             throw new FileRenameException('Could not rename a file ' . $oldFileName, 3, [
                 'info' => 'Please contact the server administrator'
             ]);
+        }
+        
+        return true;
+    }
+    
+    
+    /**
+     * Removes file or folder (including subfolders).
+     *
+     * @param $dir
+     *
+     * @return bool
+     * @throws \FileRemoveException
+     */
+    public function removeFileOrFolder($dir)
+    {
+        $files = array_diff(scandir($dir), ['.','..']);
+        foreach ($files as $file) {
+            is_dir("$dir/$file") ? $this->removeFileOrFolder("$dir/$file") : @unlink("$dir/$file");
+        }
+        
+        if (!rmdir($dir)) {
+            throw new FileRemoveException("Could not remove file or folder $dir");
         }
         
         return true;
