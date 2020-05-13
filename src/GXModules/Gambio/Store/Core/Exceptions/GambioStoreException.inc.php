@@ -23,7 +23,7 @@ class GambioStoreException extends Exception
      * @param array           $context
      * @param \Throwable|null $previous
      */
-    public function __construct($message = "", $code = 0, $context = [], $previous = null)
+    public function __construct($message = '', $code = 0, $context = [], $previous = null)
     {
         $this->context = $context;
         
