@@ -7,8 +7,11 @@
    --------------------------------------------------------------
 */
 
-require_once 'Exceptions/FileSystemExceptions/FileCopyException.php';
-require_once 'Exceptions/FileSystemExceptions/FileNotFoundException.php';
+require_once 'Exceptions/FileSystemExceptions/FileCopyException.inc.php';
+require_once 'Exceptions/FileSystemExceptions/FileNotFoundException.inc.php';
+require_once 'Exceptions/FileSystemExceptions/FileRenameException.inc.php';
+require_once 'Exceptions/FileSystemExceptions/FileMoveException.inc.php';
+require_once 'Exceptions/FileSystemExceptions/CreateDirectoryException.inc.php';
 
 class GambioStoreFileSystem
 {
@@ -95,6 +98,37 @@ class GambioStoreFileSystem
             }
     
             throw new CreateDirectoryException('Could not create a folder ' . $path, 3, [
+                'info' => 'Please contact the server administrator'
+            ]);
+        }
+        
+        return true;
+    }
+    
+    
+    /**
+     * Renames a file. Any folders for the new name will be ignored.
+     *
+     * @param $oldFileName
+     * @param $newFileName
+     *
+     * @return bool
+     * @throws \FileNotFoundException
+     * @throws \FileRenameException
+     */
+    public function fileRename($oldFileName, $newFileName)
+    {
+        $newFileBaeName = basename($newFileName);
+        
+        if (!file_exists($oldFileName) || !is_file($oldFileName)) {
+            throw new FileNotFoundException('File not found: ' . $oldFileName, 1, [
+                'info' => "File not found on attempt to rename file $oldFileName to $newFileBaeName"
+            ]);
+        }
+    
+
+        if (!rename($oldFileName, dirname($oldFileName) . '/' . $newFileBaeName)) {
+            throw new FileRenameException('Could not rename a file ' . $oldFileName, 3, [
                 'info' => 'Please contact the server administrator'
             ]);
         }
