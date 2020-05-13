@@ -34,9 +34,36 @@ class GambioStoreFileSystem
         return true;
     }
     
-    public function move($sourcePath, $destinationPath)
-    {
     
+    /**
+     * Moves source file from to the destination directory.
+     * Creates destination directory recursively in case it doesn't exist.
+     *
+     * @param $source
+     * @param $destination
+     *
+     * @return bool
+     * @throws \FileNotFoundException
+     * @throws \CreateDirectoryException
+     * @throws \FileMoveException
+     */
+    public function fileMove($source, $destination)
+    {
+        if (!file_exists($source) || !is_file($source)) {
+            throw new FileNotFoundException('File not found: ' . $source, 1, [
+                'info' => "File not found on attempt to move file $source to $destination"
+            ]);
+        }
+    
+        if (!file_exists($destination)) {
+            $this->createDirectory($destination);
+        }
+    
+        if (! rename($source, $destination)) {
+            throw new FileMoveException("Could not move file $source to $destination folder");
+        }
+    
+        return true;
     }
     
     
