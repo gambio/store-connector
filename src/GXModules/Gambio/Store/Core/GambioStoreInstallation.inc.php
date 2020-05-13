@@ -82,8 +82,7 @@ class GambioStoreInstallation extends AbstractGambioStoreFileSystem
     
     private function downloadPackageToCacheFolder()
     {
-        //$downloaded = $this->downloadPackageFromZipToCacheFolder() ?: $this->downLoadPackageFilesToCacheFolder();
-        $downloaded = $this->downLoadPackageFilesToCacheFolder();
+        $downloaded = $this->downloadPackageFromZipToCacheFolder() ?: $this->downloadPackageFilesToCacheFolder();
         
         if (! $downloaded) {
             throw new DownloadPackageException('Could not download package');
@@ -111,7 +110,7 @@ class GambioStoreInstallation extends AbstractGambioStoreFileSystem
         }
     }
     
-    private function downLoadPackageFilesToCacheFolder()
+    private function downloadPackageFilesToCacheFolder()
     {
         $packageTempDirectory = $this->getCacheFolder() . $this->getTransactionId();
         
