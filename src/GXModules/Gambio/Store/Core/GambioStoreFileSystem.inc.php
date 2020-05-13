@@ -13,6 +13,9 @@ require_once 'Exceptions/FileSystemExceptions/FileNotFoundException.php';
 class GambioStoreFileSystem
 {
     /**
+     * Copies file from source to destination.
+     * In case folders of destination path are not exist, they will be created.
+     *
      * @param      $source
      * @param      $destination
      *
@@ -68,6 +71,8 @@ class GambioStoreFileSystem
     
     
     /**
+     * Crates a directory recursively.
+     *
      * @param $path
      *
      * @return bool
