@@ -7,7 +7,7 @@ const build = async () => {
 	const div = document.getElementById('gambio-store-iframe');
 	const storeUrl = div.dataset.storeUrl;
 	const iframe = document.createElement('iframe');
-	const languageCode = GambioStore.translation.getLanguageCode();
+	const languageCode = div.dataset.storeLanguage;
 	
 	if (storeUrl.includes('?')) {
 		iframe.src = `${storeUrl}&language=${languageCode}`;

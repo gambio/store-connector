@@ -239,7 +239,7 @@ class GambioStoreController extends AdminHttpViewController
         return new KeyValueCollection([
             'storeUrl'      => $this->getGambioStoreUrl() . $urlPostfix,
             'storeToken'    => $this->getGambioStoreToken(),
-            'storeLanguage' => $_SESSION['languages_id'],
+            'storeLanguage' => $this->connector->getCurrentShopLanguageCode(),
             'translations'  => $translations
         ]);
     }

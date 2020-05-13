@@ -7,22 +7,31 @@
    --------------------------------------------------------------
 */
 
+require_once 'Exceptions/FileSystemExceptions/FileCopyException.php';
+require_once 'Exceptions/FileSystemExceptions/FileNotFoundException.php';
+
 class GambioStoreFileSystem
 {
-    
-    public function fileCopy($sourcePath, $destinationPath)
-    {
-    
-    }
-
-    public function dirCopy($sourcePath, $destinationPath)
-    {
-    
-    }
-    
-    public function createDirRecursively()
-    {
-    
+    /**
+     * @param      $source
+     * @param      $destination
+     *
+     * @return bool
+     * @throws \CreateDirectoryException
+     * @throws \FileNotFoundException|\FileCopyException
+     */
+    public function fileCopy($source, $destination) {
+        if (! file_exists($source) || !is_file($source)) {
+            throw new FileNotFoundException('No such file: ' . $source);
+        }
+        
+        $this->createDirectory(dirname($destination));
+        
+        if (! copy($source, $destination)) {
+            throw new FileCopyException("Couldn't copy file " . $source);
+        }
+        
+        return true;
     }
     
     public function move($sourcePath, $destinationPath)
@@ -60,6 +69,5 @@ class GambioStoreFileSystem
         
         return true;
     }
-    
 }
 
