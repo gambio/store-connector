@@ -43,21 +43,29 @@ class GambioStoreConnector
      */
     private $themes;
     
+    /**
+     * @var GambioStoreDatabase
+     */
+    private $database;
+    
     
     /**
      * GambioStoreConnector constructor.
      *
+     * @param \GambioStoreDatabase      $database
      * @param \GambioStoreConfiguration $configuration
      * @param \GambioStoreCompatibility $compatibility
      * @param \GambioStoreLogger        $logger
      * @param \GambioStoreThemes        $themes
      */
     private function __construct(
+        GambioStoreDatabase $database,
         GambioStoreConfiguration $configuration,
         GambioStoreCompatibility $compatibility,
         GambioStoreLogger $logger,
         GambioStoreThemes $themes
     ) {
+        $this->database      = $database;
         $this->configuration = $configuration;
         $this->compatibility = $compatibility;
         $this->logger        = $logger;
@@ -78,7 +86,7 @@ class GambioStoreConnector
         $logger        = new GambioStoreLogger();
         $themes        = new GambioStoreThemes($compatibility);
     
-        return new self($configuration, $compatibility, $logger, $themes);
+        return new self($database, $configuration, $compatibility, $logger, $themes);
     }
     
     
@@ -149,16 +157,32 @@ class GambioStoreConnector
         return implode($delimiter, [$prefix, $date, $hash, $suffix]);
     }
     
+    
+    /**
+     * Returns the GambioStoreDatabase
+     *
+     * @return \GambioStoreDatabase
+     */
+    public function getDatabase()
+    {
+        return $this->database;
+    }
+    
+    
+    /**
+     * Installs a package
+     *
+     * @param $packageData
+     *
+     * @return bool[]
+     * @throws \PackageInstallationException
+     */
     public function installPackage($packageData)
     {
-        $cache = new GambioStoreCache(GambioStoreDatabase::connect());
-        $installaton = new GambioStoreInstallation(
-            $packageData,
-            $this->configuration->get('GAMBIO_STORE_TOKEN'),
-            $cache,
-            $this->logger
-        );
-    
+        $cache       = new GambioStoreCache(GambioStoreDatabase::connect());
+        $installaton = new GambioStoreInstallation($packageData, $this->configuration->get('GAMBIO_STORE_TOKEN'),
+            $cache, $this->logger);
+        
         return $installaton->perform();
     }
 }
