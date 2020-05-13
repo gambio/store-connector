@@ -170,6 +170,29 @@ class GambioStoreConnector
     
     
     /**
+     * Returns the current shop language code.
+     * 
+     * @return string
+     */
+    public function getCurrentShopLanguageCode(){
+        if(isset($_SESSION['languages_id'])) {
+            $rows = $this->database->query('SELECT code FROM languages WHERE languages_id = :id', [
+                'id' => $_SESSION['languages_id']
+            ]);
+            $id = $rows->fetchColumn();
+            if($id !== false) {
+                return $id;
+            }
+        }
+    
+        if(defined('DEFAULT_LANGUAGE')) {
+            return DEFAULT_LANGUAGE;
+        }
+        
+        return 'en';
+    }
+    
+    /**
      * Installs a package
      *
      * @param $packageData
