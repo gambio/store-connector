@@ -166,20 +166,20 @@ class GambioStoreFileSystem
     /**
      * Removes file or folder (including subfolders).
      *
-     * @param $dir
+     * @param
      *
      * @return bool
      * @throws \FileRemoveException
      */
-    public function removeFileOrFolder($dir)
+    public function remove($item)
     {
-        $files = array_diff(scandir($dir), ['.','..']);
+        $files = array_diff(scandir($item), ['.','..']);
         foreach ($files as $file) {
-            is_dir("$dir/$file") ? $this->removeFileOrFolder("$dir/$file") : @unlink("$dir/$file");
+            is_dir("$item/$file") ? $this->remove("$item/$file") : @unlink("$item/$file");
         }
         
-        if (!rmdir($dir)) {
-            throw new FileRemoveException("Could not remove file or folder $dir");
+        if (!rmdir($item)) {
+            throw new FileRemoveException("Could not remove file or folder $item");
         }
         
         return true;
