@@ -42,27 +42,28 @@ class GambioStoreRemoval extends AbstractGambioStoreFileSystem
      * Starts the performing of a gambio store removal.
      * Removes for example the files of a gambio store package.
      *
-     * @throws \RuntimeException
-     * @throws \WrongFilePermissionException
+     * @return bool[]
      */
     public function perform()
     {
-        $wrongPermittedFiles = $this->checkFilesPermissionsWithFileList($this->fileList);
-        if (count($wrongPermittedFiles) !== 0) {
-            throw new WrongFilePermissionException('Wrong permissions, cannot remove gambio store package',
-                $wrongPermittedFiles);
-        }
+        //$wrongPermittedFiles = $this->checkFilesPermissionsWithFileList($this->fileList);
+        //if (count($wrongPermittedFiles) !== 0) {
+        //    throw new WrongFilePermissionException('Wrong permissions, cannot remove gambio store package',
+        //        $wrongPermittedFiles);
+        //}
+        //
+        //// $this->createBackup($this->fileList);
+        //try {
+        //    foreach ($this->fileList as $file) {
+        //         if(!@unlink($file)){
+        //          throw new \RuntimeException();
+        //         }
+        //    }
+        //} catch (\Exception $exception) {
+        //    $this->restoreBackup();
+        //    throw new RuntimeException('Removing of package failed, because of : ', 0, $exception);
+        //}
         
-        // $this->createBackup($this->fileList);
-        try {
-            foreach ($this->fileList as $file) {
-                 if(!@unlink($file)){
-                  throw new \RuntimeException();
-                 }
-            }
-        } catch (\Exception $exception) {
-            $this->restoreBackup();
-            throw new RuntimeException('Removing of package failed, because of : ', 0, $exception);
-        }
+        return ['success' => true];
     }
 }

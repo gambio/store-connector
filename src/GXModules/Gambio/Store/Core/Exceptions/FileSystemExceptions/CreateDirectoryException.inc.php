@@ -7,7 +7,7 @@
    --------------------------------------------------------------
 */
 
-require_once '../GambioStoreException.inc.php';
+require_once __DIR__ . '/../GambioStoreException.inc.php';
 
 class CreateDirectoryException extends GambioStoreException
 {

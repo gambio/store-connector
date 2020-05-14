@@ -1,6 +1,6 @@
 <?php
 /* --------------------------------------------------------------
-   GambioStoreConnector.php 2020-04-29
+   GambioStoreConnector.php 2020-05-14
    Gambio GmbH
    http://www.gambio.de
    Copyright (c) 2020 Gambio GmbH
@@ -15,6 +15,7 @@ require_once 'Core/GambioStoreDatabase.inc.php';
 require_once 'Core/GambioStoreLogger.inc.php';
 require_once 'Core/GambioStoreConfiguration.inc.php';
 require_once 'Core/GambioStoreThemes.inc.php';
+require_once 'Core/GambioStoreFileSystem.inc.php';
 require_once 'Core/GambioStoreShopInformation.php';
 
 /**
@@ -50,6 +51,11 @@ class GambioStoreConnector
     private $database;
     
     /**
+     * @var \GambioStoreFileSystem
+     */
+    private $fileSystem;
+    
+    /**
      * @var \GambioStoreShopInformation
      */
     private $shopInformation;
@@ -63,6 +69,7 @@ class GambioStoreConnector
      * @param \GambioStoreCompatibility   $compatibility
      * @param \GambioStoreLogger          $logger
      * @param \GambioStoreThemes          $themes
+     * @param \GambioStoreFileSystem      $fileSystem
      * @param \GambioStoreShopInformation $shopInformation
      */
     private function __construct(
@@ -71,6 +78,7 @@ class GambioStoreConnector
         GambioStoreCompatibility $compatibility,
         GambioStoreLogger $logger,
         GambioStoreThemes $themes,
+        GambioStoreFileSystem $fileSystem,
         GambioStoreShopInformation $shopInformation
     ) {
         $this->database        = $database;
@@ -78,6 +86,7 @@ class GambioStoreConnector
         $this->compatibility   = $compatibility;
         $this->logger          = $logger;
         $this->themes          = $themes;
+        $this->fileSystem      = $fileSystem;
         $this->shopInformation = $shopInformation;
     }
     
@@ -94,9 +103,10 @@ class GambioStoreConnector
         $configuration   = new GambioStoreConfiguration($database, $compatibility);
         $logger          = new GambioStoreLogger();
         $themes          = new GambioStoreThemes($compatibility);
+        $fileSystem      = new GambioStoreFileSystem();
         $shopInformation = new GambioStoreShopInformation($database);
-    
-        return new self($database, $configuration, $compatibility, $logger, $themes, $shopInformation);
+        
+        return new self($database, $configuration, $compatibility, $logger, $themes, $fileSystem, $shopInformation);
     }
     
     
@@ -199,7 +209,7 @@ class GambioStoreConnector
     
     
     /**
-     * Returns the GambioStoreDatabase
+     * Returns the GambioStoreDatabase instance.
      *
      * @return \GambioStoreDatabase
      */
@@ -235,7 +245,7 @@ class GambioStoreConnector
     
     
     /**
-     * Installs a package
+     * Installs a package.
      *
      * @param $packageData
      *
@@ -249,5 +259,33 @@ class GambioStoreConnector
             $cache, $this->logger);
         
         return $installaton->perform();
+    }
+    
+    
+    /**
+     * Uninstalls a package.
+     *
+     * @param $fileLIst
+     *
+     * @return bool[]
+     * @throws \PackageInstallationException
+     */
+    public function uninstallPackage($fileLIst)
+    {
+        $cache   = new GambioStoreCache(GambioStoreDatabase::connect());
+        $removal = new GambioStoreRemoval($fileLIst);
+        
+        return $removal->perform();
+    }
+    
+    
+    /**
+     * Returns a GambioStoreFileSystem instance.
+     *
+     * @return \GambioStoreFileSystem
+     */
+    public function getFileSystem()
+    {
+        return $this->fileSystem;
     }
 }
