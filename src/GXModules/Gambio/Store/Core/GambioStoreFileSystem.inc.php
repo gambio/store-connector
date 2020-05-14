@@ -223,24 +223,24 @@ class GambioStoreFileSystem
     
     
     /**
-     * Returns shop path.
+     * Returns shop directory path.
      *
      * @return string
      */
-    public function getShopFolder()
+    public function getShopDirectory()
     {
-        return dirname(__FILE__, 5) . '/';
+        return dirname(__FILE__, 5);
     }
     
     
     /**
-     * Returns cache folder path.
+     * Returns cache directory path.
      *
      * @return string
      */
-    public function getCacheFolder()
+    public function getCacheDirectory()
     {
-        return $this->getShopFolder() . 'cache/';
+        return $this->getShopDirectory() . '/cache';
     }
 }
 
