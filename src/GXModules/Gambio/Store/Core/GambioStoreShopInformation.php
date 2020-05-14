@@ -22,16 +22,22 @@ class GambioStoreShopInformation
      */
     private $database;
     
+    /**
+     * @var \GambioStoreFileSystem
+     */
+    private $fileSystem;
+    
     
     /**
      * GambioStoreShopInformation constructor.
      *
      * @param \GambioStoreDatabase $database
      */
-    public function __construct(GambioStoreDatabase $database)
+    public function __construct(GambioStoreDatabase $database, GambioStoreFileSystem $fileSystem)
     {
-        $this->database = $database;
-        require_once __DIR__ . '/../../../../admin/includes/configure.php';
+        $this->database   = $database;
+        $this->fileSystem = $fileSystem;
+        require_once $this->fileSystem->getShopDirectory() . '/admin/includes/configure.php';
     }
     
     
@@ -107,7 +113,7 @@ class GambioStoreShopInformation
      */
     private function getShopVersion()
     {
-        require __DIR__ . '/../../../../release_info.php';
+        require $this->fileSystem->getShopDirectory() . '/release_info.php';
         
         if (!isset($gx_version)) {
             throw new GambioStoreShopVersionMissingException('The release_info.php no longer includes a $gx_version variable or the file is missing.');
@@ -147,8 +153,8 @@ class GambioStoreShopInformation
     private function getModuleVersionFiles()
     {
         $versionFiles = [];
-        
-        foreach (new DirectoryIterator(__DIR__ . '/../../../../version_info') as $file) {
+    
+        foreach (new DirectoryIterator($this->fileSystem->getShopDirectory() . '/version_info') as $file) {
             if ($file->isFile() && strpos($file->getFilename(), '.php')) {
                 $versionFiles[] = $file->getFilename();
             }
@@ -166,8 +172,8 @@ class GambioStoreShopInformation
     private function getThemes()
     {
         $themes = [];
-        
-        foreach (new DirectoryIterator(__DIR__ . '/../../../../themes') as $directory) {
+    
+        foreach (new DirectoryIterator($this->fileSystem->getShopDirectory() . '/themes') as $directory) {
             if ($directory->isDir() && !$directory->isDot()) {
                 $themeJsonContents = @file_get_contents($directory->getPathname() . '/theme.json');
                 if ($themeJsonContents) {

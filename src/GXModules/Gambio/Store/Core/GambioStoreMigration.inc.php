@@ -17,6 +17,11 @@
 class GambioStoreMigration
 {
     /**
+     * @var \GambioStoreFileSystem
+     */
+    private $fileSystem;
+    
+    /**
      * @var array
      */
     private $up;
@@ -30,13 +35,15 @@ class GambioStoreMigration
     /**
      * GambioStoreMigration constructor.
      *
-     * @param array $up
-     * @param array $down
+     * @param \GambioStoreFileSystem $fileSystem
+     * @param array                  $up
+     * @param array                  $down
      */
-    public function __construct(array $up, array $down)
+    public function __construct(\GambioStoreFileSystem $fileSystem, array $up, array $down)
     {
-        $this->up   = $up;
-        $this->down = $down;
+        $this->fileSystem = $fileSystem;
+        $this->up         = $up;
+        $this->down       = $down;
     }
     
     
@@ -49,7 +56,7 @@ class GambioStoreMigration
     {
         foreach ($this->up as $item) {
             try {
-                require_once $item;
+                require_once $this->fileSystem->getShopDirectory() . '/' . $item;
             } catch (\Exception $exception) {
                 throw new UpMigrationException('Up migration failed. File: ', 0, $item);
             }
@@ -66,7 +73,7 @@ class GambioStoreMigration
     {
         foreach ($this->down as $item) {
             try {
-                require_once $item;
+                require_once $this->fileSystem->getShopDirectory() . '/' . $item;
             } catch (\Exception $exception) {
                 throw new DownMigrationException('Down migration failed. File: ', 0, $item);
             }

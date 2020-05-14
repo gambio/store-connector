@@ -21,15 +21,22 @@ class GambioStoreThemes
      */
     private $compatibility;
     
+    /**
+     * @var \GambioStoreFileSystem
+     */
+    private $fileSystem;
+    
     
     /**
      * GambioStoreThemes constructor.
      *
      * @param \GambioStoreCompatibility $compatibility
+     * @param \GambioStoreFileSystem    $fileSystem
      */
-    public function __construct(GambioStoreCompatibility $compatibility)
+    public function __construct(GambioStoreCompatibility $compatibility, GambioStoreFileSystem $fileSystem)
     {
         $this->compatibility = $compatibility;
+        $this->fileSystem    = $fileSystem;
     }
     
     
@@ -70,9 +77,9 @@ class GambioStoreThemes
         if (!$this->compatibility->has(GambioStoreCompatibility::FEATURE_THEME_SERVICE)) {
             return false;
         }
-        
+    
         $themeServiceFactory = new ThemeServiceFactory();
-        $shopRootDirectory   = new ExistingDirectory(__DIR__ . '/../../../../');
+        $shopRootDirectory   = new ExistingDirectory($this->fileSystem->getShopDirectory());
         $themeService        = $themeServiceFactory->createThemeService($shopRootDirectory);
         
         try {
