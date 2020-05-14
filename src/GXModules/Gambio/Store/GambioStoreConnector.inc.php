@@ -17,6 +17,7 @@ require_once 'Core/GambioStoreConfiguration.inc.php';
 require_once 'Core/GambioStoreThemes.inc.php';
 require_once 'Core/GambioStoreFileSystem.inc.php';
 require_once 'Core/GambioStoreShopInformation.php';
+require_once __DIR__ . '/Core/Exceptions/GambioStoreLanguageNotResolvableException.inc.php';
 
 /**
  * Class GambioStoreConnector
@@ -240,7 +241,7 @@ class GambioStoreConnector
             return DEFAULT_LANGUAGE;
         }
         
-        return 'en';
+        throw new GambioStoreLanguageNotResolvableException(['languages_id' => $_SESSION['languages_id']]);
     }
     
     
