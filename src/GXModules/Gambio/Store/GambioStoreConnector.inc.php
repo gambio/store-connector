@@ -61,6 +61,11 @@ class GambioStoreConnector
      */
     private $shopInformation;
     
+    /**
+     * @var \GambioStoreUpdater
+     */
+    private $updater;
+    
     
     /**
      * GambioStoreConnector constructor.
@@ -80,7 +85,8 @@ class GambioStoreConnector
         GambioStoreLogger $logger,
         GambioStoreThemes $themes,
         GambioStoreFileSystem $fileSystem,
-        GambioStoreShopInformation $shopInformation
+        GambioStoreShopInformation $shopInformation,
+        GambioStoreUpdater $updater
     ) {
         $this->database        = $database;
         $this->configuration   = $configuration;
@@ -89,6 +95,7 @@ class GambioStoreConnector
         $this->themes          = $themes;
         $this->fileSystem      = $fileSystem;
         $this->shopInformation = $shopInformation;
+        $this->updater         = $updater;
     }
     
     
@@ -106,8 +113,10 @@ class GambioStoreConnector
         $logger          = new GambioStoreLogger();
         $themes          = new GambioStoreThemes($compatibility, $fileSystem);
         $shopInformation = new GambioStoreShopInformation($database, $fileSystem);
+        $updater         = new GambioStoreUpdater($configuration, $database, $fileSystem);
     
-        return new self($database, $configuration, $compatibility, $logger, $themes, $fileSystem, $shopInformation);
+        return new self($database, $configuration, $compatibility, $logger, $themes, $fileSystem, $shopInformation,
+            $updater);
     }
     
     
@@ -288,5 +297,14 @@ class GambioStoreConnector
     public function getFileSystem()
     {
         return $this->fileSystem;
+    }
+    
+    
+    /**
+     * Updates the GambioStoreConnector
+     */
+    public function update()
+    {
+        $this->updater->update();
     }
 }
