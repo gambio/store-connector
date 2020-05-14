@@ -34,6 +34,9 @@ class GambioStoreFileSystem
      */
     public function fileMove($source, $destination)
     {
+        $source      = $this->getShopDirectory() . '/' . $source;
+        $destination = $this->getShopDirectory() . '/' . $destination;
+        
         if (!file_exists($source) || !is_file($source)) {
             throw new GambioStoreFileNotFoundException('File not found: ' . $source, 1, [
                 'info' => "File not found on attempt to move file $source to $destination"
@@ -64,6 +67,7 @@ class GambioStoreFileSystem
      */
     public function fileRename($oldFileName, $newFileName)
     {
+        $oldFileName    = $this->getShopDirectory() . '/' . $oldFileName;
         $newFileBaeName = basename($newFileName);
         
         if (!file_exists($oldFileName) || !is_file($oldFileName)) {
@@ -94,8 +98,11 @@ class GambioStoreFileSystem
      */
     public function copy($source, $destination)
     {
-        $directory = new RecursiveDirectoryIterator($source, \RecursiveDirectoryIterator::SKIP_DOTS);
-        $iterator  = new RecursiveIteratorIterator($directory, \RecursiveIteratorIterator::SELF_FIRST);
+        $source      = $this->getShopDirectory() . '/' . $source;
+        $destination = $this->getShopDirectory() . '/' . $destination;
+    
+        $directory = new RecursiveDirectoryIterator($source, RecursiveDirectoryIterator::SKIP_DOTS);
+        $iterator  = new RecursiveIteratorIterator($directory, RecursiveIteratorIterator::SELF_FIRST);
         
         foreach ($iterator as $item) {
             if ($item->isDir()) {
@@ -117,13 +124,15 @@ class GambioStoreFileSystem
      */
     public function remove($item)
     {
+        $item = $this->getShopDirectory() . '/' . $item;
+        
         $files = array_diff(scandir($item), ['.', '..']);
         foreach ($files as $file) {
-            is_dir("$item/$file") ? $this->remove("$item/$file") : @unlink("$item/$file");
-        }
-        
-        if (!rmdir($item)) {
-            throw new GambioStoreFileRemoveException("Could not remove file or folder $item");
+            $removed = is_dir("$item/$file") ? $this->remove("$item/$file") : @unlink("$item/$file");
+            
+            if (!$removed) {
+                throw new GambioStoreFileRemoveException("Could not remove file or folder $item/$file");
+            }
         }
         
         return true;
