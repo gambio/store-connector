@@ -9,7 +9,7 @@
    --------------------------------------------------------------
 */
 
-require_once '../GambioStoreConnector.inc.php';
+require_once __DIR__ . '/../GambioStoreConnector.inc.php';
 
 
 /**
