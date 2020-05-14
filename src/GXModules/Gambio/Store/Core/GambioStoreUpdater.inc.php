@@ -30,6 +30,11 @@ class GambioStoreUpdater
     private $database;
     
     /**
+     * @var \GambioStoreFileSystem
+     */
+    private $fileSystem;
+    
+    /**
      * @var \GambioStoreConnector
      */
     private $connector;
@@ -45,11 +50,13 @@ class GambioStoreUpdater
     public function __construct(
         GambioStoreConfiguration $configuration,
         GambioStoreDatabase $database,
+        GambioStoreFileSystem $fileSystem,
         GambioStoreConnector $connector
     ) {
         
         $this->configuration = $configuration;
         $this->database      = $database;
+        $this->fileSystem    = $fileSystem;
         $this->connector     = $connector;
     }
     
@@ -59,6 +66,7 @@ class GambioStoreUpdater
      */
     public function update()
     {
+        $this->removeOldStoreFilesInShop();
         $this->updateMenu();
         $this->createDatabaseKeysIfNotExists();
         $this->createCacheTableIfNotExists();
@@ -124,12 +132,29 @@ class GambioStoreUpdater
                 ) ENGINE=INNODB
             ');
     }
+    
+    
+    /**
+     * Removes the old files inside the Shop of the previous Store implementation
+     */
+    private function removeOldStoreFilesInShop()
+    {
+        $this->fileSystem->remove('GXMainComponents/Controllers/HttpView/Admin/GambioStoreController.inc.php');
+        $this->fileSystem->remove('GXMainComponents/Controllers/HttpView/AdminAjax/GambioStoreAjaxController.inc.php');
+        $this->fileSystem->remove('GXMainComponents/Controllers/HttpView/Shop/GambioStoreCallbackController.inc.php');
+        $this->fileSystem->remove('GXMainComponents/Extensions/GambioStore');
+        $this->fileSystem->remove('admin/html/content/gambio_store');
+        $this->fileSystem->remove('admin/javascript/engine/controllers/gambio_store');
+        $this->fileSystem->remove('lang/german/original_sections/admin/gambio_store');
+        $this->fileSystem->remove('lang/english/original_sections/admin/gambio_store');
+    }
 }
 
 $connector = GambioStoreConnector::getInstance();
 
 $configuration = $connector->getConfiguration();
 $database      = $connector->getDatabase();
+$fileSystem    = $connector->getFileSystem();
 
-$updater = new GambioStoreUpdater($configuration, $database, $connector);
+$updater = new GambioStoreUpdater($configuration, $database, $fileSystem, $connector);
 $updater->update();
