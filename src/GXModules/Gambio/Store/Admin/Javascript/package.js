@@ -51,7 +51,7 @@ const isThemeActive = (themeName) => {
 const installPackage = async (data, progressCallback = () => null) => {
 	const formData = new FormData();
 	formData.append('gambioStoreData', JSON.stringify(data));
-
+	
 	const doPackageInstallation = async () => {
 		const response = await GambioStore.callShop('admin.php?do=GambioStoreAjax/InstallPackage', {
 			method: 'post',
@@ -62,11 +62,11 @@ const installPackage = async (data, progressCallback = () => null) => {
 		if (response.done !== true) {
 			await doPackageInstallation;
 		}
-        
-        return true;
-    }
-
-    await doPackageInstallation();
+		
+		return true;
+	}
+	
+	await doPackageInstallation();
 }
 
 /**
@@ -80,7 +80,10 @@ const isFilePermissionCorrect = async (data) => {
 	
 	formData.append('gambioStoreData', JSON.stringify(data));
 	try {
-		await GambioStore.callShop('admin.php?do=GambioStoreAjax/CheckFilePermissions', {method: 'post', body: formData})
+		await GambioStore.callShop('admin.php?do=GambioStoreAjax/CheckFilePermissions', {
+			method: 'post',
+			body: formData
+		})
 		return true;
 	} catch {
 		return false;
@@ -94,7 +97,12 @@ const isFilePermissionCorrect = async (data) => {
  */
 const uninstallPackage = async (data) => {
 	const formData = new FormData();
-	formData.append('folderNameInsideShop', data.folderNameInsideShop)
+	
+	if (data.folderNameInsideShop) {
+		formData.append('folderNameInsideShop', data.folderNameInsideShop)
+	} else {
+		formData.append('fileList', data.fileList)
+	}
 	
 	try {
 		await GambioStore.callShop('admin.php?do=GambioStoreAjax/uninstallPackage', {
@@ -121,7 +129,7 @@ const startPackageInstallation = async (data) => {
 	// By checking whether a gallery object is present,
 	// we can determine if this is a theme or not.
 	try {
-        // progressDescription.textContent = GambioStore.translation.translate('INSTALLING_PACKAGE');
+		// progressDescription.textContent = GambioStore.translation.translate('INSTALLING_PACKAGE');
 		await installPackage(data, updateProgressCallback);
 		
 		if (data.details.gallery) {
@@ -175,9 +183,9 @@ const install = async (data) => {
 	// const progressDescription = document.getElementsByClassName('.progress-description').item(0);
 	
 	// progressDescription.textContent = GambioStore.translation.translate('PREPARING_PACKAGE');
-
+	
 	updateProgressCallback({progress: 0}); // always set to 0 initially
-
+	
 	$installingPackageModal.modal('show');
 	await startPackageInstallation(data);
 }
@@ -185,5 +193,6 @@ const install = async (data) => {
 window.addEventListener('DOMContentLoaded', () => {
 	GambioStore.messenger.listenToMessage('start_installation_process', install);
 	GambioStore.messenger.listenToMessage('uninstall_theme', uninstallPackage);
+	GambioStore.messenger.listenToMessage('uninstall_package', uninstallPackage);
 	GambioStore.messenger.listenToMessage('activate_theme', activateTheme);
 });

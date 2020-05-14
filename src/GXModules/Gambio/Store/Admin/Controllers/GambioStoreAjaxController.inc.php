@@ -43,6 +43,11 @@ class GambioStoreAjaxController extends AdminHttpViewController
      */
     private $themes;
     
+    /**
+     * @var \GambioStoreFileSystem
+     */
+    private $fileSystem;
+    
     
     /**
      * Sets up this class avoiding the constructor.
@@ -54,6 +59,7 @@ class GambioStoreAjaxController extends AdminHttpViewController
         $this->configuration = $this->connector->getConfiguration();
         $this->compatibility = $this->connector->getCompatibility();
         $this->themes        = $this->connector->getThemes();
+        $this->fileSystem    = $this->connector->getFileSystem();
     }
     
     
@@ -80,12 +86,12 @@ class GambioStoreAjaxController extends AdminHttpViewController
     public function actionInstallPackage()
     {
         $this->setup();
-    
+        
         $packageData = json_decode(stripcslashes($_POST['gambioStoreData']), true);
         
         try {
             $response = $this->connector->installPackage($packageData);
-    
+            
             return new JsonHttpControllerResponse($response);
         } catch (\Exception $e) {
             return new JsonHttpControllerResponse(['success' => false]);
@@ -103,12 +109,18 @@ class GambioStoreAjaxController extends AdminHttpViewController
         $this->setup();
         
         try {
-            $this->connector->uninstallPackage($_POST);
+            if (isset($_POST['folderNameInsideShop'])) {
+                $fileList = $this->fileSystem->getDirectoryContent($_POST['folderNameInsideShop']);
+            } else {
+                $fileList = $_POST['fileList'];
+            }
+            
+            $response = $this->connector->uninstallPackage($fileList);
         } catch (\Exception $e) {
             return new JsonHttpControllerResponse(['success' => false]);
         }
-    
-        return new JsonHttpControllerResponse(['success' => true]);
+        
+        return new JsonHttpControllerResponse($response);
     }
     
     
@@ -121,7 +133,7 @@ class GambioStoreAjaxController extends AdminHttpViewController
     {
         $this->setup();
         $isAccepted = $this->configuration->get('GAMBIO_STORE_ACCEPTED_DATA_PROCESSING');
-    
+        
         return new JsonHttpControllerResponse(['accepted' => $isAccepted]);
     }
     
@@ -134,18 +146,18 @@ class GambioStoreAjaxController extends AdminHttpViewController
     public function actionIsThemeActive()
     {
         $this->setup();
-    
+        
         if (!isset($_GET) || !isset($_GET['themeName'])) {
             return new JsonHttpControllerResponse(['success' => false]);
         }
-    
+        
         if (!$this->compatibility->has(GambioStoreCompatibility::FEATURE_THEME_CONTROL)) {
             return new JsonHttpControllerResponse(['isActive' => true]);
         }
-    
+        
         $themeName    = $_GET['themeName'];
         $themeControl = StaticGXCoreLoader::getThemeControl();
-    
+        
         foreach ($themeControl->getCurrentThemeHierarchy() as $theme) {
             if ($theme === $themeName) {
                 return new JsonHttpControllerResponse([
@@ -153,7 +165,7 @@ class GambioStoreAjaxController extends AdminHttpViewController
                 ]);
             }
         }
-    
+        
         return new JsonHttpControllerResponse([
             'isActive' => false
         ]);
@@ -168,15 +180,15 @@ class GambioStoreAjaxController extends AdminHttpViewController
     public function actionActivateTheme()
     {
         $this->setup();
-    
+        
         if (!isset($_POST)
             || !isset($_POST['themeStorageName'])) {
             return new JsonHttpControllerResponse(['success' => false]);
         }
-    
+        
         $themeName = $_POST['themeStorageName'];
         $result    = $this->themes->activateTheme($themeName);
-    
+        
         return new JsonHttpControllerResponse(['success' => $result]);
     }
 }

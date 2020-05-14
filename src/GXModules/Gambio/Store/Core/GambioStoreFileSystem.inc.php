@@ -1,18 +1,21 @@
 <?php
 /* --------------------------------------------------------------
-   GambioStoreFileSystem.inc.php 2020-05-13
+   GambioStoreFileSystem.php 2020-05-14
    Gambio GmbH
    http://www.gambio.de
    Copyright (c) 2020 Gambio GmbH
+   Released under the GNU General Public License (Version 2)
+   [http://www.gnu.org/licenses/gpl-2.0.html]
    --------------------------------------------------------------
 */
 
 require_once 'Exceptions/FileSystemExceptions/FileCopyException.inc.php';
-require_once 'Exceptions/FileSystemExceptions/FileNotFoundException.inc.php';
-require_once 'Exceptions/FileSystemExceptions/FileRenameException.inc.php';
 require_once 'Exceptions/FileSystemExceptions/FileMoveException.inc.php';
-require_once 'Exceptions/FileSystemExceptions/CreateDirectoryException.inc.php';
+require_once 'Exceptions/FileSystemExceptions/FileRenameException.inc.php';
 require_once 'Exceptions/FileSystemExceptions/FileRemoveException.inc.php';
+require_once 'Exceptions/FileSystemExceptions/FileNotFoundException.inc.php';
+require_once 'Exceptions/FileSystemExceptions/CreateDirectoryException.inc.php';
+require_once 'Exceptions/FileSystemExceptions/PathIsNotDirectoryException.inc.php';
 
 class GambioStoreFileSystem
 {
@@ -34,7 +37,7 @@ class GambioStoreFileSystem
         
         $this->createDirectory(dirname($destination));
         
-        if (! copy($source, $destination)) {
+        if (!copy($source, $destination)) {
             throw new FileCopyException("Couldn't copy file " . $source);
         }
         
@@ -61,15 +64,15 @@ class GambioStoreFileSystem
                 'info' => "File not found on attempt to move file $source to $destination"
             ]);
         }
-    
+        
         if (!file_exists($destination)) {
             $this->createDirectory($destination);
         }
-    
-        if (! rename($source, $destination)) {
+        
+        if (!rename($source, $destination)) {
             throw new FileMoveException("Could not move file $source to $destination folder");
         }
-    
+        
         return true;
     }
     
@@ -97,7 +100,7 @@ class GambioStoreFileSystem
                     'info' => 'There is already a symlink exists for this path! ' . $path
                 ]);
             }
-    
+            
             throw new CreateDirectoryException('Could not create a folder ' . $path, 3, [
                 'info' => 'Please contact the server administrator'
             ]);
@@ -126,8 +129,7 @@ class GambioStoreFileSystem
                 'info' => "File not found on attempt to rename file $oldFileName to $newFileBaeName"
             ]);
         }
-    
-
+        
         if (!rename($oldFileName, dirname($oldFileName) . '/' . $newFileBaeName)) {
             throw new FileRenameException('Could not rename a file ' . $oldFileName, 3, [
                 'info' => 'Please contact the server administrator'
@@ -183,6 +185,39 @@ class GambioStoreFileSystem
         }
         
         return true;
+    }
+    
+    
+    /**
+     * Returns the content as array of provided directory path recursively.
+     *
+     * @param       $dir
+     *
+     * @return array
+     * @throws \DirectoryContentException
+     * @throws \PathIsNotDirectoryException
+     */
+    public function getDirectoryContent($dir)
+    {
+        if (!is_dir($dir)) {
+            throw new PathIsNotDirectoryException('Path :' . $dir . ' is not a directory');
+        }
+        
+        try {
+            $files     = [];
+            $directory = new RecursiveDirectoryIterator($dir, FilesystemIterator::SKIP_DOTS);
+            foreach (new RecursiveIteratorIterator($directory, RecursiveIteratorIterator::SELF_FIRST) as $path) {
+                if ($path->isDir()) {
+                    $files[] = $path->__toString();
+                } else {
+                    $files[] = realpath($path->__toString());
+                }
+            }
+        } catch (Exception $exception) {
+            throw new DirectoryContentException('Could not get content form directory:' . $dir, 0, [], $exception);
+        }
+        
+        return $files;
     }
 }
 
