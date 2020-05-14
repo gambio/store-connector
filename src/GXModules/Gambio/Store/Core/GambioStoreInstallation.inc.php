@@ -128,15 +128,9 @@ class GambioStoreInstallation
     {
         foreach ($this->getPackageFilesDestinations() as $file) {
             $shopFile = $this->filesystem->getShopDirectory() . '/' . $file;
-            $backupFile = $this->filesystem->getCacheDirectory() . 'backup/' . $file . '.bak';
             $newPackageFile = $this->filesystem->getCacheDirectory() . $this->getTransactionId() .  '/' . $file;
 
             try {
-                // Backup
-                if ($this->filesystem->fileMove($shopFile, $backupFile)) {
-                    $this->toRestore[] = $file;
-                }
-
                 // Replace the old package file with new
                 $this->filesystem->fileMove($newPackageFile, $shopFile);
             } catch (Exception $e) {

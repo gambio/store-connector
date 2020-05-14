@@ -115,6 +115,38 @@ class GambioStoreFileSystem
     
     
     /**
+     * @param $source
+     * @param $destination
+     *
+     * @return bool
+     * @throws \Exception
+     */
+    public function move($source, $destination)
+    {
+        if (!file_exists($source)) {
+            throw new GambioStoreFileNotFoundException('');
+        }
+        
+        if (is_file($source)) {
+            return $this->fileMove($source, $destination);
+        }
+        
+        $directory = new RecursiveDirectoryIterator($source, \RecursiveDirectoryIterator::SKIP_DOTS);
+        $iterator = new RecursiveIteratorIterator($directory, \RecursiveIteratorIterator::SELF_FIRST);
+        
+        foreach ($iterator as $item) {
+            if ($item->isDir()) {
+                $this->createDirectory($destination . DIRECTORY_SEPARATOR . $iterator->getSubPathName());
+            } else {
+                $this->fileMove($item, $destination . DIRECTORY_SEPARATOR . $iterator->getSubPathName());
+            }
+        }
+        
+        return true;
+    }
+    
+    
+    /**
      * Removes file or folder (including subfolders).
      *
      * @param $item
