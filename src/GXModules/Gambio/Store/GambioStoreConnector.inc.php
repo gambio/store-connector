@@ -15,6 +15,7 @@ require_once 'Core/GambioStoreDatabase.inc.php';
 require_once 'Core/GambioStoreLogger.inc.php';
 require_once 'Core/GambioStoreConfiguration.inc.php';
 require_once 'Core/GambioStoreThemes.inc.php';
+require_once 'Core/GambioStoreShopInformation.php';
 
 /**
  * Class GambioStoreConnector
@@ -48,28 +49,36 @@ class GambioStoreConnector
      */
     private $database;
     
+    /**
+     * @var \GambioStoreShopInformation
+     */
+    private $shopInformation;
+    
     
     /**
      * GambioStoreConnector constructor.
      *
-     * @param \GambioStoreDatabase      $database
-     * @param \GambioStoreConfiguration $configuration
-     * @param \GambioStoreCompatibility $compatibility
-     * @param \GambioStoreLogger        $logger
-     * @param \GambioStoreThemes        $themes
+     * @param \GambioStoreDatabase        $database
+     * @param \GambioStoreConfiguration   $configuration
+     * @param \GambioStoreCompatibility   $compatibility
+     * @param \GambioStoreLogger          $logger
+     * @param \GambioStoreThemes          $themes
+     * @param \GambioStoreShopInformation $shopInformation
      */
     private function __construct(
         GambioStoreDatabase $database,
         GambioStoreConfiguration $configuration,
         GambioStoreCompatibility $compatibility,
         GambioStoreLogger $logger,
-        GambioStoreThemes $themes
+        GambioStoreThemes $themes,
+        GambioStoreShopInformation $shopInformation
     ) {
-        $this->database      = $database;
-        $this->configuration = $configuration;
-        $this->compatibility = $compatibility;
-        $this->logger        = $logger;
-        $this->themes        = $themes;
+        $this->database        = $database;
+        $this->configuration   = $configuration;
+        $this->compatibility   = $compatibility;
+        $this->logger          = $logger;
+        $this->themes          = $themes;
+        $this->shopInformation = $shopInformation;
     }
     
     
@@ -80,13 +89,14 @@ class GambioStoreConnector
      */
     public static function getInstance()
     {
-        $database      = GambioStoreDatabase::connect();
-        $compatibility = new GambioStoreCompatibility($database);
-        $configuration = new GambioStoreConfiguration($database, $compatibility);
-        $logger        = new GambioStoreLogger();
-        $themes        = new GambioStoreThemes($compatibility);
+        $database        = GambioStoreDatabase::connect();
+        $compatibility   = new GambioStoreCompatibility($database);
+        $configuration   = new GambioStoreConfiguration($database, $compatibility);
+        $logger          = new GambioStoreLogger();
+        $themes          = new GambioStoreThemes($compatibility);
+        $shopInformation = new GambioStoreShopInformation($database);
     
-        return new self($database, $configuration, $compatibility, $logger, $themes);
+        return new self($database, $configuration, $compatibility, $logger, $themes, $shopInformation);
     }
     
     
@@ -153,8 +163,27 @@ class GambioStoreConnector
         $hash      = md5(time());
         $suffix    = 'XX';
         $delimiter = '-';
-    
+        
         return implode($delimiter, [$prefix, $date, $hash, $suffix]);
+    }
+    
+    
+    /**
+     * Synthesizes the shop information and returns it as an array
+     *
+     * @return array
+     */
+    public function getShopInformation()
+    {
+        try {
+            return $this->shopInformation->getShopInformation();
+        } catch (\GambioStoreException $e) {
+            $this->logger->critical($e->getMessage(), $e->getContext());
+            
+            return [
+                'error' => $e->getMessage()
+            ];
+        }
     }
     
     
@@ -171,26 +200,28 @@ class GambioStoreConnector
     
     /**
      * Returns the current shop language code.
-     * 
+     *
      * @return string
      */
-    public function getCurrentShopLanguageCode(){
-        if(isset($_SESSION['languages_id'])) {
-            $rows = $this->database->query('SELECT code FROM languages WHERE languages_id = :id', [
+    public function getCurrentShopLanguageCode()
+    {
+        if (isset($_SESSION['languages_id'])) {
+            $rows = $this->database->query('SELECT `code` FROM `languages` WHERE `languages_id` = :id', [
                 'id' => $_SESSION['languages_id']
             ]);
-            $id = $rows->fetchColumn();
-            if($id !== false) {
+            $id   = $rows->fetchColumn();
+            if ($id !== false) {
                 return $id;
             }
         }
-    
-        if(defined('DEFAULT_LANGUAGE')) {
+        
+        if (defined('DEFAULT_LANGUAGE')) {
             return DEFAULT_LANGUAGE;
         }
         
         return 'en';
     }
+    
     
     /**
      * Installs a package

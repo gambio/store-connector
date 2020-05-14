@@ -44,7 +44,7 @@ class GambioStoreDatabase
     public static function connect()
     {
         if (self::$instance === null) {
-            require_once __DIR__ . '/../../../../includes/configure.php';
+            require_once __DIR__ . '/../../../../admin/includes/configure.php';
             
             $dsn = 'mysql:host=' . DB_SERVER . ';dbname=' . DB_DATABASE;
             
@@ -76,11 +76,22 @@ class GambioStoreDatabase
         if ($parameters && !count(array_filter(array_keys($parameters), 'is_string'))) {
             throw new \RuntimeException('Parameters array should be associative.');
         }
-
+    
         $statement = $this->pdo->prepare($sql);
-        
+    
         $statement->execute($parameters);
-        
+    
         return $statement;
+    }
+    
+    
+    /**
+     * Returns the MySQL version
+     *
+     * @return string
+     */
+    public function getVersion()
+    {
+        return $this->pdo->getAttribute(PDO::ATTR_SERVER_VERSION);
     }
 }

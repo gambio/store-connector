@@ -4,3 +4,5 @@ GXMainComponents/Controllers/HttpView/Shop/GambioStoreCallbackController.inc.php
 GXMainComponents/Extensions/GambioStore/*
 admin/html/content/gambio_store/*
 admin/javascript/engine/controllers/gambio_store/*
+lang/german/original_sections/admin/gambio_store/*
+lang/english/original_sections/admin/gambio_store/*

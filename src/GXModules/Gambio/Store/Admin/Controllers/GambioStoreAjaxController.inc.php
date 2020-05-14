@@ -65,12 +65,8 @@ class GambioStoreAjaxController extends AdminHttpViewController
     public function actionCollectShopInformation()
     {
         $this->setup();
-        $factory = new ShopInformationFactory();
     
-        $service    = $factory->createService();
-        $serializer = $factory->createShopInformationSerializer();
-    
-        $shopInformation = $serializer->serialize($service->getShopInformation());
+        $shopInformation = $this->connector->getShopInformation();
     
         return new JsonHttpControllerResponse($shopInformation);
     }
