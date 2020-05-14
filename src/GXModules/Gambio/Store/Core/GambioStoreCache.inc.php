@@ -10,6 +10,7 @@
 */
 
 require_once 'GambioStoreDatabase.inc.php';
+require_once 'Exceptions/GambioStoreCacheException.inc.php';
 
 /**
  * Class GambioStoreCache
@@ -36,7 +37,7 @@ class GambioStoreCache
      *
      * @param $database
      */
-    public function __construct($database)
+    public function __construct(GambioStoreDatabase $database)
     {
         $this->database = $database;
     }
@@ -47,15 +48,22 @@ class GambioStoreCache
      *
      * @param $key
      *
-     * @return mixed
+     * @return mixed | bool
      */
     public function get($key)
     {
-        $sql = 'SELECT * FROM ' . self::CACHE_TABLE .  ' WHERE cache_key = :cache_key LIMIT 1';
-    
-        $query = $this->database->query($sql, [':cache_key' => $key]);
-    
-        return $query->fetch();
+        $sql = 'SELECT * FROM ' . self::CACHE_TABLE . ' WHERE cache_key = :cache_key LIMIT 1';
+        
+        $query            = $this->database->query($sql, [':cache_key' => $key]);
+        $result           = $query->fetch();
+        $errorInformation = $query->errorInfo();
+        
+        if ($errorInformation[0] === null) {
+            return $result;
+        }
+        
+        throw new GambioStoreCacheException('Could not get key: ' . $key . ' from cache table', 0,
+            ['sqlError' => $errorInformation]);
     }
     
     
@@ -65,15 +73,24 @@ class GambioStoreCache
      * @param $key
      * @param $value
      *
-     * @return mixed
+     * @throws \GambioStoreCacheException
      */
     public function set($key, $value)
     {
-        $table = self::CACHE_TABLE;
+        $sql = 'INSERT INTO ' . self::CACHE_TABLE . ' (cache_key,cache_value) VALUES (:cache_key, :cache_value) '
+               . 'ON DUPLICATE KEY UPDATE cache_value=:cache_value ';
         
-        $sql = "INSERT INTO $table (cache_key, cache_value) VALUES ($key, $value)";
-    
-        return $this->database->query($sql);
+        $query   = $this->database->query($sql, ['cache_key' => $key, 'cache_value' => $value]);
+        $success = $query->execute();
+        
+        if ($success) {
+            return;
+        }
+        
+        $errorInformation = $query->errorInfo();
+        
+        throw new GambioStoreCacheException('Could not set key: ' . $key . 'value: ' . $value . 'into cache table', 0,
+            ['sqlError' => $errorInformation]);
     }
     
     
@@ -83,15 +100,22 @@ class GambioStoreCache
      * @param $key
      *
      * @return bool
+     * @throws \GambioStoreCacheException
      */
     public function has($key)
     {
-        $sql = 'SELECT COUNT(*) FROM ' . self::CACHE_TABLE .  ' WHERE cache_key = :cache_key LIMIT 1';
-    
+        $sql = 'SELECT COUNT(*) FROM ' . self::CACHE_TABLE . ' WHERE cache_key = :cache_key LIMIT 1';
+        
         $query = $this->database->query($sql, [':cache_key' => $key]);
-    
-        $count = (int) $query->fetchColumn();
-    
+        
+        $count = (int)$query->fetchColumn();
+        
+        if ($count === false) {
+            $errorInformation = $query->errorInfo();
+            throw  new GambioStoreCacheException('Could not check if cache table has ' . $key, 0,
+                ['sqlError' => $errorInformation]);
+        }
+        
         return $count > 0;
     }
 }
