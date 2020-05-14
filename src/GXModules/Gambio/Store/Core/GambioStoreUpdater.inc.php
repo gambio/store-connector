@@ -9,9 +9,6 @@
    --------------------------------------------------------------
 */
 
-require_once __DIR__ . '/../GambioStoreConnector.inc.php';
-
-
 /**
  * Class GambioStoreUpdater
  *
@@ -34,30 +31,22 @@ class GambioStoreUpdater
      */
     private $fileSystem;
     
-    /**
-     * @var \GambioStoreConnector
-     */
-    private $connector;
-    
     
     /**
      * GambioStoreUpdater constructor.
      *
      * @param \GambioStoreConfiguration $configuration
      * @param \GambioStoreDatabase      $database
-     * @param \GambioStoreConnector     $connector
      */
     public function __construct(
         GambioStoreConfiguration $configuration,
         GambioStoreDatabase $database,
-        GambioStoreFileSystem $fileSystem,
-        GambioStoreConnector $connector
+        GambioStoreFileSystem $fileSystem
     ) {
         
         $this->configuration = $configuration;
         $this->database      = $database;
         $this->fileSystem    = $fileSystem;
-        $this->connector     = $connector;
     }
     
     
@@ -76,9 +65,9 @@ class GambioStoreUpdater
     /**
      * Removes the old menu entry for shops that were still shipped with the Store
      */
-    public function updateMenu()
+    private function updateMenu()
     {
-        $menuPath = $this->fileSystem->getShopDirectory() . '/system/conf/admin_menu/gambio_menu.xml';
+        $menuPath = __DIR__ . '/../../../../system/conf/admin_menu/gambio_menu.xml';
         
         $menuContent = file_get_contents($menuPath);
         
@@ -93,14 +82,20 @@ class GambioStoreUpdater
     /**
      * Creates the necessary database values for the Store
      */
-    public function createDatabaseKeysIfNotExists()
+    private function createDatabaseKeysIfNotExists()
     {
         if (!$this->configuration->has('GAMBIO_STORE_URL')) {
             $this->configuration->create('GAMBIO_STORE_URL', 'https://store.gambio.com/a');
         }
         
         if (!$this->configuration->has('GAMBIO_STORE_TOKEN')) {
-            $gambioToken = $this->connector->generateToken();
+            $prefix    = 'STORE';
+            $date      = date('Ymd');
+            $hash      = md5(time());
+            $suffix    = 'XX';
+            $delimiter = '-';
+            
+            $gambioToken = implode($delimiter, [$prefix, $date, $hash, $suffix]);
             $this->configuration->create('GAMBIO_STORE_TOKEN', $gambioToken);
         }
         
@@ -122,7 +117,7 @@ class GambioStoreUpdater
     /**
      * Ensures the cache table exists in the database
      */
-    public function createCacheTableIfNotExists()
+    private function createCacheTableIfNotExists()
     {
         $this->database->query('
                 CREATE TABLE IF NOT EXISTS `gambio_store_cache` (
@@ -149,12 +144,3 @@ class GambioStoreUpdater
         $this->fileSystem->remove('lang/english/original_sections/admin/gambio_store');
     }
 }
-
-$connector = GambioStoreConnector::getInstance();
-
-$configuration = $connector->getConfiguration();
-$database      = $connector->getDatabase();
-$fileSystem    = $connector->getFileSystem();
-
-$updater = new GambioStoreUpdater($configuration, $database, $fileSystem, $connector);
-$updater->update();
