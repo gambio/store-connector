@@ -26,8 +26,7 @@ class GambioStoreException extends Exception
     public function __construct($message = '', $code = 0, $context = [], $previous = null)
     {
         $this->context = array_merge($context, [
-            'exception' => static::class,
-            'message'   => $message
+            'exception' => static::class
         ]);
     
         parent::__construct($message, $code, $previous);
