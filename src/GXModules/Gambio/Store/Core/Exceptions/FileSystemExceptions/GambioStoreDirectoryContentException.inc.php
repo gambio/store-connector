@@ -1,7 +1,7 @@
 <?php
 
 /* --------------------------------------------------------------
-   ScanDirectoryException.php 2020-05-14
+   GambioStoreDirectoryContentException.inc.php 2020-05-14
    Gambio GmbH
    http://www.gambio.de
    Copyright (c) 2020 Gambio GmbH
@@ -12,7 +12,7 @@
 
 require_once __DIR__ . '/../GambioStoreException.inc.php';
 
-class DirectoryContentException extends GambioStoreException
+class GambioStoreDirectoryContentException extends GambioStoreException
 {
     
 }

@@ -9,14 +9,14 @@
    --------------------------------------------------------------
 */
 
-require_once 'Exceptions/FileSystemExceptions/FileCopyException.inc.php';
-require_once 'Exceptions/FileSystemExceptions/FileMoveException.inc.php';
-require_once 'Exceptions/FileSystemExceptions/FileRenameException.inc.php';
-require_once 'Exceptions/FileSystemExceptions/FileRemoveException.inc.php';
-require_once 'Exceptions/FileSystemExceptions/FileNotFoundException.inc.php';
-require_once 'Exceptions/FileSystemExceptions/DirectoryContentException.inc.php';
-require_once 'Exceptions/FileSystemExceptions/CreateDirectoryException.inc.php';
-require_once 'Exceptions/FileSystemExceptions/PathIsNotDirectoryException.inc.php';
+require_once 'Exceptions/FileSystemExceptions/GambioStoreFileCopyException.inc.php';
+require_once 'Exceptions/FileSystemExceptions/GambioStoreFileMoveException.inc.php';
+require_once 'Exceptions/FileSystemExceptions/GambioStoreFileRenameException.inc.php';
+require_once 'Exceptions/FileSystemExceptions/GambioStoreFileRemoveException.inc.php';
+require_once 'Exceptions/FileSystemExceptions/GambioStoreFileNotFoundException.inc.php';
+require_once 'Exceptions/FileSystemExceptions/GambioStoreDirectoryContentException.inc.php';
+require_once 'Exceptions/FileSystemExceptions/GambioStoreCreateDirectoryException.inc.php';
+require_once 'Exceptions/FileSystemExceptions/GambioStorePathIsNotDirectoryException.inc.php';
 
 class GambioStoreFileSystem
 {
@@ -28,14 +28,13 @@ class GambioStoreFileSystem
      * @param $destination
      *
      * @return bool
-     * @throws \FileNotFoundException
-     * @throws \CreateDirectoryException
-     * @throws \FileMoveException
+     * @throws \GambioStoreFileNotFoundException
+     * @throws \GambioStoreFileMoveException
      */
     public function fileMove($source, $destination)
     {
         if (!file_exists($source) || !is_file($source)) {
-            throw new FileNotFoundException('File not found: ' . $source, 1, [
+            throw new GambioStoreFileNotFoundException('File not found: ' . $source, 1, [
                 'info' => "File not found on attempt to move file $source to $destination"
             ]);
         }
@@ -45,7 +44,7 @@ class GambioStoreFileSystem
         }
         
         if (!rename($source, $destination)) {
-            throw new FileMoveException("Could not move file $source to $destination folder");
+            throw new GambioStoreFileMoveException("Could not move file $source to $destination folder");
         }
         
         return true;
@@ -67,7 +66,7 @@ class GambioStoreFileSystem
         $newFileBaeName = basename($newFileName);
         
         if (!file_exists($oldFileName) || !is_file($oldFileName)) {
-            throw new FileNotFoundException('File not found: ' . $oldFileName, 1, [
+            throw new GambioStoreFileNotFoundException('File not found: ' . $oldFileName, 1, [
                 'info' => "File not found on attempt to rename file $oldFileName to $newFileBaeName"
             ]);
         }
@@ -249,8 +248,10 @@ class GambioStoreFileSystem
      * @param string $directoryPath
      *
      * @return array
-     * @throws \DirectoryContentException
-     * @throws \PathIsNotDirectoryException
+     * @throws \GambioStoreDirectoryContentException
+     * @throws \GambioStorePathIsNotDirectoryException
+     * @throws \GambioStoreDirectoryContentException
+     * @throws \GambioStorePathIsNotDirectoryException
      */
     public function getContentsRecursively($directoryPath)
     {
@@ -269,7 +270,7 @@ class GambioStoreFileSystem
                 }
             }
         } catch (Exception $exception) {
-            throw new DirectoryContentException('Could not get content form directory:' . $directoryPath, 0, [],
+            throw new GambioStoreDirectoryContentException('Could not get content form directory:' . $directoryPath, 0, [],
                 $exception);
         }
         
@@ -283,25 +284,25 @@ class GambioStoreFileSystem
      * @param string $path
      *
      * @return bool
-     * @throws \CreateDirectoryException
+     * @throws \GambioStoreCreateDirectoryException
      */
     private function createDirectory($path)
     {
         if (!mkdir($path, 0777, true) && !is_dir($path)) {
             
             if (is_file($path)) {
-                throw new CreateDirectoryException('Could not create a folder ' . $path, 1, [
+                throw new GambioStoreCreateDirectoryException('Could not create a folder ' . $path, 1, [
                     'info' => 'There is already a file exists for the path: ' . $path
                 ]);
             }
             
             if (is_link($path)) {
-                throw new CreateDirectoryException('Could not create a folder ' . $path, 2, [
+                throw new GambioStoreCreateDirectoryException('Could not create a folder ' . $path, 2, [
                     'info' => 'There is already a symlink exists for this path! ' . $path
                 ]);
             }
             
-            throw new CreateDirectoryException('Could not create a folder ' . $path, 3, [
+            throw new GambioStoreCreateDirectoryException('Could not create a folder ' . $path, 3, [
                 'info' => 'Please contact the server administrator'
             ]);
         }
@@ -318,19 +319,19 @@ class GambioStoreFileSystem
      * @param string $destination
      *
      * @return bool
-     * @throws \CreateDirectoryException
-     * @throws \FileNotFoundException|\FileCopyException
+     * @throws \GambioStoreCreateDirectoryException
+     * @throws \GambioStoreFileNotFoundException|\GambioStoreFileCopyException
      */
     private function fileCopy($source, $destination)
     {
         if (!file_exists($source) || !is_file($source)) {
-            throw new FileNotFoundException('No such file: ' . $source);
+            throw new GambioStoreFileNotFoundException('No such file: ' . $source);
         }
         
         $this->createDirectory(dirname($destination));
         
         if (!copy($source, $destination)) {
-            throw new FileCopyException("Couldn't copy file " . $source);
+            throw new GambioStoreFileCopyException("Couldn't copy file " . $source);
         }
         
         return true;
@@ -342,12 +343,12 @@ class GambioStoreFileSystem
      *
      * @param string $path
      *
-     * @throws \PathIsNotDirectoryException
+     * @throws \GambioStorePathIsNotDirectoryException
      */
     private function checkIfPathIsDirectory($path)
     {
         if (!is_dir($path)) {
-            throw new PathIsNotDirectoryException('Path :' . $path . ' is not a directory');
+            throw new GambioStorePathIsNotDirectoryException('Path :' . $path . ' is not a directory');
         }
     }
     

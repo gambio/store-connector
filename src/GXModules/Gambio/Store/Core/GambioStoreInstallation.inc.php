@@ -39,6 +39,14 @@ class GambioStoreInstallation extends AbstractGambioStoreFileSystem
     private $backup;
     
     
+    /**
+     * GambioStoreInstallation constructor.
+     *
+     * @param $packageData
+     * @param $token
+     * @param $cache
+     * @param $logger
+     */
     public function __construct($packageData, $token, $cache, $logger)
     {
         $this->packageData  = $packageData;
@@ -47,18 +55,30 @@ class GambioStoreInstallation extends AbstractGambioStoreFileSystem
         $this->logger      = $logger;
         $this->backup = new GambioStoreGambioStoreBackup($this->getTransactionId());
     }
-
+    
+    
+    /**
+     * @return mixed
+     */
     private function getTransactionId()
     {
         return $this->packageData['details']['id'];
     }
-
-
+    
+    
+    /**
+     * @return array
+     */
     private function getPackageFilesDestinations()
     {
         return array_column($this->packageData['fileList']['includedFiles'], 'destination');
     }
     
+    
+    /**
+     * @return bool[]
+     * @throws \PackageInstallationException
+     */
     public function perform()
     {
         if ($this->cache->has($this->getTransactionId())) {
@@ -70,6 +90,8 @@ class GambioStoreInstallation extends AbstractGambioStoreFileSystem
             $this->backup->backupPackageFiles($this->getPackageFilesDestinations());
             $this->installPackage();
         } catch (Exception $e) {
+            
+            // Log everything here
             throw new PackageInstallationException($e->getMessage());
         } finally {
             $this->cleanCache();
