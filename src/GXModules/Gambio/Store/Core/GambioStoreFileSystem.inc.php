@@ -47,6 +47,39 @@ class GambioStoreFileSystem
     
     
     /**
+     * Moves source file or folder to destination folder.
+     * @param $source
+     * @param $destination
+     *
+     * @return bool
+     * @throws \Exception
+     */
+    public function move($source, $destination)
+    {
+        if (!file_exists($source)) {
+            throw new FileNotFoundException('No such file of folder : ' . $source);
+        }
+    
+        if (is_file($source)) {
+            return $this->fileMove($source, $destination);
+        }
+    
+        $directory = new RecursiveDirectoryIterator($source, \RecursiveDirectoryIterator::SKIP_DOTS);
+        $iterator = new RecursiveIteratorIterator($directory, \RecursiveIteratorIterator::SELF_FIRST);
+    
+        foreach ($iterator as $item) {
+            if ($item->isDir()) {
+                $this->createDirectory($destination . DIRECTORY_SEPARATOR . $iterator->getSubPathName());
+            } else {
+                $this->fileMove($item, $destination . DIRECTORY_SEPARATOR . $iterator->getSubPathName());
+            }
+        }
+    
+        return true;
+    }
+    
+    
+    /**
      * Moves source file from to the destination directory.
      * Creates destination directory recursively in case it doesn't exist.
      *
@@ -147,12 +180,21 @@ class GambioStoreFileSystem
      * @param $source
      * @param $destination
      *
+     * @return bool
      * @throws \CreateDirectoryException
      * @throws \FileCopyException
      * @throws \FileNotFoundException
      */
     public function copy($source, $destination)
     {
+        if (!file_exists($source)) {
+            throw new FileNotFoundException('No such file of folder : ' . $source);
+        }
+    
+        if (is_file($source)) {
+            return $this->fileCopy($source, $destination);
+        }
+        
         $directory = new RecursiveDirectoryIterator($source, \RecursiveDirectoryIterator::SKIP_DOTS);
         $iterator = new RecursiveIteratorIterator($directory, \RecursiveIteratorIterator::SELF_FIRST);
         
@@ -163,6 +205,8 @@ class GambioStoreFileSystem
                 $this->fileCopy($item, $destination . DIRECTORY_SEPARATOR . $iterator->getSubPathName());
             }
         }
+        
+        return true;
     }
     
     
