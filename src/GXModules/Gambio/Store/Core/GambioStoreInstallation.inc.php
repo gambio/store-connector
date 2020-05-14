@@ -37,6 +37,11 @@ class GambioStoreInstallation
      */
     private $backup;
     
+    /**
+     * @var \GambioStoreFileSystem
+     */
+    private $filesystem;
+    
     
     /**
      * GambioStoreInstallation constructor.
@@ -53,6 +58,7 @@ class GambioStoreInstallation
         $this->cache       = $cache;
         $this->logger      = $logger;
         $this->backup = new GambioStoreGambioStoreBackup($this->getTransactionId());
+        $this->filesystem = new GambioStoreFileSystem;
     }
     
     
@@ -114,21 +120,25 @@ class GambioStoreInstallation
         }
     }
     
+    
+    /**
+     * @throws \Exception
+     */
     private function installPackage()
     {
         foreach ($this->getPackageFilesDestinations() as $file) {
-            $shopFile = $this->getShopFolder() . '/' . $file;
-            $backupFile = $this->getCacheFolder() . 'backup/' . $file . '.bak';
-            $newPackageFile = $this->getCacheFolder() . $this->getTransactionId() .  '/' . $file;
+            $shopFile = $this->filesystem->getShopDirectory() . '/' . $file;
+            $backupFile = $this->filesystem->getCacheDirectory() . 'backup/' . $file . '.bak';
+            $newPackageFile = $this->filesystem->getCacheDirectory() . $this->getTransactionId() .  '/' . $file;
 
             try {
                 // Backup
-                if ($this->fileCopy($shopFile, $backupFile)) {
+                if ($this->filesystem->fileMove($shopFile, $backupFile)) {
                     $this->toRestore[] = $file;
                 }
 
                 // Replace the old package file with new
-                $this->fileCopy($newPackageFile, $shopFile);
+                $this->filesystem->fileMove($newPackageFile, $shopFile);
             } catch (Exception $e) {
                 $this->restorePackageFromBackup($this->toRestore);
             }
@@ -137,7 +147,7 @@ class GambioStoreInstallation
     
     private function downloadPackageFilesToCacheFolder()
     {
-        $packageTempDirectory = $this->getCacheFolder() . $this->getTransactionId();
+        $packageTempDirectory = $this->filesystem->getCacheDirectory() . '/' . $this->getTransactionId();
         
         foreach ($this->packageData['fileList']['includedFiles'] as $file) {
             
@@ -166,7 +176,7 @@ class GambioStoreInstallation
     private function downloadPackageFromZipToCacheFolder()
     {
         $targetFileName = $this->getTransactionId() . '.zip';
-        $targetFilePath = $this->getCacheFolder() . $targetFileName;
+        $targetFilePath = $this->filesystem->getCacheDirectory() . '/' . $targetFileName;
         $zipFile = fopen($targetFilePath, 'wb+');
         $downloadZipUrl = $this->packageData['fileList']['zip']['source'];
     
@@ -195,12 +205,19 @@ class GambioStoreInstallation
             return false;
         }
     
-        $zip->extractTo($this->getCacheFolder() . $this->getTransactionId());
+        $zip->extractTo($this->filesystem->getCacheDirectory() . '/' . $this->getTransactionId());
         $zip->close();
     
         return true;
     }
     
+    
+    /**
+     * @param       $url
+     * @param array $options
+     *
+     * @throws \CurlFileDownloadException
+     */
     public function curlFileDownload($url, $options = [])
     {
         $curlOptions = $options + [
