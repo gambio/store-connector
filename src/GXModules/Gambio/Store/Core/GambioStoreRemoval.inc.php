@@ -9,7 +9,6 @@
    --------------------------------------------------------------
 */
 require_once 'Exceptions/WrongFilePermissionException.inc.php';
-require_once 'Abstract/AbstractGambioStoreFileSystem.inc.php';
 require_once 'GambioStoreLogger.inc.php';
 
 /**
@@ -19,7 +18,7 @@ require_once 'GambioStoreLogger.inc.php';
  *
  * Execute the downgrade script if needed.
  */
-class GambioStoreRemoval extends AbstractGambioStoreFileSystem
+class GambioStoreRemoval
 {
     /**
      * @var array
