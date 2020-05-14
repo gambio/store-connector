@@ -168,8 +168,8 @@ class GambioStoreShopInformation
         $themes = [];
         
         foreach (new DirectoryIterator(__DIR__ . '/../../../../themes') as $directory) {
-            if ($directory->isDir()) {
-                $themeJsonContents = file_get_contents($directory->getPathname() . '/theme.json');
+            if ($directory->isDir() && !$directory->isDot()) {
+                $themeJsonContents = @file_get_contents($directory->getPathname() . '/theme.json');
                 if ($themeJsonContents) {
                     $themeJson = json_decode($themeJsonContents, true);
                     if ($themeJson !== null) {
