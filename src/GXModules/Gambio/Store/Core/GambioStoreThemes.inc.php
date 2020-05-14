@@ -34,6 +34,31 @@ class GambioStoreThemes
     
     
     /**
+     * Determines whether a theme is active
+     *
+     * @param $themeName
+     *
+     * @return bool
+     */
+    public function isActive($themeName)
+    {
+        if (!$this->compatibility->has(GambioStoreCompatibility::FEATURE_THEME_CONTROL)) {
+            return true;
+        }
+        
+        $themeControl = StaticGXCoreLoader::getThemeControl();
+        
+        foreach ($themeControl->getCurrentThemeHierarchy() as $theme) {
+            if ($theme === $themeName) {
+                return true;
+            }
+        }
+        
+        return false;
+    }
+    
+    
+    /**
      * Activates a Theme
      *
      * @param string $themeName

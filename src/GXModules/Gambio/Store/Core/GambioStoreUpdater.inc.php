@@ -9,7 +9,7 @@
    --------------------------------------------------------------
 */
 
-require_once '../GambioStoreConnector.inc.php';
+require_once __DIR__ . '/../GambioStoreConnector.inc.php';
 
 
 /**
@@ -19,6 +19,44 @@ require_once '../GambioStoreConnector.inc.php';
  */
 class GambioStoreUpdater
 {
+    /**
+     * @var \GambioStoreConfiguration
+     */
+    private $configuration;
+    
+    /**
+     * @var \GambioStoreDatabase
+     */
+    private $database;
+    
+    /**
+     * @var \GambioStoreConnector
+     */
+    private $connector;
+    
+    
+    /**
+     * GambioStoreUpdater constructor.
+     *
+     * @param \GambioStoreConfiguration $configuration
+     * @param \GambioStoreDatabase      $database
+     * @param \GambioStoreConnector     $connector
+     */
+    public function __construct(
+        GambioStoreConfiguration $configuration,
+        GambioStoreDatabase $database,
+        GambioStoreConnector $connector
+    ) {
+        
+        $this->configuration = $configuration;
+        $this->database      = $database;
+        $this->connector     = $connector;
+    }
+    
+    
+    /**
+     * Runs the updates for the StoreConnector
+     */
     public function update()
     {
         $this->updateMenu();
@@ -27,6 +65,9 @@ class GambioStoreUpdater
     }
     
     
+    /**
+     * Removes the old menu entry for shops that were still shipped with the Store
+     */
     public function updateMenu()
     {
         $menuPath = __DIR__ . '/../../../../system/conf/admin_menu/gambio_menu.xml';
@@ -41,45 +82,54 @@ class GambioStoreUpdater
     }
     
     
+    /**
+     * Creates the necessary database values for the Store
+     */
     public function createDatabaseKeysIfNotExists()
     {
-        $connector = GambioStoreConnector::getInstance();
-        
-        $configuration = $connector->getConfiguration();
-        
-        if (!$configuration->has('GAMBIO_STORE_URL')) {
-            $configuration->create('GAMBIO_STORE_URL', 'https://store.gambio.com/a');
+        if (!$this->configuration->has('GAMBIO_STORE_URL')) {
+            $this->configuration->create('GAMBIO_STORE_URL', 'https://store.gambio.com/a');
         }
         
-        if (!$configuration->has('GAMBIO_STORE_TOKEN')) {
-            $gambioToken = $connector->generateToken();
-            $configuration->create('GAMBIO_STORE_TOKEN', $gambioToken);
+        if (!$this->configuration->has('GAMBIO_STORE_TOKEN')) {
+            $gambioToken = $this->connector->generateToken();
+            $this->configuration->create('GAMBIO_STORE_TOKEN', $gambioToken);
         }
         
-        if (!$configuration->has('GAMBIO_STORE_IS_REGISTERED')) {
-            $configuration->create('GAMBIO_STORE_IS_REGISTERED', 'false');
+        if (!$this->configuration->has('GAMBIO_STORE_IS_REGISTERED')) {
+            $this->configuration->create('GAMBIO_STORE_IS_REGISTERED', 'false');
         }
         
-        if (!$configuration->has('GAMBIO_STORE_ACCEPTED_DATA_PROCESSING')) {
-            if ($configuration->has('ADMIN_FEED_ACCEPTED_SHOP_INFORMATION_DATA_PROCESSING')) {
-                $value = $configuration->get('ADMIN_FEED_ACCEPTED_SHOP_INFORMATION_DATA_PROCESSING');
-                $configuration->create('GAMBIO_STORE_ACCEPTED_DATA_PROCESSING', $value);
+        if (!$this->configuration->has('GAMBIO_STORE_ACCEPTED_DATA_PROCESSING')) {
+            if ($this->configuration->has('ADMIN_FEED_ACCEPTED_SHOP_INFORMATION_DATA_PROCESSING')) {
+                $value = $this->configuration->get('ADMIN_FEED_ACCEPTED_SHOP_INFORMATION_DATA_PROCESSING');
+                $this->configuration->create('GAMBIO_STORE_ACCEPTED_DATA_PROCESSING', $value);
             } else {
-                $configuration->create('GAMBIO_STORE_ACCEPTED_DATA_PROCESSING', 'false');
+                $this->configuration->create('GAMBIO_STORE_ACCEPTED_DATA_PROCESSING', 'false');
             }
         }
     }
     
     
+    /**
+     * Ensures the cache table exists in the database
+     */
     public function createCacheTableIfNotExists()
     {
-        //        CREATE TABLE IF NOT EXISTS gambio_store_cache (
-        //        id INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-        //	      cache_key VARCHAR(30) NOT NULL,
-        //	      cache_value TEXT NOT NULL
-        //        ) ENGINE=INNODB
+        $this->database->query('
+                CREATE TABLE IF NOT EXISTS `gambio_store_cache` (
+                `id` INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+        	      `cache_key` VARCHAR(30) NOT NULL,
+        	      `cache_value` TEXT NOT NULL
+                ) ENGINE=INNODB
+            ');
     }
 }
 
-$updater = new GambioStoreUpdater();
+$connector = GambioStoreConnector::getInstance();
+
+$configuration = $connector->getConfiguration();
+$database      = $connector->getDatabase();
+
+$updater = new GambioStoreUpdater($configuration, $database, $connector);
 $updater->update();

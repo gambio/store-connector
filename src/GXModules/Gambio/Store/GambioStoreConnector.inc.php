@@ -179,11 +179,22 @@ class GambioStoreConnector
             return $this->shopInformation->getShopInformation();
         } catch (\GambioStoreException $e) {
             $this->logger->critical($e->getMessage(), $e->getContext());
-            
+    
             return [
                 'error' => $e->getMessage()
             ];
         }
+    }
+    
+    
+    /**
+     * Determines whether a theme is active or not
+     *
+     * @param $themeName
+     */
+    public function isThemeActive($themeName)
+    {
+        return $this->themes->isActive($themeName);
     }
     
     

@@ -139,23 +139,10 @@ class GambioStoreAjaxController extends AdminHttpViewController
             return new JsonHttpControllerResponse(['success' => false]);
         }
     
-        if (!$this->compatibility->has(GambioStoreCompatibility::FEATURE_THEME_CONTROL)) {
-            return new JsonHttpControllerResponse(['isActive' => true]);
-        }
-    
         $themeName    = $_GET['themeName'];
-        $themeControl = StaticGXCoreLoader::getThemeControl();
-    
-        foreach ($themeControl->getCurrentThemeHierarchy() as $theme) {
-            if ($theme === $themeName) {
-                return new JsonHttpControllerResponse([
-                    'isActive' => true
-                ]);
-            }
-        }
     
         return new JsonHttpControllerResponse([
-            'isActive' => false
+            'isActive' => $this->connector->isThemeActive($themeName)
         ]);
     }
     
