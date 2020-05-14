@@ -30,6 +30,7 @@ class GambioStoreFileSystem
      * @return bool
      * @throws \GambioStoreFileNotFoundException
      * @throws \GambioStoreFileMoveException
+     * @throws \GambioStoreCreateDirectoryException
      */
     public function fileMove($source, $destination)
     {
@@ -58,8 +59,8 @@ class GambioStoreFileSystem
      * @param $newFileName
      *
      * @return bool
-     * @throws \FileNotFoundException
-     * @throws \FileRenameException
+     * @throws \GambioStoreFileRenameException
+     * @throws \GambioStoreFileNotFoundException
      */
     public function fileRename($oldFileName, $newFileName)
     {
@@ -72,7 +73,7 @@ class GambioStoreFileSystem
         }
         
         if (!rename($oldFileName, dirname($oldFileName) . '/' . $newFileBaeName)) {
-            throw new FileRenameException('Could not rename a file ' . $oldFileName, 3, [
+            throw new GambioStoreFileRenameException('Could not rename a file ' . $oldFileName, 3, [
                 'info' => 'Please contact the server administrator'
             ]);
         }
@@ -87,9 +88,9 @@ class GambioStoreFileSystem
      * @param $source
      * @param $destination
      *
-     * @throws \CreateDirectoryException
-     * @throws \FileCopyException
-     * @throws \FileNotFoundException
+     * @throws \GambioStoreCreateDirectoryException
+     * @throws \GambioStoreFileCopyException
+     * @throws \GambioStoreFileNotFoundException
      */
     public function copy($source, $destination)
     {
@@ -112,7 +113,7 @@ class GambioStoreFileSystem
      * @param $item
      *
      * @return bool
-     * @throws \FileRemoveException
+     * @throws \GambioStoreFileRemoveException
      */
     public function remove($item)
     {
@@ -122,7 +123,7 @@ class GambioStoreFileSystem
         }
         
         if (!rmdir($item)) {
-            throw new FileRemoveException("Could not remove file or folder $item");
+            throw new GambioStoreFileRemoveException("Could not remove file or folder $item");
         }
         
         return true;
@@ -135,7 +136,7 @@ class GambioStoreFileSystem
      * @param $directoryPath
      *
      * @return array|false
-     * @throws \PathIsNotDirectoryException
+     * @throws \GambioStorePathIsNotDirectoryException
      */
     public function getDirectories($directoryPath)
     {
@@ -151,8 +152,9 @@ class GambioStoreFileSystem
      * @param string $directoryPath
      *
      * @return array
-     * @throws \DirectoryContentException
-     * @throws \PathIsNotDirectoryException
+     * @throws \GambioStoreDirectoryContentException
+     * @throws \GambioStorePathIsNotDirectoryException
+     * @throws \GambioStoreDirectoryContentException
      */
     public function getDirectoriesRecursively($directoryPath)
     {
@@ -169,7 +171,7 @@ class GambioStoreFileSystem
                 }
             }
         } catch (Exception $exception) {
-            throw new DirectoryContentException('Could not get content form directory:' . $directoryPath, 0, [],
+            throw new GambioStoreDirectoryContentException('Could not get content form directory:' . $directoryPath, 0, [],
                 $exception);
         }
         
@@ -183,7 +185,7 @@ class GambioStoreFileSystem
      * @param string $directoryPath
      *
      * @return array|false
-     * @throws \PathIsNotDirectoryException
+     * @throws \GambioStorePathIsNotDirectoryException
      */
     public function getFiles($directoryPath)
     {
@@ -199,8 +201,7 @@ class GambioStoreFileSystem
      * @param string $directoryPath
      *
      * @return array
-     * @throws \DirectoryContentException
-     * @throws \PathIsNotDirectoryException
+     * @throws \GambioStorePathIsNotDirectoryException|\GambioStoreDirectoryContentException
      */
     public function getFilesRecursively($directoryPath)
     {
@@ -218,7 +219,7 @@ class GambioStoreFileSystem
                 $recursiveFileList[] = realpath($path->__toString());
             }
         } catch (Exception $exception) {
-            throw new DirectoryContentException('Could not get content form directory:' . $directoryPath, 0, [],
+            throw new GambioStoreDirectoryContentException('Could not get content form directory:' . $directoryPath, 0, [],
                 $exception);
         }
         
@@ -232,7 +233,7 @@ class GambioStoreFileSystem
      * @param string $directoryPath
      *
      * @return array|false
-     * @throws \PathIsNotDirectoryException
+     * @throws \GambioStorePathIsNotDirectoryException
      */
     public function getContents($directoryPath)
     {
