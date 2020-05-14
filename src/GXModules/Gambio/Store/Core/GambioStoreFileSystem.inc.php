@@ -14,6 +14,7 @@ require_once 'Exceptions/FileSystemExceptions/FileMoveException.inc.php';
 require_once 'Exceptions/FileSystemExceptions/FileRenameException.inc.php';
 require_once 'Exceptions/FileSystemExceptions/FileRemoveException.inc.php';
 require_once 'Exceptions/FileSystemExceptions/FileNotFoundException.inc.php';
+require_once 'Exceptions/FileSystemExceptions/DirectoryContentException.inc.php';
 require_once 'Exceptions/FileSystemExceptions/CreateDirectoryException.inc.php';
 require_once 'Exceptions/FileSystemExceptions/PathIsNotDirectoryException.inc.php';
 
@@ -168,7 +169,7 @@ class GambioStoreFileSystem
     /**
      * Removes file or folder (including subfolders).
      *
-     * @param
+     * @param $item
      *
      * @return bool
      * @throws \FileRemoveException
