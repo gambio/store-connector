@@ -27,7 +27,7 @@ class GambioStoreFileSystem
      * @throws \CreateDirectoryException
      * @throws \FileNotFoundException|\FileCopyException
      */
-    public function fileCopy($source, $destination) {
+    private function fileCopy($source, $destination) {
         if (! file_exists($source) || !is_file($source)) {
             throw new FileNotFoundException('No such file: ' . $source);
         }
@@ -82,7 +82,7 @@ class GambioStoreFileSystem
      * @return bool
      * @throws \CreateDirectoryException
      */
-    public function createDirectory($path)
+    private function createDirectory($path)
     {
         if (!mkdir($path, 0777, true) && !is_dir($path)) {
             
@@ -135,6 +135,31 @@ class GambioStoreFileSystem
         }
         
         return true;
+    }
+    
+    
+    /**
+     * Copies a file or directory from source to destination. If destination folder doesn't exist, it will be created.
+     *
+     * @param $source
+     * @param $destination
+     *
+     * @throws \CreateDirectoryException
+     * @throws \FileCopyException
+     * @throws \FileNotFoundException
+     */
+    public function copy($source, $destination)
+    {
+        $directory = new RecursiveDirectoryIterator($source, \RecursiveDirectoryIterator::SKIP_DOTS);
+        $iterator = new RecursiveIteratorIterator($directory, \RecursiveIteratorIterator::SELF_FIRST);
+        
+        foreach ($iterator as $item) {
+            if ($item->isDir()) {
+                $this->createDirectory($destination . DIRECTORY_SEPARATOR . $iterator->getSubPathName());
+            } else {
+                $this->fileCopy($item, $destination . DIRECTORY_SEPARATOR . $iterator->getSubPathName());
+            }
+        }
     }
     
     
