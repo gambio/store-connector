@@ -33,6 +33,11 @@ class GambioStoreInstallation extends AbstractGambioStoreFileSystem
     
     private $toRestore = [];
     
+    /**
+     * @var \GambioStoreGambioStoreBackup
+     */
+    private $backup;
+    
     
     public function __construct($packageData, $token, $cache, $logger)
     {
@@ -40,6 +45,7 @@ class GambioStoreInstallation extends AbstractGambioStoreFileSystem
         $this->token       = $token;
         $this->cache       = $cache;
         $this->logger      = $logger;
+        $this->backup = new GambioStoreGambioStoreBackup($this->getTransactionId());
     }
 
     private function getTransactionId()
@@ -47,15 +53,6 @@ class GambioStoreInstallation extends AbstractGambioStoreFileSystem
         return $this->packageData['details']['id'];
     }
 
-    protected function getShopFolder()
-    {
-        return dirname(__FILE__, 5);
-    }
-
-    private function getCacheFolder()
-    {
-        return $this->getShopFolder() . '/cache/';
-    }
 
     private function getPackageFilesDestinations()
     {
@@ -70,6 +67,7 @@ class GambioStoreInstallation extends AbstractGambioStoreFileSystem
 
         try {
             $this->downloadPackageToCacheFolder();
+            $this->backup->backupPackageFiles($this->getPackageFilesDestinations());
             $this->installPackage();
         } catch (Exception $e) {
             throw new PackageInstallationException($e->getMessage());
@@ -80,6 +78,12 @@ class GambioStoreInstallation extends AbstractGambioStoreFileSystem
         return ['success' => true];
     }
     
+    
+    /**
+     * Downloads package into cache folder.
+     *
+     * @throws \DownloadPackageException
+     */
     private function downloadPackageToCacheFolder()
     {
         $downloaded = $this->downloadPackageFromZipToCacheFolder() ?: $this->downloadPackageFilesToCacheFolder();
