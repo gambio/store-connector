@@ -21,32 +21,6 @@ require_once 'Exceptions/FileSystemExceptions/PathIsNotDirectoryException.inc.ph
 class GambioStoreFileSystem
 {
     /**
-     * Copies file from source to destination.
-     * In case folders of destination path are not exist, they will be created.
-     *
-     * @param      $source
-     * @param      $destination
-     *
-     * @return bool
-     * @throws \CreateDirectoryException
-     * @throws \FileNotFoundException|\FileCopyException
-     */
-    private function fileCopy($source, $destination) {
-        if (! file_exists($source) || !is_file($source)) {
-            throw new FileNotFoundException('No such file: ' . $source);
-        }
-        
-        $this->createDirectory(dirname($destination));
-        
-        if (!copy($source, $destination)) {
-            throw new FileCopyException("Couldn't copy file " . $source);
-        }
-        
-        return true;
-    }
-    
-    
-    /**
      * Moves source file from to the destination directory.
      * Creates destination directory recursively in case it doesn't exist.
      *
@@ -72,39 +46,6 @@ class GambioStoreFileSystem
         
         if (!rename($source, $destination)) {
             throw new FileMoveException("Could not move file $source to $destination folder");
-        }
-        
-        return true;
-    }
-    
-    
-    /**
-     * Crates a directory recursively.
-     *
-     * @param $path
-     *
-     * @return bool
-     * @throws \CreateDirectoryException
-     */
-    private function createDirectory($path)
-    {
-        if (!mkdir($path, 0777, true) && !is_dir($path)) {
-            
-            if (is_file($path)) {
-                throw new CreateDirectoryException('Could not create a folder ' . $path, 1, [
-                    'info' => 'There is already a file exists for the path: ' . $path
-                ]);
-            }
-            
-            if (is_link($path)) {
-                throw new CreateDirectoryException('Could not create a folder ' . $path, 2, [
-                    'info' => 'There is already a symlink exists for this path! ' . $path
-                ]);
-            }
-            
-            throw new CreateDirectoryException('Could not create a folder ' . $path, 3, [
-                'info' => 'Please contact the server administrator'
-            ]);
         }
         
         return true;
@@ -154,7 +95,7 @@ class GambioStoreFileSystem
     public function copy($source, $destination)
     {
         $directory = new RecursiveDirectoryIterator($source, \RecursiveDirectoryIterator::SKIP_DOTS);
-        $iterator = new RecursiveIteratorIterator($directory, \RecursiveIteratorIterator::SELF_FIRST);
+        $iterator  = new RecursiveIteratorIterator($directory, \RecursiveIteratorIterator::SELF_FIRST);
         
         foreach ($iterator as $item) {
             if ($item->isDir()) {
@@ -176,7 +117,7 @@ class GambioStoreFileSystem
      */
     public function remove($item)
     {
-        $files = array_diff(scandir($item), ['.','..']);
+        $files = array_diff(scandir($item), ['.', '..']);
         foreach ($files as $file) {
             is_dir("$item/$file") ? $this->remove("$item/$file") : @unlink("$item/$file");
         }
@@ -190,35 +131,224 @@ class GambioStoreFileSystem
     
     
     /**
-     * Returns the content as array of provided directory path recursively.
+     * Returns all directories from provided directory path.
      *
-     * @param       $dir
+     * @param $directoryPath
+     *
+     * @return array|false
+     * @throws \PathIsNotDirectoryException
+     */
+    public function getDirectories($directoryPath)
+    {
+        $this->checkIfPathIsDirectory($directoryPath);
+        
+        return glob($directoryPath . '/**', GLOB_ONLYDIR);
+    }
+    
+    
+    /**
+     * Returns all directories from provided directory path.
+     *
+     * @param string $directoryPath
      *
      * @return array
      * @throws \DirectoryContentException
      * @throws \PathIsNotDirectoryException
      */
-    public function getDirectoryContent($dir)
+    public function getDirectoriesRecursively($directoryPath)
     {
-        if (!is_dir($dir)) {
-            throw new PathIsNotDirectoryException('Path :' . $dir . ' is not a directory');
-        }
+        $this->checkIfPathIsDirectory($directoryPath);
         
         try {
-            $files     = [];
-            $directory = new RecursiveDirectoryIterator($dir, FilesystemIterator::SKIP_DOTS);
-            foreach (new RecursiveIteratorIterator($directory, RecursiveIteratorIterator::SELF_FIRST) as $path) {
+            $recursiveDirectories = [];
+            $directoryIterator    = new RecursiveDirectoryIterator($directoryPath, FilesystemIterator::SKIP_DOTS);
+            
+            foreach (new RecursiveIteratorIterator($directoryIterator,
+                RecursiveIteratorIterator::SELF_FIRST) as $path) {
                 if ($path->isDir()) {
-                    $files[] = $path->__toString();
-                } else {
-                    $files[] = realpath($path->__toString());
+                    $recursiveDirectories[] = $path->__toString();
                 }
             }
         } catch (Exception $exception) {
-            throw new DirectoryContentException('Could not get content form directory:' . $dir, 0, [], $exception);
+            throw new DirectoryContentException('Could not get content form directory:' . $directoryPath, 0, [],
+                $exception);
         }
         
-        return $files;
+        return $recursiveDirectories;
+    }
+    
+    
+    /**
+     * Returns all files in provided directory path.
+     *
+     * @param string $directoryPath
+     *
+     * @return array|false
+     * @throws \PathIsNotDirectoryException
+     */
+    public function getFiles($directoryPath)
+    {
+        $this->checkIfPathIsDirectory($directoryPath);
+        
+        return glob($directoryPath . '/*.*');
+    }
+    
+    
+    /**
+     * Returns all files recursively in the provided directory.
+     *
+     * @param string $directoryPath
+     *
+     * @return array
+     * @throws \DirectoryContentException
+     * @throws \PathIsNotDirectoryException
+     */
+    public function getFilesRecursively($directoryPath)
+    {
+        $this->checkIfPathIsDirectory($directoryPath);
+        
+        try {
+            $recursiveFileList = [];
+            $directoryIterator = new RecursiveDirectoryIterator($directoryPath, FilesystemIterator::SKIP_DOTS);
+            
+            foreach (new RecursiveIteratorIterator($directoryIterator,
+                RecursiveIteratorIterator::SELF_FIRST) as $path) {
+                if ($path->isDir()) {
+                    continue;
+                }
+                $recursiveFileList[] = realpath($path->__toString());
+            }
+        } catch (Exception $exception) {
+            throw new DirectoryContentException('Could not get content form directory:' . $directoryPath, 0, [],
+                $exception);
+        }
+        
+        return $recursiveFileList;
+    }
+    
+    
+    /**
+     * Returns directories and files from directories.
+     *
+     * @param string $directoryPath
+     *
+     * @return array|false
+     * @throws \PathIsNotDirectoryException
+     */
+    public function getContents($directoryPath)
+    {
+        $this->checkIfPathIsDirectory($directoryPath);
+        
+        return glob($directoryPath . '/**');
+    }
+    
+    
+    /**
+     * Returns the content as array of provided directory path recursively.
+     *
+     * @param string $directoryPath
+     *
+     * @return array
+     * @throws \DirectoryContentException
+     * @throws \PathIsNotDirectoryException
+     */
+    public function getContentsRecursively($directoryPath)
+    {
+        $this->checkIfPathIsDirectory($directoryPath);
+        
+        try {
+            $recursiveContentsList = [];
+            $directoryIterator     = new RecursiveDirectoryIterator($directoryPath, FilesystemIterator::SKIP_DOTS);
+            
+            foreach (new RecursiveIteratorIterator($directoryIterator,
+                RecursiveIteratorIterator::SELF_FIRST) as $path) {
+                if ($path->isDir()) {
+                    $recursiveContentsList[] = $path->__toString();
+                } else {
+                    $recursiveContentsList[] = realpath($path->__toString());
+                }
+            }
+        } catch (Exception $exception) {
+            throw new DirectoryContentException('Could not get content form directory:' . $directoryPath, 0, [],
+                $exception);
+        }
+        
+        return $recursiveContentsList;
+    }
+    
+    
+    /**
+     * Crates a directory recursively.
+     *
+     * @param string $path
+     *
+     * @return bool
+     * @throws \CreateDirectoryException
+     */
+    private function createDirectory($path)
+    {
+        if (!mkdir($path, 0777, true) && !is_dir($path)) {
+            
+            if (is_file($path)) {
+                throw new CreateDirectoryException('Could not create a folder ' . $path, 1, [
+                    'info' => 'There is already a file exists for the path: ' . $path
+                ]);
+            }
+            
+            if (is_link($path)) {
+                throw new CreateDirectoryException('Could not create a folder ' . $path, 2, [
+                    'info' => 'There is already a symlink exists for this path! ' . $path
+                ]);
+            }
+            
+            throw new CreateDirectoryException('Could not create a folder ' . $path, 3, [
+                'info' => 'Please contact the server administrator'
+            ]);
+        }
+        
+        return true;
+    }
+    
+    
+    /**
+     * Copies file from source to destination.
+     * In case folders of destination path are not exist, they will be created.
+     *
+     * @param string $source
+     * @param string $destination
+     *
+     * @return bool
+     * @throws \CreateDirectoryException
+     * @throws \FileNotFoundException|\FileCopyException
+     */
+    private function fileCopy($source, $destination)
+    {
+        if (!file_exists($source) || !is_file($source)) {
+            throw new FileNotFoundException('No such file: ' . $source);
+        }
+        
+        $this->createDirectory(dirname($destination));
+        
+        if (!copy($source, $destination)) {
+            throw new FileCopyException("Couldn't copy file " . $source);
+        }
+        
+        return true;
+    }
+    
+    
+    /**
+     * Checks if provided path is a directory.
+     *
+     * @param string $path
+     *
+     * @throws \PathIsNotDirectoryException
+     */
+    private function checkIfPathIsDirectory($path)
+    {
+        if (!is_dir($path)) {
+            throw new PathIsNotDirectoryException('Path :' . $path . ' is not a directory');
+        }
     }
     
     

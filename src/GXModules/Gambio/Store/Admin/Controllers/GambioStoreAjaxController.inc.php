@@ -110,7 +110,7 @@ class GambioStoreAjaxController extends AdminHttpViewController
         
         try {
             if (isset($_POST['folderNameInsideShop'])) {
-                $fileList = $this->fileSystem->getDirectoryContent($_POST['folderNameInsideShop']);
+                $fileList = $this->fileSystem->getContentsRecursively($_POST['folderNameInsideShop']);
             } else {
                 $fileList = $_POST['fileList'];
             }
