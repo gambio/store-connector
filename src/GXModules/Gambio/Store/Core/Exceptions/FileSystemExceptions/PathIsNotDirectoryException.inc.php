@@ -10,6 +10,8 @@
    --------------------------------------------------------------
 */
 
+require_once __DIR__ . '/../GambioStoreException.inc.php';
+
 class PathIsNotDirectoryException extends GambioStoreException
 {
     
