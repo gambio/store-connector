@@ -98,14 +98,14 @@ class GambioStoreConnector
      */
     public static function getInstance()
     {
-        $database        = GambioStoreDatabase::connect();
+        $fileSystem      = new GambioStoreFileSystem();
+        $database        = GambioStoreDatabase::connect($fileSystem);
         $compatibility   = new GambioStoreCompatibility($database);
         $configuration   = new GambioStoreConfiguration($database, $compatibility);
         $logger          = new GambioStoreLogger();
-        $themes          = new GambioStoreThemes($compatibility);
-        $fileSystem      = new GambioStoreFileSystem();
-        $shopInformation = new GambioStoreShopInformation($database);
-        
+        $themes          = new GambioStoreThemes($compatibility, $fileSystem);
+        $shopInformation = new GambioStoreShopInformation($database, $fileSystem);
+    
         return new self($database, $configuration, $compatibility, $logger, $themes, $fileSystem, $shopInformation);
     }
     

@@ -78,7 +78,7 @@ class GambioStoreUpdater
      */
     public function updateMenu()
     {
-        $menuPath = __DIR__ . '/../../../../system/conf/admin_menu/gambio_menu.xml';
+        $menuPath = $this->fileSystem->getShopDirectory() . '/system/conf/admin_menu/gambio_menu.xml';
         
         $menuContent = file_get_contents($menuPath);
         
