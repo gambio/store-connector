@@ -82,7 +82,7 @@ class GambioStoreInstallation
     
     /**
      * @return bool[]
-     * @throws \PackageInstallationException
+     * @throws \PackageInstallationException|\GambioStoreFileRemoveException
      */
     public function perform()
     {
@@ -132,7 +132,7 @@ class GambioStoreInstallation
 
             try {
                 // Replace the old package file with new
-                $this->filesystem->fileMove($newPackageFile, $shopFile);
+                $this->filesystem->move($newPackageFile, $shopFile);
             } catch (Exception $e) {
                 $this->restorePackageFromBackup($this->toRestore);
             }
@@ -253,7 +253,6 @@ class GambioStoreInstallation
     
     
     /**
-     * @throws \GambioStoreFileRemoveException
      */
     private function cleanCache()
     {
