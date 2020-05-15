@@ -22,15 +22,25 @@ require_once 'Exceptions/PackageInstallationException.inc.php';
  */
 class GambioStoreInstallation
 {
+    /**
+     * @var string Store Token.
+     */
     private $token;
     
+    /**
+     * @var \GambioStoreCache Cache instance.
+     */
     private $cache;
     
+    /**
+     * @var \GambioStoreLogger Logger instance.
+     */
     private $logger;
-
-    private $packageData;
     
-    private $toRestore = [];
+    /**
+     * @var array Package data.
+     */
+    private $packageData;
     
     /**
      * @var \GambioStoreGambioStoreBackup
@@ -53,16 +63,17 @@ class GambioStoreInstallation
      */
     public function __construct($packageData, $token, $cache, $logger)
     {
-        $this->packageData  = $packageData;
+        $this->packageData = $packageData;
         $this->token       = $token;
         $this->cache       = $cache;
         $this->logger      = $logger;
-        $this->backup = new GambioStoreGambioStoreBackup($this->getTransactionId());
-        $this->filesystem = new GambioStoreFileSystem;
+        $this->backup      = new GambioStoreGambioStoreBackup($this->getTransactionId());
+        $this->filesystem  = new GambioStoreFileSystem;
     }
     
     
     /**
+     * Returns unique installation id.
      * @return mixed
      */
     private function getTransactionId()
@@ -72,6 +83,8 @@ class GambioStoreInstallation
     
     
     /**
+     * Returns array of installing files.
+     *
      * @return array
      */
     private function getPackageFilesDestinations()
@@ -81,8 +94,10 @@ class GambioStoreInstallation
     
     
     /**
+     * Inits installation.
+     *
      * @return bool[]
-     * @throws \PackageInstallationException|\GambioStoreFileRemoveException
+     * @throws \PackageInstallationException|\GambioStoreCacheException
      */
     public function perform()
     {
@@ -122,6 +137,8 @@ class GambioStoreInstallation
     
     
     /**
+     * Installing package.
+     *
      * @throws \Exception
      */
     private function installPackage()
@@ -139,6 +156,12 @@ class GambioStoreInstallation
         }
     }
     
+    
+    /**
+     * Downloads files from the filelist.
+     *
+     * @return bool
+     */
     private function downloadPackageFilesToCacheFolder()
     {
         $packageTempDirectory = $this->filesystem->getCacheDirectory() . '/' . $this->getTransactionId();
@@ -167,6 +190,12 @@ class GambioStoreInstallation
         return true;
     }
     
+    
+    /**
+     * Downloads zip archive to cache folder.
+     *
+     * @return bool
+     */
     private function downloadPackageFromZipToCacheFolder()
     {
         $targetFileName = $this->getTransactionId() . '.zip';
@@ -207,6 +236,8 @@ class GambioStoreInstallation
     
     
     /**
+     * Performs Curl requests.
+     *
      * @param       $url
      * @param array $options
      *
@@ -234,6 +265,7 @@ class GambioStoreInstallation
     
     
     /**
+     * Removes temporary folders created during installation.
      */
     private function cleanCache()
     {

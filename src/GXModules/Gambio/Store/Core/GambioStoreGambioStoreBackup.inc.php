@@ -14,10 +14,17 @@ class GambioStoreGambioStoreBackup
      */
     private $fileSystem;
     
-    
+    /**
+     * @var string Store package id.
+     */
     private $packageId;
     
     
+    /**
+     * GambioStoreGambioStoreBackup constructor.
+     *
+     * @param $packageId
+     */
     public function __construct($packageId)
     {
         $this->packageId = $packageId;
@@ -25,6 +32,13 @@ class GambioStoreGambioStoreBackup
     }
     
     
+    /**
+     * Restores backup.
+     *
+     * @param $toRestore
+     *
+     * @throws \Exception
+     */
     public function restoreBackUp($toRestore)
     {
         foreach ($toRestore as $file) {
@@ -36,6 +50,8 @@ class GambioStoreGambioStoreBackup
     
     
     /**
+     * Backups files.
+     *
      * @param $files
      *
      * @throws \Exception
