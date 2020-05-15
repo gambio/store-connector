@@ -156,6 +156,10 @@ class GambioStoreFileSystem
     public function remove($path)
     {
         $path = $this->getShopDirectory() . '/' . $path;
+        
+        if (!file_exists($path)) {
+            return true;
+        }
     
         if (is_file($path)) {
             return unlink($path);
