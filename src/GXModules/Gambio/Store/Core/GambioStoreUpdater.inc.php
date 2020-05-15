@@ -122,7 +122,7 @@ class GambioStoreUpdater
         $this->database->query('
                 CREATE TABLE IF NOT EXISTS `gambio_store_cache` (
                 `id` INT(6) UNSIGNED AUTO_INCREMENT PRIMARY KEY,
-        	      `cache_key` VARCHAR(30) NOT NULL,
+        	      `cache_key` VARCHAR(30) NOT NULL UNIQUE,
         	      `cache_value` TEXT NOT NULL
                 ) ENGINE=INNODB
             ');
