@@ -126,16 +126,16 @@ class GambioStoreInstallation
      */
     private function installPackage()
     {
-        foreach ($this->getPackageFilesDestinations() as $file) {
-            $shopFile = $file;
-            $newPackageFile = 'cache/' . $this->getTransactionId() .  '/' . $file;
-
-            try {
+        try {
+            foreach ($this->getPackageFilesDestinations() as $file) {
+                $shopFile = $file;
+                $newPackageFile = 'cache/' . $this->getTransactionId() .  '/' . $file;
+    
                 // Replace the old package file with new
                 $this->filesystem->move($newPackageFile, $shopFile);
-            } catch (Exception $e) {
-                $this->restorePackageFromBackup($this->toRestore);
             }
+        } catch (Exception $e) {
+            $this->backup->restoreBackUp($this->getPackageFilesDestinations());
         }
     }
     
@@ -229,25 +229,6 @@ class GambioStoreInstallation
 
         if ($curl_success === false) {
             throw new CurlFileDownloadException(sprintf('%s - %s', $curl_errno, $curl_error));
-        }
-    }
-    
-    private function restorePackageFromBackup($toRestore)
-    {
-        foreach ($this->getPackageFilesDestinations() as $file) {
-    
-            $shopFile = $this->getShopFolder() . '/' . $file;
-            $backupFile = $this->getCacheFolder() . 'backup/' . $file . '.bak';
-            
-            if (in_array($file, $toRestore, true)) {
-                try {
-                    $this->fileCopy($backupFile, $shopFile);
-                } catch (Exception $e) {
-                    throw $e;
-                }
-            } else {
-                @unlink($shopFile);
-            }
         }
     }
     

@@ -23,11 +23,15 @@ class GambioStoreGambioStoreBackup
         $this->packageId = $packageId;
         $this->fileSystem = new GambioStoreFileSystem();
     }
-
     
-    public function restoreBackUp()
+    
+    public function restoreBackUp($toRestore)
     {
-    
+        foreach ($toRestore as $file) {
+            if (file_exists($this->fileSystem->getShopDirectory() . '/cache/backup/' . $this->packageId . '/' . $file . '.bak')) {
+                $this->fileSystem->move('cache/backup/' . $this->packageId . '/' . $file . '.bak', $file);
+            }
+        }
     }
     
     
@@ -42,7 +46,7 @@ class GambioStoreGambioStoreBackup
             $packageFileSource = $this->fileSystem->getShopDirectory() . '/' . $file;
             
             if (file_exists($packageFileSource) && is_file($packageFileSource)) {
-                $this->fileSystem->move($file, 'cache/backup/' . $this->packageId . '/' . $file);
+                $this->fileSystem->move($file, 'cache/backup/' . $this->packageId . '/' . $file . '.bak');
             }
         }
     }
