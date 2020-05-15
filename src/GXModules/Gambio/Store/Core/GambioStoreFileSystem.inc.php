@@ -42,9 +42,9 @@ class GambioStoreFileSystem
                 'info' => "File not found on attempt to move file $source to $destination"
             ]);
         }
-        
-        if (!file_exists($destination)) {
-            $this->createDirectory($destination);
+    
+        if (!file_exists(dirname($destination))) {
+            $this->createDirectory(dirname($destination));
         }
         
         if (!rename($source, $destination)) {

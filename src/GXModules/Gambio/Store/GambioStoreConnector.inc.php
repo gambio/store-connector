@@ -264,7 +264,7 @@ class GambioStoreConnector
      */
     public function installPackage($packageData)
     {
-        $cache       = new GambioStoreCache(GambioStoreDatabase::connect());
+        $cache       = new GambioStoreCache(GambioStoreDatabase::connect($this->getFileSystem()));
         $installaton = new GambioStoreInstallation($packageData, $this->configuration->get('GAMBIO_STORE_TOKEN'),
             $cache, $this->logger);
         
