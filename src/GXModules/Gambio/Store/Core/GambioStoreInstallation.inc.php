@@ -132,7 +132,7 @@ class GambioStoreInstallation
 
             try {
                 // Replace the old package file with new
-                $this->filesystem->fileMove($newPackageFile, $shopFile);
+                $this->filesystem->move($newPackageFile, $shopFile);
             } catch (Exception $e) {
                 $this->restorePackageFromBackup($this->toRestore);
             }

@@ -32,11 +32,8 @@ class GambioStoreFileSystem
      * @throws \GambioStoreFileMoveException
      * @throws \GambioStoreCreateDirectoryException
      */
-    public function fileMove($source, $destination)
+    private function fileMove($source, $destination)
     {
-        $source      = $this->getShopDirectory() . '/' . $source;
-        $destination = $this->getShopDirectory() . '/' . $destination;
-        
         if (!file_exists($source) || !is_file($source)) {
             throw new GambioStoreFileNotFoundException('File not found: ' . $source, 1, [
                 'info' => "File not found on attempt to move file $source to $destination"
@@ -123,6 +120,9 @@ class GambioStoreFileSystem
      */
     public function move($source, $destination)
     {
+        $source      = $this->getShopDirectory() . '/' . $source;
+        $destination = $this->getShopDirectory() . '/' . $destination;
+        
         if (!file_exists($source)) {
             throw new GambioStoreFileNotFoundException('');
         }
