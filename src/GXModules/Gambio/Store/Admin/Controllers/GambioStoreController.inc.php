@@ -72,6 +72,10 @@ class GambioStoreController extends AdminHttpViewController
             $contentNavigation = $this->getStoreNavigation();
             $data              = $this->getIFrameTemplateData('/downloads');
         }
+        
+        if (is_array($data)) {
+            throw new GambioStoreUpdateWasNotExecutedProperlyException('OH NO');
+        }
     
         return new AdminLayoutHttpControllerResponse($title, $template, $data, $assets, $contentNavigation);
     }
