@@ -149,25 +149,30 @@ class GambioStoreFileSystem
     /**
      * Removes file or folder (including subfolders).
      *
-     * @param $item
+     * @param $path
      *
      * @return bool
-     * @throws \GambioStoreFileRemoveException
      */
-    public function remove($item)
+    public function remove($path)
     {
-        $item = $this->getShopDirectory() . '/' . $item;
-        
-        $files = array_diff(scandir($item), ['.', '..']);
-        foreach ($files as $file) {
-            $removed = is_dir("$item/$file") ? $this->remove("$item/$file") : @unlink("$item/$file");
-            
-            if (!$removed) {
-                throw new GambioStoreFileRemoveException("Could not remove file or folder $item/$file");
+        $path = $this->getShopDirectory() . '/' . $path;
+    
+        if (is_file($path)) {
+            return unlink($path);
+        }
+    
+        $directory = new RecursiveDirectoryIterator($path, RecursiveDirectoryIterator::SKIP_DOTS);
+        $iterator  = new RecursiveIteratorIterator($directory, RecursiveIteratorIterator::CHILD_FIRST);
+    
+        foreach ($iterator as $item) {
+            if ($item->isDir()) {
+                rmdir($item->getRealPath());
+            } else {
+                unlink($item->getRealPath());
             }
         }
-        
-        return true;
+    
+        rmdir($path);
     }
     
     

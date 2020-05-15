@@ -251,13 +251,16 @@ class GambioStoreInstallation
         }
     }
     
+    
+    /**
+     * @throws \GambioStoreFileRemoveException
+     */
     private function cleanCache()
     {
-        $targetFileName = $this->getTransactionId() . '.zip';
-        $targetFilePath = $this->getCacheFolder() . $targetFileName;
-        file_exists($targetFilePath) and $this->deleteFileOrFolder($targetFilePath);
-
-        $targetFilePath = $this->getCacheFolder() . $this->getTransactionId();
-        file_exists($targetFilePath) and $this->deleteFileOrFolder($targetFilePath);
+        $targetFilePath = 'cache/' . $this->getTransactionId() . '.zip';
+        file_exists($this->filesystem->getShopDirectory() . '/' . $targetFilePath) && $this->filesystem->remove($targetFilePath);
+    
+        $targetFilePath = 'cache/' . $this->getTransactionId();
+        file_exists($this->filesystem->getShopDirectory() . '/' . $targetFilePath) && $this->filesystem->remove($targetFilePath);
     }
 }
