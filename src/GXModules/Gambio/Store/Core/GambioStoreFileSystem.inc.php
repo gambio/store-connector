@@ -157,6 +157,10 @@ class GambioStoreFileSystem
     {
         $path = $this->getShopDirectory() . '/' . $path;
         
+        if (!is_file($path) && !is_dir($path)) {
+            return true;
+        }
+        
         if (!file_exists($path)) {
             return true;
         }
