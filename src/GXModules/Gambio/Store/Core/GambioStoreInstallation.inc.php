@@ -82,7 +82,7 @@ class GambioStoreInstallation
     
     /**
      * @return bool[]
-     * @throws \PackageInstallationException
+     * @throws \PackageInstallationException|\GambioStoreFileRemoveException
      */
     public function perform()
     {
@@ -253,7 +253,6 @@ class GambioStoreInstallation
     
     
     /**
-     * @throws \GambioStoreFileRemoveException
      */
     private function cleanCache()
     {

@@ -248,13 +248,6 @@ class GambioStoreConnector
      */
     public function getCurrentShopLanguageCode()
     {
-        $this->cache->set('test', 123);
-        var_dump($this->cache->has('test'));
-        var_dump($this->cache->get('test'));
-        $this->cache->delete('test');
-        var_dump($this->cache->has('test'));
-        die();
-        
         if (isset($_SESSION['languages_id'])) {
             $rows = $this->database->query('SELECT `code` FROM `languages` WHERE `languages_id` = :id', [
                 'id' => $_SESSION['languages_id']
