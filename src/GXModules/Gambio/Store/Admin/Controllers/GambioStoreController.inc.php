@@ -9,7 +9,7 @@
    --------------------------------------------------------------
 */
 
-require_once __DIR__ . '/../../Core/Exceptions/GambioStoreUpdateWasNotExecutedProperlyException.php';
+require_once __DIR__ . '/../../Core/Exceptions/GambioStoreUpdateWasNotExecutedProperlyException.inc.php';
 require_once __DIR__ . '/../../GambioStoreConnector.inc.php';
 
 class GambioStoreController extends AdminHttpViewController
