@@ -87,7 +87,7 @@ class GambioStoreInstallation
      *
      * @throws \Exception
      */
-    private function registerShutdownFunction()
+    public function registerShutdownFunction()
     {
         if ($error = error_get_last()) {
             $this->logger->critical('Critical error during package installation', $error);
