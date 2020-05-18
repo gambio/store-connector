@@ -89,13 +89,17 @@ class GambioStoreConfiguration
     {
         $statement = $this->database->query('SELECT `value` FROM gx_configurations WHERE `key` = :key',
             ['key' => 'gm_configuration/' . $key]);
-        
+    
         $result = $statement->fetch(PDO::FETCH_ASSOC);
-        
+    
         if ($result === false) {
             return null;
         }
-        
+    
+        if ($result['value'] === 'false' || $result['value'] === 'true') {
+            $result['value'] = $result['value'] !== 'false';
+        }
+    
         return $result['value'];
     }
     
@@ -108,6 +112,10 @@ class GambioStoreConfiguration
      */
     public function set($key, $value)
     {
+        if (is_bool($value)) {
+            $value = $value ? 'true' : 'false';
+        }
+    
         if ($this->compatibility->has(GambioStoreCompatibility::RESOURCE_GM_CONFIGURATION_TABLE)) {
             $this->gmSet($key, $value);
         } else {
