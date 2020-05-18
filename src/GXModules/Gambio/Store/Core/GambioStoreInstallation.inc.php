@@ -136,7 +136,7 @@ class GambioStoreInstallation
             $this->downloadPackageToCacheFolder();
             $this->backup->backupPackageFiles($this->getPackageFilesDestinations());
             $this->installPackage();
-        } catch (DownloadPackageException $e) {
+        } catch (CurlFileDownloadException $e) {
             $this->logger->warning($e->getMessage());
         } catch (Exception $e) {
             $this->backup->restoreBackUp($this->getPackageFilesDestinations());
@@ -153,14 +153,12 @@ class GambioStoreInstallation
     /**
      * Downloads package into cache folder.
      *
-     * @throws \DownloadPackageException
+     * @throws \CurlFileDownloadException
      */
     private function downloadPackageToCacheFolder()
     {
-        $downloaded = $this->downloadPackageFromZipToCacheFolder() ? : $this->downloadPackageFilesToCacheFolder();
-        
-        if (!$downloaded) {
-            throw new DownloadPackageException('Could not download package');
+        if (! $this->downloadPackageFromZipToCacheFolder()) {
+            $this->downloadPackageFilesToCacheFolder();
         }
     }
     
