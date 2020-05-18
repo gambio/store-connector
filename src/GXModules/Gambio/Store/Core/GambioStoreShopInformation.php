@@ -9,10 +9,10 @@
    --------------------------------------------------------------
 */
 
-require_once "Exceptions/GambioStoreHttpServerMissingException.php";
-require_once "Exceptions/GambioStoreRelativeShopPathMissingException.php";
-require_once "Exceptions/GambioStoreShopKeyMissingException.php";
-require_once "Exceptions/GambioStoreShopVersionMissingException.php";
+require_once "Exceptions/GambioStoreHttpServerMissingException.inc.php";
+require_once "Exceptions/GambioStoreRelativeShopPathMissingException.inc.php";
+require_once "Exceptions/GambioStoreShopKeyMissingException.inc.php";
+require_once "Exceptions/GambioStoreShopVersionMissingException.inc.php";
 
 
 class GambioStoreShopInformation
