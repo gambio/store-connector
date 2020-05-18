@@ -1,6 +1,6 @@
 <?php
 /* --------------------------------------------------------------
-   GambioStoreConfiguration.php 2020-04-29
+   GambioStoreConfigurationFacade.php 2020-04-29
    Gambio GmbH
    http://www.gambio.de
    Copyright (c) 2020 Gambio GmbH
@@ -10,32 +10,32 @@
 */
 
 /**
- * Class GambioStoreConfiguration
+ * Class GambioStoreConfigurationFacade
  *
  * This class enables read/write operations to the shop's configuration table, using the key/value paradigm.
  *
  * These operations differ depending on the shop version but this class makes sure data are being read correctly.
  */
-class GambioStoreConfiguration
+class GambioStoreConfigurationFacade
 {
     /**
-     * @var \GambioStoreDatabase
+     * @var \GambioStoreDatabaseFacade
      */
     private $database;
     
     /**
-     * @var \GambioStoreCompatibility
+     * @var \GambioStoreCompatibilityFacade
      */
     private $compatibility;
     
     
     /**
-     * GambioStoreConfiguration constructor.
+     * GambioStoreConfigurationFacade constructor.
      *
-     * @param \GambioStoreDatabase      $database
-     * @param \GambioStoreCompatibility $compatibility
+     * @param \GambioStoreDatabaseFacade      $database
+     * @param \GambioStoreCompatibilityFacade $compatibility
      */
-    public function __construct(GambioStoreDatabase $database, GambioStoreCompatibility $compatibility)
+    public function __construct(GambioStoreDatabaseFacade $database, GambioStoreCompatibilityFacade $compatibility)
     {
         $this->database      = $database;
         $this->compatibility = $compatibility;
@@ -47,11 +47,11 @@ class GambioStoreConfiguration
      *
      * @param string $key
      *
-     * @return bool|mixed|null
+     * @return mixed|null
      */
     public function get($key)
     {
-        if ($this->compatibility->has(GambioStoreCompatibility::RESOURCE_GM_CONFIGURATION_TABLE)) {
+        if ($this->compatibility->has(GambioStoreCompatibilityFacade::RESOURCE_GM_CONFIGURATION_TABLE)) {
             return $this->gmGet($key);
         }
         
@@ -68,7 +68,7 @@ class GambioStoreConfiguration
      */
     private function gmGet($key)
     {
-        $statement = $this->database->query('SELECT gm_value FROM gm_configuration WHERE gm_key = :key',
+        $statement = $this->database->query('SELECT `gm_value` FROM `gm_configuration` WHERE `gm_key` = :key',
             ['key' => $key]);
         
         $result = $statement->fetch(PDO::FETCH_ASSOC);
@@ -76,6 +76,7 @@ class GambioStoreConfiguration
         if ($result === false) {
             return null;
         }
+        
         return $result['gm_value'];
     }
     
@@ -89,19 +90,15 @@ class GambioStoreConfiguration
      */
     private function gxGet($key)
     {
-        $statement = $this->database->query('SELECT `value` FROM gx_configurations WHERE `key` = :key',
+        $statement = $this->database->query('SELECT `value` FROM `gx_configurations` WHERE `key` = :key',
             ['key' => 'gm_configuration/' . $key]);
-    
+        
         $result = $statement->fetch(PDO::FETCH_ASSOC);
-    
+        
         if ($result === false) {
             return null;
         }
-    
-        if ($result['value'] === 'false' || $result['value'] === 'true') {
-            $result['value'] = $result['value'] !== 'false';
-        }
-    
+        
         return $result['value'];
     }
     
@@ -114,11 +111,7 @@ class GambioStoreConfiguration
      */
     public function set($key, $value)
     {
-        if (is_bool($value)) {
-            $value = $value ? 'true' : 'false';
-        }
-    
-        if ($this->compatibility->has(GambioStoreCompatibility::RESOURCE_GM_CONFIGURATION_TABLE)) {
+        if ($this->compatibility->has(GambioStoreCompatibilityFacade::RESOURCE_GM_CONFIGURATION_TABLE)) {
             $this->gmSet($key, $value);
         } else {
             $this->gxSet($key, $value);
@@ -161,7 +154,7 @@ class GambioStoreConfiguration
      */
     public function has($key)
     {
-        if ($this->compatibility->has(GambioStoreCompatibility::RESOURCE_GM_CONFIGURATION_TABLE)) {
+        if ($this->compatibility->has(GambioStoreCompatibilityFacade::RESOURCE_GM_CONFIGURATION_TABLE)) {
             return $this->gmHas($key);
         } else {
             return $this->gxHas($key);
@@ -213,7 +206,7 @@ class GambioStoreConfiguration
      */
     public function create($key, $value)
     {
-        if ($this->compatibility->has(GambioStoreCompatibility::RESOURCE_GM_CONFIGURATION_TABLE)) {
+        if ($this->compatibility->has(GambioStoreCompatibilityFacade::RESOURCE_GM_CONFIGURATION_TABLE)) {
             $this->gmCreate($key, $value);
         } else {
             $this->gxCreate($key, $value);

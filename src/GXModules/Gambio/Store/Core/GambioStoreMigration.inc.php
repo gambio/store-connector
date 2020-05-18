@@ -54,6 +54,19 @@ class GambioStoreMigration
      */
     public function up()
     {
+        /**
+         * Require and instantiate all facades
+         */
+        $this->requireFacades();
+    
+        $fileSystem    = new GambioStoreFileSystemFacade();
+        $database      = GambioStoreDatabaseFacade::connect($fileSystem);
+        $compatibility = new GambioStoreCompatibilityFacade($database);
+        $configuration = new GambioStoreConfigurationFacade($database, $compatibility);
+        $cache         = new GambioStoreCacheFacade($database);
+        $http          = new GambioStoreHttpFacade();
+        $log           = new GambioStoreLoggerFacade();
+    
         foreach ($this->up as $item) {
             try {
                 require_once $this->fileSystem->getShopDirectory() . '/' . $item;
@@ -71,6 +84,19 @@ class GambioStoreMigration
      */
     public function down()
     {
+        /**
+         * Require and instantiate all facades
+         */
+        $this->requireFacades();
+    
+        $fileSystem    = new GambioStoreFileSystemFacade();
+        $database      = GambioStoreDatabaseFacade::connect($fileSystem);
+        $compatibility = new GambioStoreCompatibilityFacade($database);
+        $configuration = new GambioStoreConfigurationFacade($database, $compatibility);
+        $cache         = new GambioStoreCacheFacade($database);
+        $http          = new GambioStoreHttpFacade();
+        $log           = new GambioStoreLoggerFacade();
+    
         foreach ($this->down as $item) {
             try {
                 require_once $this->fileSystem->getShopDirectory() . '/' . $item;
@@ -78,5 +104,20 @@ class GambioStoreMigration
                 throw new DownMigrationException('Down migration failed. File: ', 0, $item);
             }
         }
+    }
+    
+    
+    /**
+     * Requires all facades
+     */
+    private function requireFacades()
+    {
+        require_once 'Facades/GambioStoreFileSystemFacade.php';
+        require_once 'Facades/GambioStoreCompatibilityFacade.php';
+        require_once 'Facades/GambioStoreDatabaseFacade.php';
+        require_once 'Facades/GambioStoreConfigurationFacade.php';
+        require_once 'Facades/GambioStoreCacheFacade.php';
+        require_once 'Facades/GambioStoreHttpFacade.php';
+        require_once 'Facades/GambioStoreLoggerFacade.php';
     }
 }

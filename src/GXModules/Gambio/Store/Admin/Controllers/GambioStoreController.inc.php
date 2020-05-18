@@ -51,7 +51,7 @@ class GambioStoreController extends AdminHttpViewController
         
         if ($this->_getQueryParameter('reset-token') || $this->_getQueryParameter('reset-token') === '') {
             $this->configuration->set('GAMBIO_STORE_TOKEN', '');
-            $this->configuration->set('GAMBIO_STORE_IS_REGISTERED', 'false');
+            $this->configuration->set('GAMBIO_STORE_IS_REGISTERED', false);
     
             return new RedirectHttpControllerResponse('./admin.php?do=GambioStore');
         }
@@ -64,11 +64,11 @@ class GambioStoreController extends AdminHttpViewController
     
         setcookie('auto_updater_admin_check', 'admin_logged_in', time() + 5 * 60, '/');
     
-        if ($this->configuration->get('GAMBIO_STORE_ACCEPTED_DATA_PROCESSING') === 'false') {
+        if ($this->configuration->get('GAMBIO_STORE_ACCEPTED_DATA_PROCESSING') === false) {
             $data = $this->getIFrameTemplateData('/dataprocessing');
-        } elseif ($this->configuration->get('GAMBIO_STORE_IS_REGISTERED') === 'false') {
+        } elseif ($this->configuration->get('GAMBIO_STORE_IS_REGISTERED') === false) {
             $data = $this->getIFrameTemplateData('/register');
-        } elseif ($this->configuration->get('GAMBIO_STORE_ACCEPTED_DATA_PROCESSING') === 'true') {
+        } elseif ($this->configuration->get('GAMBIO_STORE_ACCEPTED_DATA_PROCESSING') === true) {
             $contentNavigation = $this->getStoreNavigation();
             $data              = $this->getIFrameTemplateData('/downloads');
         }
@@ -90,7 +90,7 @@ class GambioStoreController extends AdminHttpViewController
     {
         $this->setup();
     
-        if ($this->configuration->get('GAMBIO_STORE_ACCEPTED_DATA_PROCESSING') !== 'true') {
+        if ($this->configuration->get('GAMBIO_STORE_ACCEPTED_DATA_PROCESSING') !== true) {
             return $this->actionDefault();
         }
     
@@ -150,7 +150,7 @@ class GambioStoreController extends AdminHttpViewController
     {
         $this->setup();
     
-        $this->configuration->set('GAMBIO_STORE_ACCEPTED_DATA_PROCESSING', 'true');
+        $this->configuration->set('GAMBIO_STORE_ACCEPTED_DATA_PROCESSING', true);
     
         return $this->actionDefault();
     }
@@ -217,6 +217,9 @@ class GambioStoreController extends AdminHttpViewController
     /**
      * Returns the content navigation for the store pages (once registered and accepted privacy stuff)
      *
+     * @param bool $mainPage
+     * @param bool $secondaryPage
+     *
      * @return mixed
      */
     private function getStoreNavigation($mainPage = true, $secondaryPage = false)
@@ -234,7 +237,10 @@ class GambioStoreController extends AdminHttpViewController
     /**
      * Returns the data for the iframe template
      *
-     * @return array
+     * @param $urlPostfix
+     *
+     * @return \KeyValueCollection
+     * @throws \GambioStoreLanguageNotResolvableException
      */
     private function getIFrameTemplateData($urlPostfix)
     {

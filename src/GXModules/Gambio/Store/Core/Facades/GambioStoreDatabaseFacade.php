@@ -1,6 +1,6 @@
 <?php
 /* --------------------------------------------------------------
-   GambioStoreDatabase.php 2020-04-29
+   GambioStoreDatabaseFacade.php 2020-04-29
    Gambio GmbH
    http://www.gambio.de
    Copyright (c) 2020 Gambio GmbH
@@ -9,14 +9,14 @@
    --------------------------------------------------------------
 */
 
-require_once 'GambioStoreFileSystem.inc.php';
+require_once 'GambioStoreFileSystemFacade.php';
 
 /**
- * Class GambioStoreDatabase
+ * Class GambioStoreDatabaseFacade
  *
  * This class encapsulates the PDO database layer provided by PHP.
  */
-class GambioStoreDatabase
+class GambioStoreDatabaseFacade
 {
     /**
      * @var \GambioStoreDatabase
@@ -30,7 +30,7 @@ class GambioStoreDatabase
     
     
     /**
-     * GambioStoreDatabase constructor.
+     * GambioStoreDatabaseFacade constructor.
      *
      * @param \PDO $pdo
      */
@@ -43,11 +43,11 @@ class GambioStoreDatabase
     /**
      * Connects to the database and returns a class instance.
      *
-     * @param \GambioStoreFileSystem $fileSystem
+     * @param \GambioStoreFileSystemFacade $fileSystem
      *
-     * @return \GambioStoreDatabase
+     * @return \GambioStoreDatabase|\GambioStoreDatabaseFacade
      */
-    public static function connect(\GambioStoreFileSystem $fileSystem)
+    public static function connect(\GambioStoreFileSystemFacade $fileSystem)
     {
         if (self::$instance === null) {
             require_once $fileSystem->getShopDirectory() . '/admin/includes/configure.php';
@@ -56,7 +56,7 @@ class GambioStoreDatabase
             
             $pdo = new PDO($dsn, DB_SERVER_USERNAME, DB_SERVER_PASSWORD);
             
-            self::$instance = new GambioStoreDatabase($pdo);
+            self::$instance = new GambioStoreDatabaseFacade($pdo);
         }
         
         return self::$instance;
@@ -82,11 +82,11 @@ class GambioStoreDatabase
         if ($parameters && !count(array_filter(array_keys($parameters), 'is_string'))) {
             throw new \RuntimeException('Parameters array should be associative.');
         }
-    
+        
         $statement = $this->pdo->prepare($sql);
-    
+        
         $statement->execute($parameters);
-    
+        
         return $statement;
     }
     
