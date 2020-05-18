@@ -11,5 +11,8 @@ $fileSystem    = new GambioStoreFileSystemFacade();
 $database      = GambioStoreDatabaseFacade::connect($fileSystem);
 $compatibility = new GambioStoreCompatibilityFacade($database);
 $configuration = new GambioStoreConfigurationFacade($database, $compatibility);
+$cache         = new GambioStoreCacheFacade($database);
+$http          = new GambioStoreHttpFacade();
+$log           = new GambioStoreLoggerFacade();
 
 require_once __DIR__ . '/../../../GXModules/Gambio/Store/Core/update.php';
