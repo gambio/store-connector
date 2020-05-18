@@ -162,7 +162,7 @@ class GambioStoreLogger
         $time  = $now->format('H:i:s');
         
         $fileName = $today . '-' . $suffix . '.log';
-        $logPath  = './../Logs/';
+        $logPath  = dirname(__FILE__, 2) . '/Logs/';
         
         if (count($context) === 0) {
             $contextMessage = '';
