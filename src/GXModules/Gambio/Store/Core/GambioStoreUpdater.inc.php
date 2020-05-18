@@ -37,6 +37,7 @@ class GambioStoreUpdater
      *
      * @param \GambioStoreConfiguration $configuration
      * @param \GambioStoreDatabase      $database
+     * @param \GambioStoreFileSystem    $fileSystem
      */
     public function __construct(
         GambioStoreConfiguration $configuration,

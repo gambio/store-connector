@@ -42,6 +42,10 @@ class GambioStoreDatabase
     
     /**
      * Connects to the database and returns a class instance.
+     *
+     * @param \GambioStoreFileSystem $fileSystem
+     *
+     * @return \GambioStoreDatabase
      */
     public static function connect(\GambioStoreFileSystem $fileSystem)
     {

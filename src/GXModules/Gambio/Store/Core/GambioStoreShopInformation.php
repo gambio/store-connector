@@ -31,7 +31,8 @@ class GambioStoreShopInformation
     /**
      * GambioStoreShopInformation constructor.
      *
-     * @param \GambioStoreDatabase $database
+     * @param \GambioStoreDatabase   $database
+     * @param \GambioStoreFileSystem $fileSystem
      */
     public function __construct(GambioStoreDatabase $database, GambioStoreFileSystem $fileSystem)
     {

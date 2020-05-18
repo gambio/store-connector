@@ -217,6 +217,9 @@ class GambioStoreController extends AdminHttpViewController
     /**
      * Returns the content navigation for the store pages (once registered and accepted privacy stuff)
      *
+     * @param bool $mainPage
+     * @param bool $secondaryPage
+     *
      * @return mixed
      */
     private function getStoreNavigation($mainPage = true, $secondaryPage = false)
@@ -234,7 +237,10 @@ class GambioStoreController extends AdminHttpViewController
     /**
      * Returns the data for the iframe template
      *
-     * @return array
+     * @param $urlPostfix
+     *
+     * @return \KeyValueCollection
+     * @throws \GambioStoreLanguageNotResolvableException
      */
     private function getIFrameTemplateData($urlPostfix)
     {

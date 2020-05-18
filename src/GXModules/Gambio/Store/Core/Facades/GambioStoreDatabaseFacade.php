@@ -42,6 +42,10 @@ class GambioStoreDatabaseFacade
     
     /**
      * Connects to the database and returns a class instance.
+     *
+     * @param \GambioStoreFileSystemFacade $fileSystem
+     *
+     * @return \GambioStoreDatabase|\GambioStoreDatabaseFacade
      */
     public static function connect(\GambioStoreFileSystemFacade $fileSystem)
     {

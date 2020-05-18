@@ -46,6 +46,8 @@ class GambioStoreConfiguration
      * Returns the configuration value of the provided key.
      *
      * @param string $key
+     *
+     * @return bool|mixed|null
      */
     public function get($key)
     {
