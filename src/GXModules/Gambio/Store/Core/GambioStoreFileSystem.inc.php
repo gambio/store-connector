@@ -183,6 +183,7 @@ class GambioStoreFileSystem
         }
     
         @rmdir($path);
+        return true;
     }
     
     

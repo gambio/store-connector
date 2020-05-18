@@ -254,6 +254,7 @@ class GambioStoreFileSystemFacade
         }
         
         @rmdir($path);
+        return true;
     }
     
     
