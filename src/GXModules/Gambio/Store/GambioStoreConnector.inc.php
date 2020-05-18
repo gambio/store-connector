@@ -293,10 +293,12 @@ class GambioStoreConnector
      * @param $fileLIst
      *
      * @return bool[]
+     * @throws \Exception
+     * @throws \GambioStoreRemovalException
      */
     public function uninstallPackage($fileLIst)
     {
-        $removal = new GambioStoreRemoval($fileLIst, $this->cache, $this->fileSystem, $this->logger);
+        $removal = new GambioStoreRemoval($fileLIst, $this->logger, $this->fileSystem, $this->backup);
         
         return $removal->perform();
     }
