@@ -1,6 +1,6 @@
 <?php
 /* --------------------------------------------------------------
-   GambioStoreCache.inc.php 2020-05-04
+   GambioStoreCache.inc.php 2020-05-15
    Gambio GmbH
    http://www.gambio.de
    Copyright (c) 2020 Gambio GmbH
@@ -49,21 +49,28 @@ class GambioStoreCache
      * @param $key
      *
      * @return mixed | bool
+     * @throws \GambioStoreCacheException
      */
     public function get($key)
     {
-        $sql = 'SELECT * FROM ' . self::CACHE_TABLE . ' WHERE cache_key = :cache_key LIMIT 1';
-        
+        # Key must be a string in the database.
+        $key              = (string)$key;
+        $sql              = 'SELECT cache_value FROM ' . self::CACHE_TABLE . ' WHERE cache_key = :cache_key LIMIT 1';
         $query            = $this->database->query($sql, [':cache_key' => $key]);
         $result           = $query->fetch();
-        $errorInformation = $query->errorInfo();
         
-        if ($errorInformation[0] === null) {
-            return $result;
+        if ($result === false) {
+            throw new GambioStoreCacheException('Could not get key: ' . $key . ' from cache table', 0,
+                ['sqlError' => $query->errorInfo()]);
         }
         
-        throw new GambioStoreCacheException('Could not get key: ' . $key . ' from cache table', 0,
-            ['sqlError' => $errorInformation]);
+        $cacheValue = $result['cache_value'];
+        
+        if ($cacheValue === 'false' || $cacheValue === 'true') {
+            $cacheValue = $cacheValue !== 'false';
+        }
+        
+        return $cacheValue;
     }
     
     
@@ -77,9 +84,15 @@ class GambioStoreCache
      */
     public function set($key, $value)
     {
-        $sql = 'INSERT INTO ' . self::CACHE_TABLE . ' (cache_key,cache_value) VALUES (:cache_key, :cache_value) '
-               . 'ON DUPLICATE KEY UPDATE cache_value=:cache_value ';
+        # Boolean values would otherwise be a empty string
+        if (is_bool($value)) {
+            $value = $value ? 'true' : 'false';
+        }
         
+        # Key must be a string in the database.
+        $key     = (string)$key;
+        $sql     = 'INSERT INTO ' . self::CACHE_TABLE . ' (cache_key,cache_value) VALUES (:cache_key, :cache_value) '
+                   . 'ON DUPLICATE KEY UPDATE cache_value=:cache_value ';
         $query   = $this->database->query($sql, ['cache_key' => $key, 'cache_value' => $value]);
         $success = $query->execute();
         
@@ -97,25 +110,48 @@ class GambioStoreCache
     /**
      * Checks if cache record exists.
      *
-     * @param $key
+     * @param string $key
      *
      * @return bool
      * @throws \GambioStoreCacheException
      */
     public function has($key)
     {
-        $sql = 'SELECT COUNT(*) FROM ' . self::CACHE_TABLE . ' WHERE cache_key = :cache_key LIMIT 1';
-        
+        # Key must be a string in the database.
+        $key   = (string)$key;
+        $sql   = 'SELECT COUNT(*) FROM ' . self::CACHE_TABLE . ' WHERE cache_key = :cache_key LIMIT 1';
         $query = $this->database->query($sql, [':cache_key' => $key]);
-        
-        $count = (int)$query->fetchColumn();
+        $count = $query->fetchColumn();
         
         if ($count === false) {
-            $errorInformation = $query->errorInfo();
             throw  new GambioStoreCacheException('Could not check if cache table has ' . $key, 0,
-                ['sqlError' => $errorInformation]);
+                ['sqlError' => $query->errorInfo()]);
         }
         
-        return $count > 0;
+        return (int)$count > 0;
+    }
+    
+    
+    /**
+     * Checks if cache record exists.
+     *
+     * @param string $key
+     *
+     * @throws \GambioStoreCacheException
+     */
+    public function delete($key)
+    {
+        # Key must be a string in the database.
+        $key     = (string)$key;
+        $sql     = 'DELETE FROM ' . self::CACHE_TABLE . ' WHERE cache_key = :cache_key LIMIT 1';
+        $query   = $this->database->query($sql, [':cache_key' => $key]);
+        $success = $query->execute();
+        
+        if ($success) {
+            return;
+        }
+        
+        throw new GambioStoreCacheException('Could not delete key: ' . $key . 'from cache table', 0,
+            ['sqlError' => $query->errorInfo()]);
     }
 }

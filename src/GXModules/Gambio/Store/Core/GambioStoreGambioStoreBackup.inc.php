@@ -23,12 +23,13 @@ class GambioStoreGambioStoreBackup
     /**
      * GambioStoreGambioStoreBackup constructor.
      *
-     * @param $packageId
+     * @param string                 $packageId
+     * @param \GambioStoreFileSystem $fileSystem
      */
-    public function __construct($packageId)
+    public function __construct($packageId, GambioStoreFileSystem $fileSystem)
     {
         $this->packageId = $packageId;
-        $this->fileSystem = new GambioStoreFileSystem();
+        $this->fileSystem = $fileSystem;
     }
     
     

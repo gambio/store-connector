@@ -60,15 +60,16 @@ class GambioStoreInstallation
      * @param $token
      * @param $cache
      * @param $logger
+     * @param $filesystem
      */
-    public function __construct($packageData, $token, $cache, $logger)
+    public function __construct($packageData, $token, $cache, $logger, $filesystem)
     {
         $this->packageData = $packageData;
         $this->token       = $token;
         $this->cache       = $cache;
         $this->logger      = $logger;
-        $this->backup      = new GambioStoreGambioStoreBackup($this->getTransactionId());
-        $this->filesystem  = new GambioStoreFileSystem;
+        $this->backup      = new GambioStoreGambioStoreBackup($this->getTransactionId(), $filesystem);
+        $this->filesystem  = $filesystem;
     
         register_shutdown_function([$this, 'registerShutdownFunction']);
     }
@@ -90,6 +91,7 @@ class GambioStoreInstallation
     
     /**
      * Returns unique installation id.
+     *
      * @return mixed
      */
     private function getTransactionId()
@@ -122,7 +124,7 @@ class GambioStoreInstallation
         if ($this->cache->has($this->getTransactionId())) {
             return $this->cache->get($this->getTransactionId());
         }
-
+        
         try {
             $this->downloadPackageToCacheFolder();
             $this->backup->backupPackageFiles($this->getPackageFilesDestinations());
@@ -132,7 +134,8 @@ class GambioStoreInstallation
         } catch (Exception $e) {
             $this->backup->restoreBackUp($this->getPackageFilesDestinations());
             throw new PackageInstallationException('Could not install package. Please contact Gambio.');
-        } finally {
+        }
+        finally {
             $this->cleanCache();
         }
         
@@ -147,9 +150,9 @@ class GambioStoreInstallation
      */
     private function downloadPackageToCacheFolder()
     {
-        $downloaded = $this->downloadPackageFromZipToCacheFolder() ?: $this->downloadPackageFilesToCacheFolder();
+        $downloaded = $this->downloadPackageFromZipToCacheFolder() ? : $this->downloadPackageFilesToCacheFolder();
         
-        if (! $downloaded) {
+        if (!$downloaded) {
             throw new DownloadPackageException('Could not download package');
         }
     }
@@ -163,13 +166,13 @@ class GambioStoreInstallation
      */
     private function installPackage()
     {
-        foreach ($this->getPackageFilesDestinations() as $file) {
-            $shopFile = $file;
-            $newPackageFile = 'cache/' . $this->getTransactionId() .  '/' . $file;
-        
-            // Replace the old package file with new
-            $this->filesystem->move($newPackageFile, $shopFile);
-        }
+            foreach ($this->getPackageFilesDestinations() as $file) {
+                $shopFile = $file;
+                $newPackageFile = 'cache/' . $this->getTransactionId() .  '/' . $file;
+    
+                // Replace the old package file with new
+                $this->filesystem->move($newPackageFile, $shopFile);
+            }
     }
     
     
@@ -193,6 +196,7 @@ class GambioStoreInstallation
             }
             
             $destinationFile = fopen($destinationFilePath, 'wb+');
+                $this->curlFileDownload($file['source'], [CURLOPT_FILE => $destinationFile]);
             $this->curlFileDownload($file['source'], [CURLOPT_FILE => $destinationFile]);
             fclose($destinationFile);
         }
@@ -210,37 +214,39 @@ class GambioStoreInstallation
     {
         $targetFileName = $this->getTransactionId() . '.zip';
         $targetFilePath = $this->filesystem->getCacheDirectory() . '/' . $targetFileName;
-        $zipFile = fopen($targetFilePath, 'wb+');
+        $zipFile        = fopen($targetFilePath, 'wb+');
         $downloadZipUrl = $this->packageData['fileList']['zip']['source'];
-    
+        
         try {
             $this->curlFileDownload($downloadZipUrl, [CURLOPT_FILE => $zipFile]);
         } catch (CurlFileDownloadException $e) {
             $this->logger->error($e->getMessage());
+            
             return false;
-        } finally {
+        }
+        finally {
             fclose($zipFile);
         }
-    
+        
         chmod($targetFilePath, 0777);
-    
-        /** @todo check the logic here. For some reason the hashes don't match */
-        //if (md5_file($targetFilePath) !== $this->packageData['fileList']['zip']['hash']) {
+        
+        /** @todo check the logic here. For some reason the hashes don't match */ //if (md5_file($targetFilePath) !== $this->packageData['fileList']['zip']['hash']) {
         //    $this->logger->error('Uploaded package zip file has wrong hash.');
         //    return false;
         //}
-    
+        
         $zip = new ZipArchive;
         $res = $zip->open($targetFilePath);
         if ($res !== true) {
             $this->logger->error('Cannot extract zip archive for id ' . $this->getTransactionId());
             $zip->close();
+            
             return false;
         }
-    
+        
         $zip->extractTo($this->filesystem->getCacheDirectory() . '/' . $this->getTransactionId());
         $zip->close();
-    
+        
         return true;
     }
     
@@ -256,18 +262,18 @@ class GambioStoreInstallation
     public function curlFileDownload($url, $options = [])
     {
         $curlOptions = $options + [
-            CURLOPT_URL            => $url,
-            CURLOPT_HTTPHEADER     => ["X-STORE-TOKEN: $this->token"]
-        ];
-    
-        $ch             = curl_init();
+                CURLOPT_URL        => $url,
+                CURLOPT_HTTPHEADER => ["X-STORE-TOKEN: $this->token"]
+            ];
+        
+        $ch = curl_init();
         curl_setopt_array($ch, $curlOptions);
         $curl_success = curl_exec($ch);
         $curl_errno   = curl_errno($ch);
         $curl_error   = curl_error($ch);
-    
+        
         curl_close($ch);
-
+        
         if ($curl_success === false) {
             throw new CurlFileDownloadException(sprintf('%s - %s', $curl_errno, $curl_error));
         }
@@ -280,9 +286,11 @@ class GambioStoreInstallation
     private function cleanCache()
     {
         $targetFilePath = 'cache/' . $this->getTransactionId() . '.zip';
-        file_exists($this->filesystem->getShopDirectory() . '/' . $targetFilePath) && $this->filesystem->remove($targetFilePath);
-    
+        file_exists($this->filesystem->getShopDirectory() . '/' . $targetFilePath)
+        && $this->filesystem->remove($targetFilePath);
+        
         $targetFilePath = 'cache/' . $this->getTransactionId();
-        file_exists($this->filesystem->getShopDirectory() . '/' . $targetFilePath) && $this->filesystem->remove($targetFilePath);
+        file_exists($this->filesystem->getShopDirectory() . '/' . $targetFilePath)
+        && $this->filesystem->remove($targetFilePath);
     }
 }

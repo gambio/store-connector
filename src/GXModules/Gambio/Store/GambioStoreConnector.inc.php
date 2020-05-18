@@ -168,7 +168,7 @@ class GambioStoreConnector
     /**
      * Determines whether this shop send the store token for registration
      *
-     * @param $storeToken
+     * @param string $storeToken
      *
      * @return bool
      */
@@ -223,6 +223,8 @@ class GambioStoreConnector
      * Determines whether a theme is active or not
      *
      * @param $themeName
+     *
+     * @return bool
      */
     public function isThemeActive($themeName)
     {
@@ -245,6 +247,7 @@ class GambioStoreConnector
      * Returns the current shop language code.
      *
      * @return string
+     * @throws \GambioStoreLanguageNotResolvableException
      */
     public function getCurrentShopLanguageCode()
     {
@@ -273,11 +276,12 @@ class GambioStoreConnector
      *
      * @return bool[]
      * @throws \PackageInstallationException
+     * @throws \GambioStoreCacheException
      */
     public function installPackage($packageData)
     {
         $installation = new GambioStoreInstallation($packageData, $this->configuration->get('GAMBIO_STORE_TOKEN'),
-            $this->cache, $this->logger);
+            $this->cache, $this->logger, $this->fileSystem);
         
         return $installation->perform();
     }
@@ -293,7 +297,7 @@ class GambioStoreConnector
      */
     public function uninstallPackage($fileLIst)
     {
-        $removal = new GambioStoreRemoval($fileLIst);
+        $removal = new GambioStoreRemoval($fileLIst, $this->cache, $this->fileSystem, $this->logger);
         
         return $removal->perform();
     }
