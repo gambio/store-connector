@@ -75,7 +75,7 @@ class GambioStoreController extends AdminHttpViewController
         }
         
         if (empty($data)) {
-            throw new GambioStoreUpdateWasNotExecutedProperlyException('OH NO');
+            throw new GambioStoreUpdateWasNotExecutedProperlyException('The updater was not executed properly. Important database values are missing for the Store.');
         }
     
         return new AdminLayoutHttpControllerResponse($title, $template, $data, $assets, $contentNavigation);
