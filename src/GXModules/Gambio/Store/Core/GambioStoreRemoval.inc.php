@@ -8,8 +8,7 @@
    [http://www.gnu.org/licenses/gpl-2.0.html]
    --------------------------------------------------------------
 */
-require_once 'Exceptions/WrongFilePermissionException.inc.php';
-require_once 'GambioStoreLogger.inc.php';
+require_once 'Exceptions/GambioStoreRemovalException.inc.php';
 
 /**
  * Class GambioStoreRemoval
@@ -26,11 +25,6 @@ class GambioStoreRemoval
     private $fileList;
     
     /**
-     * @var \GambioStoreCache
-     */
-    private $cache;
-    
-    /**
      * @var \GambioStoreFileSystem
      */
     private $fileSystem;
@@ -40,25 +34,30 @@ class GambioStoreRemoval
      */
     private $logger;
     
+    /**
+     * @var \GambioStoreBackup
+     */
+    private $backup;
+    
     
     /**
      * GambioStoreRemoval constructor.
      *
      * @param array                  $fileList
-     * @param \GambioStoreCache      $cache
-     * @param \GambioStoreFileSystem $fileSystem
      * @param \GambioStoreLogger     $logger
+     * @param \GambioStoreFileSystem $fileSystem
+     * @param \GambioStoreBackup     $backup
      */
     public function __construct(
         array $fileList,
-        GambioStoreCache $cache,
+        GambioStoreLogger $logger,
         GambioStoreFileSystem $fileSystem,
-        GambioStoreLogger $logger
+        GambioStoreBackup $backup
     ) {
         $this->fileList   = $fileList;
-        $this->cache      = $cache;
         $this->fileSystem = $fileSystem;
         $this->logger     = $logger;
+        $this->backup     = $backup;
     }
     
     
@@ -67,10 +66,49 @@ class GambioStoreRemoval
      * Removes for example the files of a gambio store package.
      *
      * @return bool[]
+     * @throws \Exception
+     * @throws \GambioStoreRemovalException
      */
     public function perform()
     {
-        $this->createBackup();
+        register_shutdown_function([$this, 'shutdownCallback']);
+        
+        try {
+            $this->backup->backupPackageFiles($this->fileList);
+            $this->removeFiles();
+        } catch (Exception $exception) {
+            $this->logger->error('Could not remove package',
+                ['fileList' => $this->fileList, 'exception' => $exception]);
+            $this->backup->restoreBackUp($this->fileList);
+            throw new GambioStoreRemovalException('Could not remove package');
+        }
+        
         return ['success' => true];
+    }
+    
+    
+    /**
+     * Removes all files or directory form package file list.
+     */
+    private function removeFiles()
+    {
+        foreach ($this->fileList as $file) {
+            $this->fileSystem->remove($file);
+        }
+    }
+    
+    
+    /**
+     * Shutdown callback function.
+     *
+     * @throws \Exception
+     */
+    public function shutdownCallback()
+    {
+        $error = error_get_last();
+        if ($error) {
+            $this->logger->critical('Critical error during package removal', ['error' => $error]);
+            $this->backup->restoreBackUp($this->fileList);
+        }
     }
 }
