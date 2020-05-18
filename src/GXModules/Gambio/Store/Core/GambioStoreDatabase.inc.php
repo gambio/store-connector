@@ -12,7 +12,7 @@
 require_once 'GambioStoreFileSystem.inc.php';
 
 /**
- * Class StoreDatabase
+ * Class GambioStoreDatabase
  *
  * This class encapsulates the PDO database layer provided by PHP.
  */
@@ -30,7 +30,7 @@ class GambioStoreDatabase
     
     
     /**
-     * StoreDatabase constructor.
+     * GambioStoreDatabase constructor.
      *
      * @param \PDO $pdo
      */

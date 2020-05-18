@@ -1,6 +1,6 @@
 <?php
 /* --------------------------------------------------------------
-   GambioStoreGambioStoreBackup.inc.php 2020-05-14
+   GambioStoreBackup.inc.php 2020-05-14
    Gambio GmbH
    http://www.gambio.de
    Copyright (c) 2020 Gambio GmbH
@@ -16,7 +16,7 @@ class GambioStoreBackup
     
     
     /**
-     * GambioStoreGambioStoreBackup constructor.
+     * GambioStoreBackup constructor.
      *
      * @param \GambioStoreFileSystem $fileSystem
      */
