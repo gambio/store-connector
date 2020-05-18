@@ -16,7 +16,7 @@ require_once 'Core/GambioStoreLogger.inc.php';
 require_once 'Core/GambioStoreConfiguration.inc.php';
 require_once 'Core/GambioStoreThemes.inc.php';
 require_once 'Core/GambioStoreFileSystem.inc.php';
-require_once 'Core/GambioStoreShopInformation.php';
+require_once 'Core/GambioStoreShopInformation.inc.php';
 require_once 'Core/GambioStoreUpdater.inc.php';
 require_once 'Core/GambioStoreCache.inc.php';
 require_once 'Core/GambioStoreBackup.inc.php';
