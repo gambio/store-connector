@@ -168,7 +168,7 @@ class GambioStoreInstallation
      */
     private function downloadPackageToCacheFolder()
     {
-        if (! $this->downloadPackageFromZipToCacheFolder()) {
+        if (!$this->downloadPackageZipToCacheFolder()) {
             $this->downloadPackageFilesToCacheFolder();
         }
     }
@@ -227,7 +227,7 @@ class GambioStoreInstallation
      * @return bool
      * @throws \CurlFileDownloadException
      */
-    private function downloadPackageFromZipToCacheFolder()
+    private function downloadPackageZipToCacheFolder()
     {
         $targetFileName = $this->getTransactionId() . '.zip';
         $targetFilePath = $this->filesystem->getCacheDirectory() . '/' . $targetFileName;
