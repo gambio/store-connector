@@ -70,13 +70,17 @@ class GambioStoreConfigurationFacade
     {
         $statement = $this->database->query('SELECT `gm_value` FROM `gm_configuration` WHERE `gm_key` = :key',
             ['key' => $key]);
-        
+    
         $result = $statement->fetch(PDO::FETCH_ASSOC);
-        
+    
         if ($result === false) {
             return null;
         }
-        
+    
+        if ($result['gm_value'] === 'false' || $result['gm_value'] === 'true') {
+            $result['gm_value'] = $result['gm_value'] !== 'false';
+        }
+    
         return $result['gm_value'];
     }
     
@@ -92,13 +96,17 @@ class GambioStoreConfigurationFacade
     {
         $statement = $this->database->query('SELECT `value` FROM `gx_configurations` WHERE `key` = :key',
             ['key' => 'gm_configuration/' . $key]);
-        
+    
         $result = $statement->fetch(PDO::FETCH_ASSOC);
-        
+    
         if ($result === false) {
             return null;
         }
-        
+    
+        if ($result['value'] === 'false' || $result['value'] === 'true') {
+            $result['value'] = $result['value'] !== 'false';
+        }
+    
         return $result['value'];
     }
     
@@ -111,6 +119,10 @@ class GambioStoreConfigurationFacade
      */
     public function set($key, $value)
     {
+        if (is_bool($value)) {
+            $value = $value ? 'true' : 'false';
+        }
+    
         if ($this->compatibility->has(GambioStoreCompatibilityFacade::RESOURCE_GM_CONFIGURATION_TABLE)) {
             $this->gmSet($key, $value);
         }

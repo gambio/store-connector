@@ -70,12 +70,17 @@ class GambioStoreConfiguration
     {
         $statement = $this->database->query('SELECT gm_value FROM gm_configuration WHERE gm_key = :key',
             ['key' => $key]);
-        
+    
         $result = $statement->fetch(PDO::FETCH_ASSOC);
-        
+    
         if ($result === false) {
             return null;
         }
+    
+        if ($result['gm_value'] === 'false' || $result['gm_value'] === 'true') {
+            $result['gm_value'] = $result['gm_value'] !== 'false';
+        }
+    
         return $result['gm_value'];
     }
     

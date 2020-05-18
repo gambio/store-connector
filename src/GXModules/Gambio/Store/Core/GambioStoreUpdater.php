@@ -101,7 +101,7 @@ class GambioStoreUpdater
         }
         
         if (!$this->configuration->has('GAMBIO_STORE_IS_REGISTERED')) {
-            $this->configuration->create('GAMBIO_STORE_IS_REGISTERED', 'false');
+            $this->configuration->create('GAMBIO_STORE_IS_REGISTERED', false);
         }
         
         if (!$this->configuration->has('GAMBIO_STORE_ACCEPTED_DATA_PROCESSING')) {
@@ -109,7 +109,7 @@ class GambioStoreUpdater
                 $value = $this->configuration->get('ADMIN_FEED_ACCEPTED_SHOP_INFORMATION_DATA_PROCESSING');
                 $this->configuration->create('GAMBIO_STORE_ACCEPTED_DATA_PROCESSING', $value);
             } else {
-                $this->configuration->create('GAMBIO_STORE_ACCEPTED_DATA_PROCESSING', 'false');
+                $this->configuration->create('GAMBIO_STORE_ACCEPTED_DATA_PROCESSING', false);
             }
         }
     }
