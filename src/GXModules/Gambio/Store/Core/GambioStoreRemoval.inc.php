@@ -25,15 +25,40 @@ class GambioStoreRemoval
      */
     private $fileList;
     
+    /**
+     * @var \GambioStoreCache
+     */
+    private $cache;
+    
+    /**
+     * @var \GambioStoreFileSystem
+     */
+    private $fileSystem;
+    
+    /**
+     * @var \GambioStoreLogger
+     */
+    private $logger;
+    
     
     /**
      * GambioStoreRemoval constructor.
      *
-     * @param array $fileList
+     * @param array                  $fileList
+     * @param \GambioStoreCache      $cache
+     * @param \GambioStoreFileSystem $fileSystem
+     * @param \GambioStoreLogger     $logger
      */
-    public function __construct(array $fileList)
-    {
-        $this->fileList = $fileList;
+    public function __construct(
+        array $fileList,
+        GambioStoreCache $cache,
+        GambioStoreFileSystem $fileSystem,
+        GambioStoreLogger $logger
+    ) {
+        $this->fileList   = $fileList;
+        $this->cache      = $cache;
+        $this->fileSystem = $fileSystem;
+        $this->logger     = $logger;
     }
     
     
@@ -45,24 +70,6 @@ class GambioStoreRemoval
      */
     public function perform()
     {
-        //$wrongPermittedFiles = $this->checkFilesPermissionsWithFileList($this->fileList);
-        //if (count($wrongPermittedFiles) !== 0) {
-        //    throw new WrongFilePermissionException('Wrong permissions, cannot remove gambio store package',
-        //        $wrongPermittedFiles);
-        //}
-        //
-        //// $this->createBackup($this->fileList);
-        //try {
-        //    foreach ($this->fileList as $file) {
-        //         if(!@unlink($file)){
-        //          throw new \RuntimeException();
-        //         }
-        //    }
-        //} catch (\Exception $exception) {
-        //    $this->restoreBackup();
-        //    throw new RuntimeException('Removing of package failed, because of : ', 0, $exception);
-        //}
-        
         return ['success' => true];
     }
 }
