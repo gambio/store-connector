@@ -126,7 +126,7 @@ class GambioStoreConnector
         $shopInformation = new GambioStoreShopInformation($database, $fileSystem);
         $cache           = new GambioStoreCache($database);
         $backup          = new GambioStoreBackup($fileSystem);
-    
+        
         return new self($database, $configuration, $compatibility, $logger, $themes, $fileSystem, $shopInformation,
             $cache, $backup);
     }
