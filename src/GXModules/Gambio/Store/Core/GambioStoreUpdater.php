@@ -17,17 +17,17 @@
 class GambioStoreUpdater
 {
     /**
-     * @var \GambioStoreConfiguration
+     * @var \GambioStoreConfigurationFacade
      */
     private $configuration;
     
     /**
-     * @var \GambioStoreDatabase
+     * @var \GambioStoreDatabaseFacade
      */
     private $database;
     
     /**
-     * @var \GambioStoreFileSystem
+     * @var \GambioStoreFileSystemFacade
      */
     private $fileSystem;
     
@@ -35,14 +35,14 @@ class GambioStoreUpdater
     /**
      * GambioStoreUpdater constructor.
      *
-     * @param \GambioStoreConfiguration $configuration
-     * @param \GambioStoreDatabase      $database
-     * @param \GambioStoreFileSystem    $fileSystem
+     * @param \GambioStoreConfigurationFacade $configuration
+     * @param \GambioStoreDatabaseFacade      $database
+     * @param \GambioStoreFileSystemFacade    $fileSystem
      */
     public function __construct(
-        GambioStoreConfiguration $configuration,
-        GambioStoreDatabase $database,
-        GambioStoreFileSystem $fileSystem
+        GambioStoreConfigurationFacade $configuration,
+        GambioStoreDatabaseFacade $database,
+        GambioStoreFileSystemFacade $fileSystem
     ) {
         
         $this->configuration = $configuration;

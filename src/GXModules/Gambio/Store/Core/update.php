@@ -9,7 +9,7 @@
    --------------------------------------------------------------
 */
 
-require_once __DIR__ . '/../GambioStoreConnector.inc.php';
+require_once __DIR__ . '/../Core/GambioStoreUpdater.php';
 
-$connector = GambioStoreConnector::getInstance();
-$connector->update();
+$updater = new GambioStoreUpdater($configuration, $database, $fileSystem);
+$updater->update();

@@ -17,7 +17,7 @@ require_once 'Core/GambioStoreConfiguration.inc.php';
 require_once 'Core/GambioStoreThemes.inc.php';
 require_once 'Core/GambioStoreFileSystem.inc.php';
 require_once 'Core/GambioStoreShopInformation.inc.php';
-require_once 'Core/GambioStoreUpdater.inc.php';
+require_once 'Core/GambioStoreUpdater.php';
 require_once 'Core/GambioStoreCache.inc.php';
 require_once 'Core/GambioStoreBackup.inc.php';
 require_once 'Core/Exceptions/GambioStoreLanguageNotResolvableException.inc.php';
@@ -65,11 +65,6 @@ class GambioStoreConnector
     private $shopInformation;
     
     /**
-     * @var \GambioStoreUpdater
-     */
-    private $updater;
-    
-    /**
      * @var \GambioStoreCache
      */
     private $cache;
@@ -89,7 +84,6 @@ class GambioStoreConnector
      * @param \GambioStoreThemes          $themes
      * @param \GambioStoreFileSystem      $fileSystem
      * @param \GambioStoreShopInformation $shopInformation
-     * @param \GambioStoreUpdater         $updater
      * @param \GambioStoreCache           $cache
      * @param \GambioStoreBackup          $backup
      */
@@ -101,7 +95,6 @@ class GambioStoreConnector
         GambioStoreThemes $themes,
         GambioStoreFileSystem $fileSystem,
         GambioStoreShopInformation $shopInformation,
-        GambioStoreUpdater $updater,
         GambioStoreCache $cache,
         GambioStoreBackup $backup
     ) {
@@ -112,7 +105,6 @@ class GambioStoreConnector
         $this->themes          = $themes;
         $this->fileSystem      = $fileSystem;
         $this->shopInformation = $shopInformation;
-        $this->updater         = $updater;
         $this->cache           = $cache;
         $this->backup          = $backup;
     }
@@ -132,12 +124,11 @@ class GambioStoreConnector
         $logger          = new GambioStoreLogger();
         $themes          = new GambioStoreThemes($compatibility, $fileSystem);
         $shopInformation = new GambioStoreShopInformation($database, $fileSystem);
-        $updater         = new GambioStoreUpdater($configuration, $database, $fileSystem);
         $cache           = new GambioStoreCache($database);
         $backup          = new GambioStoreBackup($fileSystem);
-        
+    
         return new self($database, $configuration, $compatibility, $logger, $themes, $fileSystem, $shopInformation,
-            $updater, $cache, $backup);
+            $cache, $backup);
     }
     
     
@@ -319,15 +310,6 @@ class GambioStoreConnector
     public function getFileSystem()
     {
         return $this->fileSystem;
-    }
-    
-    
-    /**
-     * Updates the GambioStoreConnector
-     */
-    public function update()
-    {
-        $this->updater->update();
     }
     
     
