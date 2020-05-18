@@ -69,6 +69,22 @@ class GambioStoreInstallation
         $this->logger      = $logger;
         $this->backup      = new GambioStoreGambioStoreBackup($this->getTransactionId());
         $this->filesystem  = new GambioStoreFileSystem;
+    
+        register_shutdown_function([$this, 'registerShutdownFunction']);
+    }
+    
+    
+    /**
+     * Shutdown callback function.
+     *
+     * @throws \Exception
+     */
+    private function registerShutdownFunction()
+    {
+        if (! $error = error_get_last()) {
+            $this->logger->critical('Critical error during package installation', $error);
+            $this->backup->restoreBackUp($this->getPackageFilesDestinations());
+        }
     }
     
     
@@ -97,7 +113,9 @@ class GambioStoreInstallation
      * Inits installation.
      *
      * @return bool[]
-     * @throws \PackageInstallationException|\GambioStoreCacheException
+     * @throws \GambioStoreCacheException
+     * @throws \PackageInstallationException
+     * @throws \Exception
      */
     public function perform()
     {
@@ -109,10 +127,11 @@ class GambioStoreInstallation
             $this->downloadPackageToCacheFolder();
             $this->backup->backupPackageFiles($this->getPackageFilesDestinations());
             $this->installPackage();
+        } catch (DownloadPackageException $e) {
+            $this->logger->warning($e->getMessage());
         } catch (Exception $e) {
-            
-            // Log everything here
-            throw new PackageInstallationException($e->getMessage());
+            $this->backup->restoreBackUp($this->getPackageFilesDestinations());
+            throw new PackageInstallationException('Could not install package. Please contact Gambio.');
         } finally {
             $this->cleanCache();
         }
@@ -137,22 +156,19 @@ class GambioStoreInstallation
     
     
     /**
-     * Installing package.
-     *
-     * @throws \Exception
+     * Installs a package.
+     * @throws \GambioStoreCreateDirectoryException
+     * @throws \GambioStoreFileMoveException
+     * @throws \GambioStoreFileNotFoundException
      */
     private function installPackage()
     {
-        try {
-            foreach ($this->getPackageFilesDestinations() as $file) {
-                $shopFile = $file;
-                $newPackageFile = 'cache/' . $this->getTransactionId() .  '/' . $file;
-    
-                // Replace the old package file with new
-                $this->filesystem->move($newPackageFile, $shopFile);
-            }
-        } catch (Exception $e) {
-            $this->backup->restoreBackUp($this->getPackageFilesDestinations());
+        foreach ($this->getPackageFilesDestinations() as $file) {
+            $shopFile = $file;
+            $newPackageFile = 'cache/' . $this->getTransactionId() .  '/' . $file;
+        
+            // Replace the old package file with new
+            $this->filesystem->move($newPackageFile, $shopFile);
         }
     }
     
@@ -161,6 +177,7 @@ class GambioStoreInstallation
      * Downloads files from the filelist.
      *
      * @return bool
+     * @throws \CurlFileDownloadException
      */
     private function downloadPackageFilesToCacheFolder()
     {
@@ -176,15 +193,8 @@ class GambioStoreInstallation
             }
             
             $destinationFile = fopen($destinationFilePath, 'wb+');
-            
-            try {
-                $this->curlFileDownload($file['source'], [CURLOPT_FILE => $destinationFile]);
-            } catch (CurlFileDownloadException $e) {
-                $this->logger->error($e->getMessage());
-                return false;
-            } finally {
-                fclose($destinationFile);
-            }
+            $this->curlFileDownload($file['source'], [CURLOPT_FILE => $destinationFile]);
+            fclose($destinationFile);
         }
         
         return true;

@@ -116,7 +116,9 @@ class GambioStoreFileSystem
      * @param $destination
      *
      * @return bool
-     * @throws \Exception
+     * @throws \GambioStoreCreateDirectoryException
+     * @throws \GambioStoreFileMoveException
+     * @throws \GambioStoreFileNotFoundException
      */
     public function move($source, $destination)
     {
@@ -166,7 +168,7 @@ class GambioStoreFileSystem
         }
     
         if (is_file($path)) {
-            return unlink($path);
+            return @unlink($path);
         }
     
         $directory = new RecursiveDirectoryIterator($path, RecursiveDirectoryIterator::SKIP_DOTS);
@@ -174,13 +176,13 @@ class GambioStoreFileSystem
     
         foreach ($iterator as $item) {
             if ($item->isDir()) {
-                rmdir($item->getRealPath());
+                @rmdir($item->getRealPath());
             } else {
-                unlink($item->getRealPath());
+                @unlink($item->getRealPath());
             }
         }
     
-        rmdir($path);
+        @rmdir($path);
     }
     
     
