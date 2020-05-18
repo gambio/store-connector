@@ -89,7 +89,7 @@ class GambioStoreInstallation
      */
     private function registerShutdownFunction()
     {
-        if (! $error = error_get_last()) {
+        if ($error = error_get_last()) {
             $this->logger->critical('Critical error during package installation', $error);
             $this->backup->restoreBackUp($this->getPackageFilesDestinations());
         }
@@ -136,6 +136,12 @@ class GambioStoreInstallation
             $this->downloadPackageToCacheFolder();
             $this->backup->backupPackageFiles($this->getPackageFilesDestinations());
             $this->installPackage();
+        } catch (GambioStoreCreateDirectoryException $e) {
+            $this->logger->warning($e->getMessage());
+        } catch (GambioStoreFileNotFoundException $e) {
+            $this->logger->warning($e->getMessage());
+        } catch (GambioStoreFileMoveException $e) {
+            $this->logger->warning($e->getMessage());
         } catch (CurlFileDownloadException $e) {
             $this->logger->warning($e->getMessage());
         } catch (Exception $e) {
@@ -214,6 +220,7 @@ class GambioStoreInstallation
      * Downloads zip archive to cache folder.
      *
      * @return bool
+     * @throws \CurlFileDownloadException
      */
     private function downloadPackageFromZipToCacheFolder()
     {
@@ -221,17 +228,8 @@ class GambioStoreInstallation
         $targetFilePath = $this->filesystem->getCacheDirectory() . '/' . $targetFileName;
         $zipFile        = fopen($targetFilePath, 'wb+');
         $downloadZipUrl = $this->packageData['fileList']['zip']['source'];
-        
-        try {
-            $this->curlFileDownload($downloadZipUrl, [CURLOPT_FILE => $zipFile]);
-        } catch (CurlFileDownloadException $e) {
-            $this->logger->error($e->getMessage());
-            
-            return false;
-        }
-        finally {
-            fclose($zipFile);
-        }
+        $this->curlFileDownload($downloadZipUrl, [CURLOPT_FILE => $zipFile]);
+        fclose($zipFile);
         
         chmod($targetFilePath, 0777);
         
