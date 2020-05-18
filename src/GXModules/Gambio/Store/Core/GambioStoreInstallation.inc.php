@@ -188,7 +188,7 @@ class GambioStoreInstallation
     
     
     /**
-     * Downloads files from the filelist.
+     * Downloads files from the fileList.
      *
      * @return bool
      * @throws \CurlFileDownloadException

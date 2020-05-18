@@ -21,7 +21,7 @@
  * @return {Function} Returns the gulp task definition.
  */
 module.exports = (gulp, $) => {
-	const gulpsync = require('gulp-sync')(gulp);
+	const gulpSync = require('gulp-sync')(gulp);
 	const del = require('del');
 	const fs = require('fs');
 	const environment = require('./lib/environment');
@@ -30,8 +30,7 @@ module.exports = (gulp, $) => {
 		global.devEnvironment = true;
 		const shopVersions = fs.readdirSync('docker').filter(dir => dir !== 'boilerplate');
 		
-		if(shopVersions.length === 0)
-		{
+		if (shopVersions.length === 0) {
 			throw new Error('"docker/" directory has no version in it.')
 		}
 		
@@ -41,7 +40,7 @@ module.exports = (gulp, $) => {
 			target + '/GXModules/Gambio/Hub'
 		]);
 		
-		gulp.start(gulpsync.sync([
+		gulp.start(gulpSync.sync([
 			'clean', 'scripts', 'styles', 'watch', 'sync'
 		], 'dev'));
 	};

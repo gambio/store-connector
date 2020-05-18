@@ -21,7 +21,7 @@
  * @return {Function} Returns the gulp task definition.
  */
 module.exports = (gulp, $) => {
-	const gulpsync = require('gulp-sync')(gulp);
+	const gulpSync = require('gulp-sync')(gulp);
 	
-	return gulpsync.sync(['clean', 'scripts', 'styles'], 'build');
+	return gulpSync.sync(['clean', 'scripts', 'styles'], 'build');
 };
