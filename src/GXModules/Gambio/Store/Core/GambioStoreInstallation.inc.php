@@ -177,13 +177,12 @@ class GambioStoreInstallation
      */
     private function installPackage()
     {
-            foreach ($this->getPackageFilesDestinations() as $file) {
-                $shopFile = $file;
-                $newPackageFile = 'cache/' . $this->getTransactionId() .  '/' . $file;
-    
-                // Replace the old package file with new
-                $this->filesystem->move($newPackageFile, $shopFile);
-            }
+        foreach ($this->getPackageFilesDestinations() as $file) {
+            $newPackageFile = 'cache/' . $this->getTransactionId() .  '/' . $file;
+
+            // Replace the old package file with new
+            $this->filesystem->move($newPackageFile, $file);
+        }
     }
     
     
