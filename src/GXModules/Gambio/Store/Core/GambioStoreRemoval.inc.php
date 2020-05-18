@@ -70,6 +70,7 @@ class GambioStoreRemoval
      */
     public function perform()
     {
+        $this->createBackup();
         return ['success' => true];
     }
 }

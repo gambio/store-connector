@@ -7,28 +7,21 @@
    --------------------------------------------------------------
 */
 
-class GambioStoreGambioStoreBackup
+class GambioStoreBackup
 {
     /**
      * @var \GambioStoreFileSystem
      */
     private $fileSystem;
     
-    /**
-     * @var string Store package id.
-     */
-    private $packageId;
-    
     
     /**
      * GambioStoreGambioStoreBackup constructor.
      *
-     * @param string                 $packageId
      * @param \GambioStoreFileSystem $fileSystem
      */
-    public function __construct($packageId, GambioStoreFileSystem $fileSystem)
+    public function __construct(GambioStoreFileSystem $fileSystem)
     {
-        $this->packageId = $packageId;
         $this->fileSystem = $fileSystem;
     }
     
@@ -43,8 +36,8 @@ class GambioStoreGambioStoreBackup
     public function restoreBackUp($toRestore)
     {
         foreach ($toRestore as $file) {
-            if (file_exists($this->fileSystem->getShopDirectory() . '/cache/backup/' . $this->packageId . '/' . $file . '.bak')) {
-                $this->fileSystem->move('cache/backup/' . $this->packageId . '/' . $file . '.bak', $file);
+            if (file_exists($this->fileSystem->getShopDirectory() . '/cache/backup/' . $file . '.bak')) {
+                $this->fileSystem->move('cache/backup/' . $file . '.bak', $file);
             }
         }
     }
@@ -63,7 +56,7 @@ class GambioStoreGambioStoreBackup
             $packageFileSource = $this->fileSystem->getShopDirectory() . '/' . $file;
             
             if (file_exists($packageFileSource) && is_file($packageFileSource)) {
-                $this->fileSystem->move($file, 'cache/backup/' . $this->packageId . '/' . $file . '.bak');
+                $this->fileSystem->move($file, 'cache/backup/' . $file . '.bak');
             }
         }
     }

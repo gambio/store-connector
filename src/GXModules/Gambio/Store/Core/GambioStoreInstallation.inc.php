@@ -43,7 +43,7 @@ class GambioStoreInstallation
     private $packageData;
     
     /**
-     * @var \GambioStoreGambioStoreBackup
+     * @var \GambioStoreBackup
      */
     private $backup;
     
@@ -56,20 +56,27 @@ class GambioStoreInstallation
     /**
      * GambioStoreInstallation constructor.
      *
-     * @param $packageData
-     * @param $token
-     * @param $cache
-     * @param $logger
-     * @param $filesystem
+     * @param array                  $packageData
+     * @param string                 $token
+     * @param \GambioStoreCache      $cache
+     * @param \GambioStoreLogger     $logger
+     * @param \GambioStoreFileSystem $filesystem
+     * @param \GambioStoreBackup     $backup
      */
-    public function __construct($packageData, $token, $cache, $logger, $filesystem)
-    {
+    public function __construct(
+        array $packageData,
+        $token,
+        GambioStoreCache $cache,
+        GambioStoreLogger $logger,
+        GambioStoreFileSystem $filesystem,
+        GambioStoreBackup $backup
+    ) {
         $this->packageData = $packageData;
         $this->token       = $token;
         $this->cache       = $cache;
         $this->logger      = $logger;
-        $this->backup      = new GambioStoreGambioStoreBackup($this->getTransactionId(), $filesystem);
         $this->filesystem  = $filesystem;
+        $this->backup      = $backup;
     
         register_shutdown_function([$this, 'registerShutdownFunction']);
     }

@@ -19,6 +19,7 @@ require_once 'Core/GambioStoreFileSystem.inc.php';
 require_once 'Core/GambioStoreShopInformation.php';
 require_once 'Core/GambioStoreUpdater.inc.php';
 require_once 'Core/GambioStoreCache.inc.php';
+require_once 'Core/GambioStoreBackup.inc.php';
 require_once 'Core/Exceptions/GambioStoreLanguageNotResolvableException.inc.php';
 
 /**
@@ -72,6 +73,10 @@ class GambioStoreConnector
      * @var \GambioStoreCache
      */
     private $cache;
+    /**
+     * @var \GambioStoreBackup
+     */
+    private $backup;
     
     
     /**
@@ -86,6 +91,7 @@ class GambioStoreConnector
      * @param \GambioStoreShopInformation $shopInformation
      * @param \GambioStoreUpdater         $updater
      * @param \GambioStoreCache           $cache
+     * @param \GambioStoreBackup          $backup
      */
     private function __construct(
         GambioStoreDatabase $database,
@@ -96,7 +102,8 @@ class GambioStoreConnector
         GambioStoreFileSystem $fileSystem,
         GambioStoreShopInformation $shopInformation,
         GambioStoreUpdater $updater,
-        GambioStoreCache $cache
+        GambioStoreCache $cache,
+        GambioStoreBackup $backup
     ) {
         $this->database        = $database;
         $this->configuration   = $configuration;
@@ -107,6 +114,7 @@ class GambioStoreConnector
         $this->shopInformation = $shopInformation;
         $this->updater         = $updater;
         $this->cache           = $cache;
+        $this->backup          = $backup;
     }
     
     
@@ -126,9 +134,10 @@ class GambioStoreConnector
         $shopInformation = new GambioStoreShopInformation($database, $fileSystem);
         $updater         = new GambioStoreUpdater($configuration, $database, $fileSystem);
         $cache           = new GambioStoreCache($database);
+        $backup          = new GambioStoreBackup($fileSystem);
         
         return new self($database, $configuration, $compatibility, $logger, $themes, $fileSystem, $shopInformation,
-            $updater, $cache);
+            $updater, $cache, $backup);
     }
     
     
@@ -281,7 +290,7 @@ class GambioStoreConnector
     public function installPackage($packageData)
     {
         $installation = new GambioStoreInstallation($packageData, $this->configuration->get('GAMBIO_STORE_TOKEN'),
-            $this->cache, $this->logger, $this->fileSystem);
+            $this->cache, $this->logger, $this->fileSystem, $this->backup);
         
         return $installation->perform();
     }
@@ -293,7 +302,6 @@ class GambioStoreConnector
      * @param $fileLIst
      *
      * @return bool[]
-     * @throws \PackageInstallationException
      */
     public function uninstallPackage($fileLIst)
     {
