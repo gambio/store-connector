@@ -147,7 +147,7 @@ class GambioStoreAjaxController extends AdminHttpViewController
     {
         $this->setup();
         
-        if (!isset($_GET) || !isset($_GET['themeName'])) {
+        if (!isset($_GET, $_GET['themeName'])) {
             return new JsonHttpControllerResponse(['success' => false]);
         }
     
@@ -167,9 +167,8 @@ class GambioStoreAjaxController extends AdminHttpViewController
     public function actionActivateTheme()
     {
         $this->setup();
-        
-        if (!isset($_POST)
-            || !isset($_POST['themeStorageName'])) {
+    
+        if (!isset($_POST, $_POST['themeStorageName'])) {
             return new JsonHttpControllerResponse(['success' => false]);
         }
         

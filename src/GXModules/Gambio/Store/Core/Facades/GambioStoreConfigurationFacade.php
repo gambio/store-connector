@@ -113,9 +113,9 @@ class GambioStoreConfigurationFacade
     {
         if ($this->compatibility->has(GambioStoreCompatibilityFacade::RESOURCE_GM_CONFIGURATION_TABLE)) {
             $this->gmSet($key, $value);
-        } else {
-            $this->gxSet($key, $value);
         }
+    
+        $this->gxSet($key, $value);
     }
     
     
@@ -156,9 +156,9 @@ class GambioStoreConfigurationFacade
     {
         if ($this->compatibility->has(GambioStoreCompatibilityFacade::RESOURCE_GM_CONFIGURATION_TABLE)) {
             return $this->gmHas($key);
-        } else {
-            return $this->gxHas($key);
         }
+    
+        return $this->gxHas($key);
     }
     
     
