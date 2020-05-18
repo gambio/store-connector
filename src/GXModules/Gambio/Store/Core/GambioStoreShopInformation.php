@@ -131,7 +131,7 @@ class GambioStoreShopInformation
      */
     private function getPhpVersion()
     {
-        return phpversion();
+        return PHP_VERSION;
     }
     
     
