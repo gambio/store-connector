@@ -12,6 +12,7 @@ require_once 'Exceptions/FileDownloadException.inc.php';
 require_once 'Exceptions/WrongFilePermissionException.inc.php';
 require_once 'Exceptions/CreateFolderException.inc.php';
 require_once 'Exceptions/PackageInstallationException.inc.php';
+require_once 'Exceptions/GambioStoreInstallationMissingPHPExtensionsException.inc.php';
 
 /**
  * Class StoreInstallation
@@ -128,10 +129,14 @@ class GambioStoreInstallation
      */
     public function perform()
     {
+        if (!extension_loaded('zip')) {
+            throw new GambioStoreInstallationMissingPHPExtensionsException('The Gambio Store could not locate the zip extension for PHP which is required for installations.');
+        }
+    
         if ($this->cache->has($this->getTransactionId())) {
             return $this->cache->get($this->getTransactionId());
         }
-        
+    
         try {
             $this->downloadPackageToCacheFolder();
             $this->backup->backupPackageFiles($this->getPackageFilesDestinations());
@@ -163,7 +168,7 @@ class GambioStoreInstallation
      */
     private function downloadPackageToCacheFolder()
     {
-        if (! $this->downloadPackageFromZipToCacheFolder()) {
+        if (!$this->downloadPackageZipToCacheFolder()) {
             $this->downloadPackageFilesToCacheFolder();
         }
     }
@@ -221,7 +226,7 @@ class GambioStoreInstallation
      * @return bool
      * @throws \CurlFileDownloadException
      */
-    private function downloadPackageFromZipToCacheFolder()
+    private function downloadPackageZipToCacheFolder()
     {
         $targetFileName = $this->getTransactionId() . '.zip';
         $targetFilePath = $this->filesystem->getCacheDirectory() . '/' . $targetFileName;
