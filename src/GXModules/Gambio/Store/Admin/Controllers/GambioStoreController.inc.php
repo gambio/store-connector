@@ -74,7 +74,7 @@ class GambioStoreController extends AdminHttpViewController
             $data              = $this->getIFrameTemplateData('/downloads');
         }
         
-        if (is_array($data)) {
+        if (empty($data)) {
             throw new GambioStoreUpdateWasNotExecutedProperlyException('OH NO');
         }
     
