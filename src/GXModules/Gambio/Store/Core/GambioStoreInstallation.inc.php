@@ -89,7 +89,7 @@ class GambioStoreInstallation
      */
     private function registerShutdownFunction()
     {
-        if (! $error = error_get_last()) {
+        if ($error = error_get_last()) {
             $this->logger->critical('Critical error during package installation', $error);
             $this->backup->restoreBackUp($this->getPackageFilesDestinations());
         }
