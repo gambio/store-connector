@@ -129,7 +129,7 @@ const startPackageInstallation = async (data) => {
 	// By checking whether a gallery object is present,
 	// we can determine if this is a theme or not.
 	try {
-		// progressDescription.textContent = GambioStore.translation.translate('INSTALLING_PACKAGE');
+		progressDescription.textContent = GambioStore.translation.translate('INSTALLING_PACKAGE');
 		await installPackage(data, updateProgressCallback);
 		
 		if (data.details.gallery) {
@@ -180,9 +180,11 @@ const updateProgressCallback = ({progress}) => {
  */
 const install = async (data) => {
 	const $installingPackageModal = $('.installing-package.modal');
-	// const progressDescription = document.getElementsByClassName('.progress-description').item(0);
+	const progressDescription = document
+		.getElementsByClassName('installing-package modal').item(0)
+		.getElementsByClassName('progress-description').item(0);
 	
-	// progressDescription.textContent = GambioStore.translation.translate('PREPARING_PACKAGE');
+	progressDescription.textContent = GambioStore.translation.translate('PREPARING_PACKAGE');
 	
 	updateProgressCallback({progress: 0}); // always set to 0 initially
 	

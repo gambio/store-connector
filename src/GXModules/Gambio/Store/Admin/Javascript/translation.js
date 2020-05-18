@@ -26,7 +26,7 @@ window.GambioStore = Object.assign({}, {
 		 */
 		translate(phrase) {
 			const div = document.getElementById('gambio-store-iframe');
-			const translations = div.dataset.translations;
+			const translations = JSON.parse(div.dataset.storeTranslations);
 			
 			return translations[phrase];
 		}
