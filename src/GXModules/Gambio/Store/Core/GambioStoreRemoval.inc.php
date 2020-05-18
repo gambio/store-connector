@@ -12,7 +12,7 @@ require_once 'Exceptions/WrongFilePermissionException.inc.php';
 require_once 'GambioStoreLogger.inc.php';
 
 /**
- * Class StoreRemoval
+ * Class GambioStoreRemoval
  *
  * Performs a Store package removal and take care of all the required actions.
  *

@@ -10,7 +10,7 @@
 */
 
 /**
- * Class StoreConfiguration
+ * Class GambioStoreConfiguration
  *
  * This class enables read/write operations to the shop's configuration table, using the key/value paradigm.
  *
@@ -30,7 +30,7 @@ class GambioStoreConfiguration
     
     
     /**
-     * StoreConfiguration constructor.
+     * GambioStoreConfiguration constructor.
      *
      * @param \GambioStoreDatabase      $database
      * @param \GambioStoreCompatibility $compatibility
