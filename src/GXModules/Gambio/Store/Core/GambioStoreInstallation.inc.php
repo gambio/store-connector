@@ -225,6 +225,7 @@ class GambioStoreInstallation
      *
      * @return bool
      * @throws \CurlFileDownloadException
+     * @throws \GambioStoreZipException
      */
     private function downloadPackageZipToCacheFolder()
     {
@@ -245,10 +246,9 @@ class GambioStoreInstallation
         $zip = new ZipArchive;
         $res = $zip->open($targetFilePath);
         if ($res !== true) {
-            $this->logger->error('Cannot extract zip archive for id ' . $this->getTransactionId());
-            $zip->close();
-            
-            return false;
+            throw new GambioStoreZipException('Cannot extract zip archive.', [
+                'file' => $zipFile
+            ]);
         }
         
         $zip->extractTo($this->filesystem->getCacheDirectory() . '/' . $this->getTransactionId());
