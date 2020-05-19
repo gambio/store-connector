@@ -10,7 +10,7 @@
 */
 
 require_once 'Exceptions/GambioStoreHttpErrorException.inc.php';
-require_once 'GambioStoreResponse.php';
+require_once 'GambioStoreResponse.inc.php';
 
 /**
  * Class GambioStoreHttp
