@@ -77,7 +77,7 @@ class GambioStoreInstallation
         $this->logger      = $logger;
         $this->filesystem  = $filesystem;
         $this->backup      = $backup;
-    
+        
         register_shutdown_function([$this, 'registerShutdownFunction']);
     }
     
@@ -129,16 +129,22 @@ class GambioStoreInstallation
     public function perform()
     {
         if (!extension_loaded('zip')) {
-            throw new GambioStoreInstallationMissingPHPExtensionsException('The Gambio Store could not locate the zip extension for PHP which is required for installations.');
+            $message = 'The Gambio Store could not locate the zip extension for PHP which is required for installations.';
+            $this->logger->critical($message);
+            throw new GambioStoreInstallationMissingPHPExtensionsException($message);
         }
-    
+        
         if ($this->cache->has($this->getTransactionId())) {
             return $this->cache->get($this->getTransactionId());
         }
-    
+        
         try {
+            $this->logger->info('Try to install package', ['packageData' => $this->packageData]);
+            $this->logger->info('Start by downloading package into cache directory');
             $this->downloadPackageToCacheFolder();
+            $this->logger->info('Creating backup in cache directory');
             $this->backup->movePackageFilesToCache($this->getPackageFilesDestinations());
+            $this->logger->info('Installing package');
             $this->installPackage();
         } catch (GambioStoreCreateDirectoryException $e) {
             $this->logger->warning($e->getMessage());
@@ -150,12 +156,16 @@ class GambioStoreInstallation
             $this->logger->warning($e->getMessage());
         } catch (Exception $e) {
             $this->backup->restorePackageFilesFromCache($this->getPackageFilesDestinations());
-            throw new GambioStorePackageInstallationException('Could not install package. Please contact Gambio.');
+            $message = 'Could not install package';
+            $this->logger->error($message, ['error' => $e]);
+            throw new GambioStorePackageInstallationException($message);
         }
         finally {
             $this->cleanCache();
+            $this->logger->info('Removing backup and download from cache directory');
         }
         
+        $this->logger->info('succeed');
         return ['success' => true];
     }
     
@@ -168,6 +178,7 @@ class GambioStoreInstallation
     private function downloadPackageToCacheFolder()
     {
         if (!$this->downloadPackageZipToCacheFolder()) {
+            $this->logger->notice('Could not download zip file');
             $this->downloadPackageFilesToCacheFolder();
         }
     }
@@ -175,6 +186,7 @@ class GambioStoreInstallation
     
     /**
      * Installs a package.
+     *
      * @throws \GambioStoreCreateDirectoryException
      * @throws \GambioStoreFileMoveException
      * @throws \GambioStoreFileNotFoundException
@@ -182,8 +194,8 @@ class GambioStoreInstallation
     private function installPackage()
     {
         foreach ($this->getPackageFilesDestinations() as $file) {
-            $newPackageFile = 'cache/' . $this->getTransactionId() .  '/' . $file;
-
+            $newPackageFile = 'cache/' . $this->getTransactionId() . '/' . $file;
+            
             // Replace the old package file with new
             $this->filesystem->move($newPackageFile, $file);
         }
@@ -198,23 +210,27 @@ class GambioStoreInstallation
      */
     private function downloadPackageFilesToCacheFolder()
     {
+        $this->logger->info('Try to download each file separately');
         $packageTempDirectory = $this->filesystem->getCacheDirectory() . '/' . $this->getTransactionId();
         
         foreach ($this->packageData['fileList']['includedFiles'] as $file) {
             
-            $destinationFilePath = $packageTempDirectory . '/' . $file['destination'];
+            $destinationFilePath      = $packageTempDirectory . '/' . $file['destination'];
             $destinationFileDirectory = dirname($destinationFilePath);
-            if (!file_exists($destinationFileDirectory) && !mkdir($destinationFileDirectory, 0777, true) && !is_dir($destinationFileDirectory)) {
+            if (!file_exists($destinationFileDirectory) && !mkdir($destinationFileDirectory, 0777, true)
+                && !is_dir($destinationFileDirectory)) {
                 $this->logger->error('Cannot create a folder in the cache directory. Please check permissions.');
+                
                 return false;
             }
             
             $destinationFile = fopen($destinationFilePath, 'wb+');
-                $this->curlFileDownload($file['source'], [CURLOPT_FILE => $destinationFile]);
+            $this->curlFileDownload($file['source'], [CURLOPT_FILE => $destinationFile]);
             $this->curlFileDownload($file['source'], [CURLOPT_FILE => $destinationFile]);
             fclose($destinationFile);
         }
         
+        $this->logger->info('Files downloaded successfully');
         return true;
     }
     
@@ -228,6 +244,7 @@ class GambioStoreInstallation
      */
     private function downloadPackageZipToCacheFolder()
     {
+        $this->logger->info('Try to download zip file');
         $targetFileName = $this->getTransactionId() . '.zip';
         $targetFilePath = $this->filesystem->getCacheDirectory() . '/' . $targetFileName;
         $zipFile        = fopen($targetFilePath, 'wb+');
@@ -253,6 +270,7 @@ class GambioStoreInstallation
         $zip->extractTo($this->filesystem->getCacheDirectory() . '/' . $this->getTransactionId());
         $zip->close();
         
+        $this->logger->info('Zip file downloaded successfully');
         return true;
     }
     
@@ -281,7 +299,9 @@ class GambioStoreInstallation
         curl_close($ch);
         
         if ($curl_success === false) {
-            throw new GambioStoreCurlFileDownloadException(sprintf('%s - %s', $curl_errno, $curl_error));
+            $message = sprintf('%s - %s', $curl_errno, $curl_error);
+            $this->logger->error($message);
+            throw new GambioStoreCurlFileDownloadException($message);
         }
     }
     
