@@ -1,6 +1,6 @@
 <?php
 /* --------------------------------------------------------------
-   GambioStoreHttpFacade.php 2020-05-15
+   GambioStoreHttp.php 2020-05-15
    Gambio GmbH
    http://www.gambio.de
    Copyright (c) 2020 Gambio GmbH
@@ -9,13 +9,13 @@
    --------------------------------------------------------------
 */
 
-require_once __DIR__ . '/../Exceptions/GambioStoreHttpErrorException.inc.php';
-require_once 'GambioStoreResponseFacade.php';
+require_once 'Exceptions/GambioStoreHttpErrorException.inc.php';
+require_once 'GambioStoreResponse.php';
 
 /**
- * Class GambioStoreHttpFacade
+ * Class GambioStoreHttp
  */
-class GambioStoreHttpFacade
+class GambioStoreHttp
 {
     /**
      * Performs an options request
