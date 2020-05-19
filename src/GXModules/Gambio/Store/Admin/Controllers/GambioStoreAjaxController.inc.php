@@ -32,19 +32,9 @@ class GambioStoreAjaxController extends AdminHttpViewController
     private $configuration;
     
     /**
-     * @var \GambioStoreCompatibility
-     */
-    private $compatibility;
-    
-    /**
      * @var \GambioStoreThemes
      */
     private $themes;
-    
-    /**
-     * @var \GambioStoreFileSystem
-     */
-    private $fileSystem;
     
     
     /**
@@ -55,9 +45,7 @@ class GambioStoreAjaxController extends AdminHttpViewController
     {
         $this->connector     = GambioStoreConnector::getInstance();
         $this->configuration = $this->connector->getConfiguration();
-        $this->compatibility = $this->connector->getCompatibility();
         $this->themes        = $this->connector->getThemes();
-        $this->fileSystem    = $this->connector->getFileSystem();
     }
     
     
