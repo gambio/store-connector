@@ -176,6 +176,7 @@ class GambioStoreInstallation
      *
      * @throws \GambioStoreZipException
      * @throws \GambioStoreHttpErrorException
+     * @throws \GambioStoreCreateDirectoryException
      */
     private function downloadPackageToCacheFolder()
     {
@@ -208,6 +209,8 @@ class GambioStoreInstallation
      * Downloads files from the fileList.
      *
      * @return bool
+     * @throws \GambioStoreHttpErrorException
+     * @throws \GambioStoreCreateDirectoryException
      */
     private function downloadPackageFilesToCacheFolder()
     {
@@ -218,17 +221,10 @@ class GambioStoreInstallation
             
             $destinationFilePath      = $packageTempDirectory . '/' . $file['destination'];
             $destinationFileDirectory = dirname($destinationFilePath);
-            if (!file_exists($destinationFileDirectory) && !mkdir($destinationFileDirectory, 0777, true)
-                && !is_dir($destinationFileDirectory)) {
-                $this->logger->error('Cannot create a folder in the cache directory. Please check permissions.');
-                
-                return false;
-            }
-            
-            $destinationFile = fopen($destinationFilePath, 'wb+');
-            $this->curlFileDownload($file['source'], [CURLOPT_FILE => $destinationFile]);
-            $this->curlFileDownload($file['source'], [CURLOPT_FILE => $destinationFile]);
-            fclose($destinationFile);
+            $this->filesystem->createDirectory($destinationFileDirectory);
+    
+            $fileContent = $this->getFileContent($file['source']);
+            file_put_contents($destinationFilePath, $fileContent);
         }
         
         $this->logger->info('Files downloaded successfully');

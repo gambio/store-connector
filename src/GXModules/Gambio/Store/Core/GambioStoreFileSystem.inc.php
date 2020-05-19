@@ -343,7 +343,7 @@ class GambioStoreFileSystem
      * @return bool
      * @throws \GambioStoreCreateDirectoryException
      */
-    private function createDirectory($path)
+    public function createDirectory($path)
     {
         if (!mkdir($path, 0777, true) && !is_dir($path)) {
             
