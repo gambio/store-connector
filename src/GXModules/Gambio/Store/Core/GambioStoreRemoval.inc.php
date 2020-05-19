@@ -25,11 +25,6 @@ class GambioStoreRemoval
     private $fileList;
     
     /**
-     * @var \GambioStoreFileSystem
-     */
-    private $fileSystem;
-    
-    /**
      * @var \GambioStoreLogger
      */
     private $logger;
@@ -45,17 +40,14 @@ class GambioStoreRemoval
      *
      * @param array                  $fileList
      * @param \GambioStoreLogger     $logger
-     * @param \GambioStoreFileSystem $fileSystem
      * @param \GambioStoreBackup     $backup
      */
     public function __construct(
         array $fileList,
         GambioStoreLogger $logger,
-        GambioStoreFileSystem $fileSystem,
         GambioStoreBackup $backup
     ) {
         $this->fileList   = $fileList;
-        $this->fileSystem = $fileSystem;
         $this->logger     = $logger;
         $this->backup     = $backup;
         

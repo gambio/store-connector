@@ -296,15 +296,15 @@ class GambioStoreConnector
      * @throws \Exception
      * @throws \GambioStoreRemovalException
      */
-    public function uninstallPackage( array $postData)
+    public function uninstallPackage(array $postData)
     {
         if (isset($postData['folder_name_inside_shop'])) {
             $fileList[] = $this->fileSystem->getThemeDirectory() . '/' . $postData['folder_name_inside_shop'];
         } else {
             $fileList = $postData['file_list'];
         }
-    
-        $removal = new GambioStoreRemoval($fileList, $this->logger, $this->fileSystem, $this->backup);
+        
+        $removal = new GambioStoreRemoval($fileList, $this->logger, $this->backup);
         
         return $removal->perform();
     }

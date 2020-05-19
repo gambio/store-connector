@@ -94,9 +94,11 @@ class GambioStoreAjaxController extends AdminHttpViewController
     public function actionUninstallPackage()
     {
         $this->setup();
+    
+        $packageData = json_decode(stripcslashes($_POST['gambioStoreData']), true);
         
         try {
-            $response = $this->connector->uninstallPackage($_POST);
+            $response = $this->connector->uninstallPackage($packageData);
         } catch (\Exception $e) {
             return new JsonHttpControllerResponse(['success' => false]);
         }
