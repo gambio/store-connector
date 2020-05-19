@@ -12,7 +12,7 @@ require_once 'Exceptions/GambioStoreCurlFileDownloadException.inc.php';
 require_once 'Exceptions/GambioStorePackageInstallationException.inc.php';
 require_once 'Exceptions/GambioStoreInstallationMissingPHPExtensionsException.inc.php';
 require_once 'Exceptions/GambioStoreZipException.inc.php';
-require_once 'Exceptions/HttpDownloadException.inc.php';
+require_once 'Exceptions/GambioStoreHttpErrorException.inc.php';
 
 /**
  * Class StoreInstallation
