@@ -316,5 +316,9 @@ class GambioStoreInstallation
         if (file_exists($this->filesystem->getShopDirectory() . '/' . $targetFilePath)) {
             $this->filesystem->remove($targetFilePath);
         }
+        
+        foreach ($this->getPackageFilesDestinations() as $file) {
+            @unlink($this->filesystem->getCacheDirectory() . '/backup/' . $file . '.bak');
+        }
     }
 }
