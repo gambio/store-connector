@@ -140,7 +140,7 @@ class GambioStoreInstallation
         }
         
         try {
-            $this->logger->info('Try to install package', ['packageData' => $this->packageData]);
+            $this->logger->notice('Try to install package', ['packageData' => $this->packageData]);
             $this->logger->info('Start by downloading package into cache directory');
             $this->downloadPackageToCacheFolder();
             $this->logger->info('Creating backup in cache directory');
