@@ -201,7 +201,7 @@ class GambioStoreConfiguration
      */
     private function gxHas($key)
     {
-        $statement = $this->database->query('SELECT `value` FROM gx_configuration WHERE `key` = :key',
+        $statement = $this->database->query('SELECT `value` FROM gx_configurations WHERE `key` = :key',
             [':key' => 'gm_configuration/' . $key]);
         
         $result = $statement->fetch(PDO::FETCH_ASSOC);
