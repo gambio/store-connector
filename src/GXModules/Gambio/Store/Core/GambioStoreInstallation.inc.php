@@ -308,11 +308,13 @@ class GambioStoreInstallation
     private function cleanCache()
     {
         $targetFilePath = 'cache/' . $this->getTransactionId() . '.zip';
-        file_exists($this->filesystem->getShopDirectory() . '/' . $targetFilePath)
-        && $this->filesystem->remove($targetFilePath);
-        
+        if (file_exists($this->filesystem->getShopDirectory() . '/' . $targetFilePath)) {
+            $this->filesystem->remove($targetFilePath);
+        }
+    
         $targetFilePath = 'cache/' . $this->getTransactionId();
-        file_exists($this->filesystem->getShopDirectory() . '/' . $targetFilePath)
-        && $this->filesystem->remove($targetFilePath);
+        if (file_exists($this->filesystem->getShopDirectory() . '/' . $targetFilePath)) {
+            $this->filesystem->remove($targetFilePath);
+        }
     }
 }
