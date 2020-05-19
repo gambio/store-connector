@@ -55,7 +55,9 @@ class GambioStoreBackup
     public function movePackageFilesToCache(array $files)
     {
         foreach ($files as $file) {
-            if (file_exists($file) && is_file($file)) {
+            $packageFileSource = $this->fileSystem->getShopDirectory() . '/' . $file;
+        
+            if (file_exists($packageFileSource) && is_file($packageFileSource)) {
                 $this->fileSystem->move($file, 'cache/backup/' . $file . '.bak');
             }
         }
