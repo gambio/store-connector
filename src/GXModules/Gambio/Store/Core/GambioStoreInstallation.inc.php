@@ -280,20 +280,22 @@ class GambioStoreInstallation
      * @param       $url
      *
      * @return string
-     * @throws \CurlFileDownloadException
      * @throws \GambioStoreHttpErrorException
      */
     public function getFileContent($url)
     {
         $http = new GambioStoreHttp;
         $response = $http->get($url, [
-                CURLOPT_HTTPHEADER => ["X-STORE-TOKEN: $this->token"]
+            CURLOPT_HTTPHEADER => ["X-STORE-TOKEN: $this->token"]
         ]);
         
         $code = $response->getInformation('http_code');
         
         if ($code !== 200) {
-            throw new HttpDownloadException('');
+            throw new GambioStoreHttpErrorException('Error on download a file', [
+                'info'  => "Couldn't download a file via $url.",
+                'token' => $this->token
+            ]);
         }
         
         return $response->getBody();
