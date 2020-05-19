@@ -36,6 +36,11 @@ class GambioStoreAjaxController extends AdminHttpViewController
      */
     private $themes;
     
+    /**
+     * @var \GambioStoreLogger
+     */
+    private $logger;
+    
     
     /**
      * Sets up this class avoiding the constructor.
@@ -46,6 +51,7 @@ class GambioStoreAjaxController extends AdminHttpViewController
         $this->connector     = GambioStoreConnector::getInstance();
         $this->configuration = $this->connector->getConfiguration();
         $this->themes        = $this->connector->getThemes();
+        $this->logger        = $this->connector->getLogger();
     }
     
     
@@ -94,7 +100,7 @@ class GambioStoreAjaxController extends AdminHttpViewController
     public function actionUninstallPackage()
     {
         $this->setup();
-    
+        
         $packageData = json_decode(stripcslashes($_POST['gambioStoreData']), true);
         
         try {
@@ -116,6 +122,12 @@ class GambioStoreAjaxController extends AdminHttpViewController
     {
         $this->setup();
         $isAccepted = $this->configuration->get('GAMBIO_STORE_ACCEPTED_DATA_PROCESSING');
+        
+        if ($isAccepted) {
+            $this->logger->info('Data processing is currently accepted');
+        } else {
+            $this->logger->notice('Data processing is currently not accepted');
+        }
         
         return new JsonHttpControllerResponse(['accepted' => $isAccepted]);
     }
@@ -156,7 +168,14 @@ class GambioStoreAjaxController extends AdminHttpViewController
         }
         
         $themeName = $_POST['themeStorageName'];
-        $result    = $this->themes->activateTheme($themeName);
+        $this->logger->info('Try to activate theme: ' . $themeName);
+        $result = $this->themes->activateTheme($themeName);
+        
+        if ($result) {
+            $this->logger->info('Activation of theme: ' . $themeName . ' succeeded');
+        } else {
+            $this->logger->error('Could not activate theme: ' . $themeName);
+        }
         
         return new JsonHttpControllerResponse(['success' => $result]);
     }
