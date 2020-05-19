@@ -92,7 +92,7 @@ class GambioStoreInstallation
     {
         if ($error = error_get_last()) {
             $this->logger->critical('Critical error during package installation', $error);
-            $this->backup->restoreBackUp($this->getPackageFilesDestinations());
+            $this->backup->restorePackageFilesFromCache($this->getPackageFilesDestinations());
         }
     }
     
@@ -139,7 +139,7 @@ class GambioStoreInstallation
     
         try {
             $this->downloadPackageToCacheFolder();
-            $this->backup->backupPackageFiles($this->getPackageFilesDestinations());
+            $this->backup->movePackageFilesToCache($this->getPackageFilesDestinations());
             $this->installPackage();
         } catch (GambioStoreCreateDirectoryException $e) {
             $this->logger->warning($e->getMessage());
@@ -150,7 +150,7 @@ class GambioStoreInstallation
         } catch (CurlFileDownloadException $e) {
             $this->logger->warning($e->getMessage());
         } catch (Exception $e) {
-            $this->backup->restoreBackUp($this->getPackageFilesDestinations());
+            $this->backup->restorePackageFilesFromCache($this->getPackageFilesDestinations());
             throw new PackageInstallationException('Could not install package. Please contact Gambio.');
         }
         finally {

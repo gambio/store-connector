@@ -58,6 +58,8 @@ class GambioStoreRemoval
         $this->fileSystem = $fileSystem;
         $this->logger     = $logger;
         $this->backup     = $backup;
+        
+        register_shutdown_function([$this, 'shutdownCallback']);
     }
     
     
@@ -71,30 +73,17 @@ class GambioStoreRemoval
      */
     public function perform()
     {
-        register_shutdown_function([$this, 'shutdownCallback']);
-        
         try {
-            $this->backup->backupPackageFiles($this->fileList);
-            $this->removeFiles();
+            $this->backup->movePackageFilesToCache($this->fileList);
+            // TODO: call clear cache from backup class if implemented $this->backup->removePackageFilesFromCache()
         } catch (Exception $exception) {
             $this->logger->error('Could not remove package',
                 ['fileList' => $this->fileList, 'exception' => $exception]);
-            $this->backup->restoreBackUp($this->fileList);
+            $this->backup->restorePackageFilesFromCache($this->fileList);
             throw new GambioStoreRemovalException('Could not remove package');
         }
         
         return ['success' => true];
-    }
-    
-    
-    /**
-     * Removes all files or directory form package file list.
-     */
-    private function removeFiles()
-    {
-        foreach ($this->fileList as $file) {
-            $this->fileSystem->remove($file);
-        }
     }
     
     
@@ -108,7 +97,7 @@ class GambioStoreRemoval
         $error = error_get_last();
         if ($error) {
             $this->logger->critical('Critical error during package removal', ['error' => $error]);
-            $this->backup->restoreBackUp($this->fileList);
+            $this->backup->restorePackageFilesFromCache($this->fileList);
         }
     }
 }

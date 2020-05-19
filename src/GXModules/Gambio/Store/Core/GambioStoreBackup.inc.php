@@ -29,11 +29,11 @@ class GambioStoreBackup
     /**
      * Restores backup.
      *
-     * @param $toRestore
+     * @param array $toRestore
      *
      * @throws \Exception
      */
-    public function restoreBackUp($toRestore)
+    public function restorePackageFilesFromCache(array $toRestore)
     {
         foreach ($toRestore as $file) {
             if (file_exists($this->fileSystem->getShopDirectory() . '/cache/backup/' . $file . '.bak')) {
@@ -46,16 +46,14 @@ class GambioStoreBackup
     /**
      * Backups files.
      *
-     * @param $files
+     * @param array $files
      *
      * @throws \Exception
      */
-    public function backupPackageFiles($files)
+    public function movePackageFilesToCache(array $files)
     {
         foreach ($files as $file) {
-            $packageFileSource = $this->fileSystem->getShopDirectory() . '/' . $file;
-            
-            if (file_exists($packageFileSource) && is_file($packageFileSource)) {
+            if (file_exists($file) && is_file($file)) {
                 $this->fileSystem->move($file, 'cache/backup/' . $file . '.bak');
             }
         }

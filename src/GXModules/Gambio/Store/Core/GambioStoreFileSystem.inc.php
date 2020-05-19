@@ -421,6 +421,16 @@ class GambioStoreFileSystem
         return dirname(__FILE__, 5);
     }
     
+     /**
+     * Returns themes directory path.
+     *
+     * @return string
+     */
+    public function getThemeDirectory()
+    {
+     return  $this->getShopDirectory() . '/themes';
+    }
+    
     
     /**
      * Returns cache directory path.

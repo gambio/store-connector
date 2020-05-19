@@ -290,15 +290,21 @@ class GambioStoreConnector
     /**
      * Uninstalls a package.
      *
-     * @param $fileLIst
+     * @param array $postData
      *
      * @return bool[]
      * @throws \Exception
      * @throws \GambioStoreRemovalException
      */
-    public function uninstallPackage($fileLIst)
+    public function uninstallPackage( array $postData)
     {
-        $removal = new GambioStoreRemoval($fileLIst, $this->logger, $this->fileSystem, $this->backup);
+        if (isset($postData['folder_name_inside_shop'])) {
+            $fileList[] = $this->fileSystem->getThemeDirectory() . '/' . $postData['folder_name_inside_shop'];
+        } else {
+            $fileList = $postData['file_list'];
+        }
+    
+        $removal = new GambioStoreRemoval($fileList, $this->logger, $this->fileSystem, $this->backup);
         
         return $removal->perform();
     }

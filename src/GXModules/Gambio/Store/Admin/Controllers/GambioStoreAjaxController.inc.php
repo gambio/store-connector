@@ -11,8 +11,6 @@
 
 require_once __DIR__ . '/../../GambioStoreConnector.inc.php';
 
-use Gambio\AdminFeed\Services\ShopInformation\ShopInformationFactory;
-
 /**
  * Class GambioStoreAjaxController
  *
@@ -71,9 +69,9 @@ class GambioStoreAjaxController extends AdminHttpViewController
     public function actionCollectShopInformation()
     {
         $this->setup();
-    
+        
         $shopInformation = $this->connector->getShopInformation();
-    
+        
         return new JsonHttpControllerResponse($shopInformation);
     }
     
@@ -94,6 +92,7 @@ class GambioStoreAjaxController extends AdminHttpViewController
             
             return new JsonHttpControllerResponse($response);
         } catch (\Exception $e) {
+            
             return new JsonHttpControllerResponse(['success' => false]);
         }
     }
@@ -109,13 +108,7 @@ class GambioStoreAjaxController extends AdminHttpViewController
         $this->setup();
         
         try {
-            if (isset($_POST['folderNameInsideShop'])) {
-                $fileList = $this->fileSystem->getContentsRecursively($_POST['folderNameInsideShop']);
-            } else {
-                $fileList = $_POST['fileList'];
-            }
-            
-            $response = $this->connector->uninstallPackage($fileList);
+            $response = $this->connector->uninstallPackage($_POST);
         } catch (\Exception $e) {
             return new JsonHttpControllerResponse(['success' => false]);
         }
@@ -150,9 +143,9 @@ class GambioStoreAjaxController extends AdminHttpViewController
         if (!isset($_GET, $_GET['themeName'])) {
             return new JsonHttpControllerResponse(['success' => false]);
         }
-    
-        $themeName    = $_GET['themeName'];
-    
+        
+        $themeName = $_GET['themeName'];
+        
         return new JsonHttpControllerResponse([
             'isActive' => $this->connector->isThemeActive($themeName)
         ]);
@@ -167,7 +160,7 @@ class GambioStoreAjaxController extends AdminHttpViewController
     public function actionActivateTheme()
     {
         $this->setup();
-    
+        
         if (!isset($_POST, $_POST['themeStorageName'])) {
             return new JsonHttpControllerResponse(['success' => false]);
         }
