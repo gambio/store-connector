@@ -149,12 +149,16 @@ class GambioStoreInstallation
             $this->installPackage();
         } catch (GambioStoreCreateDirectoryException $e) {
             $this->logger->warning($e->getMessage());
+            $this->backup->restorePackageFilesFromCache($this->getPackageFilesDestinations());
+            throw new GambioStorePackageInstallationException('Could not install package');
         } catch (GambioStoreFileNotFoundException $e) {
+            $this->backup->restorePackageFilesFromCache($this->getPackageFilesDestinations());
             $this->logger->warning($e->getMessage());
+            throw new GambioStorePackageInstallationException('Could not install package');
         } catch (GambioStoreFileMoveException $e) {
+            $this->backup->restorePackageFilesFromCache($this->getPackageFilesDestinations());
             $this->logger->warning($e->getMessage());
-        } catch (GambioStoreCurlFileDownloadException $e) {
-            $this->logger->warning($e->getMessage());
+            throw new GambioStorePackageInstallationException('Could not install package');
         } catch (Exception $e) {
             $this->backup->restorePackageFilesFromCache($this->getPackageFilesDestinations());
             $message = 'Could not install package';

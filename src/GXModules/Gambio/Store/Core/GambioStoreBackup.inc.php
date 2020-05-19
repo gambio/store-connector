@@ -40,6 +40,8 @@ class GambioStoreBackup
         foreach ($toRestore as $file) {
             if (file_exists($this->fileSystem->getShopDirectory() . '/cache/backup/' . $file . '.bak')) {
                 $this->fileSystem->move('cache/backup/' . $file . '.bak', $file);
+            } elseif(file_exists($this->fileSystem->getShopDirectory() . '/' . $file)) {
+                @unlink($this->fileSystem->getShopDirectory() . '/' . $file);
             }
         }
     }
