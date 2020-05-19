@@ -12,7 +12,7 @@
 /**
  * Class GambioStoreException
  */
-class GambioStoreException extends Exception
+abstract class GambioStoreException extends Exception
 {
     /**
      * @var array
