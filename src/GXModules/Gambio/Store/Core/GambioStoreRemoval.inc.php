@@ -38,18 +38,18 @@ class GambioStoreRemoval
     /**
      * GambioStoreRemoval constructor.
      *
-     * @param array                  $fileList
-     * @param \GambioStoreLogger     $logger
-     * @param \GambioStoreBackup     $backup
+     * @param array              $fileList
+     * @param \GambioStoreLogger $logger
+     * @param \GambioStoreBackup $backup
      */
     public function __construct(
         array $fileList,
         GambioStoreLogger $logger,
         GambioStoreBackup $backup
     ) {
-        $this->fileList   = $fileList;
-        $this->logger     = $logger;
-        $this->backup     = $backup;
+        $this->fileList = $fileList;
+        $this->logger   = $logger;
+        $this->backup   = $backup;
         
         register_shutdown_function([$this, 'shutdownCallback']);
     }
@@ -66,15 +66,19 @@ class GambioStoreRemoval
     public function perform()
     {
         try {
+            $this->logger->notice('Try to remove package', ['fileList' => $this->fileList]);
+            $this->logger->info('Start by move all files to cache directory');
             $this->backup->movePackageFilesToCache($this->fileList);
+            $this->logger->info('Removing backup files form cache');
             // TODO: call clear cache from backup class if implemented $this->backup->removePackageFilesFromCache()
         } catch (Exception $exception) {
-            $this->logger->error('Could not remove package',
-                ['fileList' => $this->fileList, 'exception' => $exception]);
+            $message = 'Could not remove package';
+            $this->logger->error($message, ['error' => $exception]);
             $this->backup->restorePackageFilesFromCache($this->fileList);
-            throw new GambioStoreRemovalException('Could not remove package');
+            throw new GambioStoreRemovalException($message);
         }
         
+        $this->logger->info('succeed');
         return ['success' => true];
     }
     
