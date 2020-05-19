@@ -56,6 +56,7 @@ class GambioStoreUpdater
      */
     public function update()
     {
+        $this->ensureLogsAreWritable();
         $this->removeOldStoreFilesInShop();
         $this->updateMenu();
         $this->createDatabaseKeysIfNotExists();
@@ -64,11 +65,20 @@ class GambioStoreUpdater
     
     
     /**
+     * Make sure our Logs directory is writable
+     */
+    private function ensureLogsAreWritable()
+    {
+        @chmod($this->fileSystem->getShopDirectory() . '/GXModules/Gambio/Store/Logs', 777);
+    }
+    
+    
+    /**
      * Removes the old menu entry for shops that were still shipped with the Store
      */
     private function updateMenu()
     {
-        $menuPath = __DIR__ . '/../../../../system/conf/admin_menu/gambio_menu.xml';
+        $menuPath = $this->fileSystem->getShopDirectory() . '/system/conf/admin_menu/gambio_menu.xml';
         
         $menuContent = file_get_contents($menuPath);
         
