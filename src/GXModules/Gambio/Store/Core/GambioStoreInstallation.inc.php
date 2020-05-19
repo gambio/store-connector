@@ -175,7 +175,7 @@ class GambioStoreInstallation
      * Downloads package into cache folder.
      *
      * @throws \GambioStoreZipException
-     * @throws \GambioStoreCurlFileDownloadException
+     * @throws \GambioStoreHttpErrorException
      */
     private function downloadPackageToCacheFolder()
     {
