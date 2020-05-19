@@ -12,7 +12,6 @@
 require_once 'Exceptions/FileSystemExceptions/GambioStoreFileCopyException.inc.php';
 require_once 'Exceptions/FileSystemExceptions/GambioStoreFileMoveException.inc.php';
 require_once 'Exceptions/FileSystemExceptions/GambioStoreFileRenameException.inc.php';
-require_once 'Exceptions/FileSystemExceptions/GambioStoreFileRemoveException.inc.php';
 require_once 'Exceptions/FileSystemExceptions/GambioStoreFileNotFoundException.inc.php';
 require_once 'Exceptions/FileSystemExceptions/GambioStoreDirectoryContentException.inc.php';
 require_once 'Exceptions/FileSystemExceptions/GambioStoreCreateDirectoryException.inc.php';

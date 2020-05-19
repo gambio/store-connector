@@ -275,7 +275,7 @@ class GambioStoreConnector
      * @param $packageData
      *
      * @return bool[]
-     * @throws \PackageInstallationException
+     * @throws \GambioStorePackageInstallationException
      * @throws \GambioStoreCacheException
      */
     public function installPackage($packageData)

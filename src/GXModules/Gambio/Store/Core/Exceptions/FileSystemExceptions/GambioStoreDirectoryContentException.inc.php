@@ -1,5 +1,4 @@
 <?php
-
 /* --------------------------------------------------------------
    GambioStoreDirectoryContentException.inc.php 2020-05-14
    Gambio GmbH

@@ -8,11 +8,10 @@
    [http://www.gnu.org/licenses/gpl-2.0.html]
    --------------------------------------------------------------
 */
-require_once 'Exceptions/FileDownloadException.inc.php';
-require_once 'Exceptions/WrongFilePermissionException.inc.php';
-require_once 'Exceptions/CreateFolderException.inc.php';
-require_once 'Exceptions/PackageInstallationException.inc.php';
+require_once 'Exceptions/GambioStoreCurlFileDownloadException.inc.php';
+require_once 'Exceptions/GambioStorePackageInstallationException.inc.php';
 require_once 'Exceptions/GambioStoreInstallationMissingPHPExtensionsException.inc.php';
+require_once 'Exceptions/GambioStoreZipException.inc.php';
 
 /**
  * Class StoreInstallation
@@ -124,7 +123,7 @@ class GambioStoreInstallation
      *
      * @return bool[]
      * @throws \GambioStoreCacheException
-     * @throws \PackageInstallationException
+     * @throws \GambioStorePackageInstallationException
      * @throws \Exception
      */
     public function perform()
@@ -147,11 +146,11 @@ class GambioStoreInstallation
             $this->logger->warning($e->getMessage());
         } catch (GambioStoreFileMoveException $e) {
             $this->logger->warning($e->getMessage());
-        } catch (CurlFileDownloadException $e) {
+        } catch (GambioStoreCurlFileDownloadException $e) {
             $this->logger->warning($e->getMessage());
         } catch (Exception $e) {
             $this->backup->restorePackageFilesFromCache($this->getPackageFilesDestinations());
-            throw new PackageInstallationException('Could not install package. Please contact Gambio.');
+            throw new GambioStorePackageInstallationException('Could not install package. Please contact Gambio.');
         }
         finally {
             $this->cleanCache();
@@ -164,7 +163,7 @@ class GambioStoreInstallation
     /**
      * Downloads package into cache folder.
      *
-     * @throws \CurlFileDownloadException
+     * @throws \GambioStoreCurlFileDownloadException
      */
     private function downloadPackageToCacheFolder()
     {
@@ -195,7 +194,7 @@ class GambioStoreInstallation
      * Downloads files from the fileList.
      *
      * @return bool
-     * @throws \CurlFileDownloadException
+     * @throws \GambioStoreCurlFileDownloadException
      */
     private function downloadPackageFilesToCacheFolder()
     {
@@ -224,7 +223,7 @@ class GambioStoreInstallation
      * Downloads zip archive to cache folder.
      *
      * @return bool
-     * @throws \CurlFileDownloadException
+     * @throws \GambioStoreCurlFileDownloadException
      * @throws \GambioStoreZipException
      */
     private function downloadPackageZipToCacheFolder()
@@ -264,7 +263,7 @@ class GambioStoreInstallation
      * @param       $url
      * @param array $options
      *
-     * @throws \CurlFileDownloadException
+     * @throws \GambioStoreCurlFileDownloadException
      */
     public function curlFileDownload($url, $options = [])
     {
@@ -282,7 +281,7 @@ class GambioStoreInstallation
         curl_close($ch);
         
         if ($curl_success === false) {
-            throw new CurlFileDownloadException(sprintf('%s - %s', $curl_errno, $curl_error));
+            throw new GambioStoreCurlFileDownloadException(sprintf('%s - %s', $curl_errno, $curl_error));
         }
     }
     

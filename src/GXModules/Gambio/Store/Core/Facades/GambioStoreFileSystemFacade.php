@@ -12,7 +12,6 @@
 require_once __DIR__ . '/../Exceptions/FileSystemExceptions/GambioStoreFileCopyException.inc.php';
 require_once __DIR__ . '/../Exceptions/FileSystemExceptions/GambioStoreFileMoveException.inc.php';
 require_once __DIR__ . '/../Exceptions/FileSystemExceptions/GambioStoreFileRenameException.inc.php';
-require_once __DIR__ . '/../Exceptions/FileSystemExceptions/GambioStoreFileRemoveException.inc.php';
 require_once __DIR__ . '/../Exceptions/FileSystemExceptions/GambioStoreFileNotFoundException.inc.php';
 require_once __DIR__ . '/../Exceptions/FileSystemExceptions/GambioStoreDirectoryContentException.inc.php';
 require_once __DIR__ . '/../Exceptions/FileSystemExceptions/GambioStoreCreateDirectoryException.inc.php';
