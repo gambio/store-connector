@@ -12,6 +12,7 @@ require_once 'Exceptions/GambioStoreCurlFileDownloadException.inc.php';
 require_once 'Exceptions/GambioStorePackageInstallationException.inc.php';
 require_once 'Exceptions/GambioStoreInstallationMissingPHPExtensionsException.inc.php';
 require_once 'Exceptions/GambioStoreZipException.inc.php';
+require_once 'Exceptions/HttpDownloadException.inc.php';
 
 /**
  * Class StoreInstallation
@@ -173,6 +174,7 @@ class GambioStoreInstallation
     /**
      * Downloads package into cache folder.
      *
+     * @throws \GambioStoreZipException
      * @throws \GambioStoreCurlFileDownloadException
      */
     private function downloadPackageToCacheFolder()
@@ -206,7 +208,6 @@ class GambioStoreInstallation
      * Downloads files from the fileList.
      *
      * @return bool
-     * @throws \GambioStoreCurlFileDownloadException
      */
     private function downloadPackageFilesToCacheFolder()
     {
@@ -239,18 +240,16 @@ class GambioStoreInstallation
      * Downloads zip archive to cache folder.
      *
      * @return bool
-     * @throws \GambioStoreCurlFileDownloadException
-     * @throws \GambioStoreZipException
+     * @throws \GambioStoreZipException|\GambioStoreHttpErrorException
      */
     private function downloadPackageZipToCacheFolder()
     {
         $this->logger->info('Try to download zip file');
         $targetFileName = $this->getTransactionId() . '.zip';
         $targetFilePath = $this->filesystem->getCacheDirectory() . '/' . $targetFileName;
-        $zipFile        = fopen($targetFilePath, 'wb+');
         $downloadZipUrl = $this->packageData['fileList']['zip']['source'];
-        $this->curlFileDownload($downloadZipUrl, [CURLOPT_FILE => $zipFile]);
-        fclose($zipFile);
+        $fileContent = $this->getFileContent($downloadZipUrl);
+        file_put_contents($targetFilePath, $fileContent);
         
         chmod($targetFilePath, 0777);
         
@@ -263,7 +262,7 @@ class GambioStoreInstallation
         $res = $zip->open($targetFilePath);
         if ($res !== true) {
             throw new GambioStoreZipException('Cannot extract zip archive.', [
-                'file' => $zipFile
+                'file' => $targetFilePath
             ]);
         }
         
@@ -279,30 +278,25 @@ class GambioStoreInstallation
      * Performs Curl requests.
      *
      * @param       $url
-     * @param array $options
      *
-     * @throws \GambioStoreCurlFileDownloadException
+     * @return string
+     * @throws \CurlFileDownloadException
+     * @throws \GambioStoreHttpErrorException
      */
-    public function curlFileDownload($url, $options = [])
+    public function getFileContent($url)
     {
-        $curlOptions = $options + [
-                CURLOPT_URL        => $url,
+        $http = new GambioStoreHttp;
+        $response = $http->get($url, [
                 CURLOPT_HTTPHEADER => ["X-STORE-TOKEN: $this->token"]
-            ];
+        ]);
         
-        $ch = curl_init();
-        curl_setopt_array($ch, $curlOptions);
-        $curl_success = curl_exec($ch);
-        $curl_errno   = curl_errno($ch);
-        $curl_error   = curl_error($ch);
+        $code = $response->getInformation('http_code');
         
-        curl_close($ch);
-        
-        if ($curl_success === false) {
-            $message = sprintf('%s - %s', $curl_errno, $curl_error);
-            $this->logger->error($message);
-            throw new GambioStoreCurlFileDownloadException($message);
+        if ($code !== 200) {
+            throw new HttpDownloadException('');
         }
+        
+        return $response->getBody();
     }
     
     
