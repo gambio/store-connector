@@ -11,7 +11,7 @@
 
 require_once 'Exceptions/FileSystemExceptions/GambioStoreFileCopyException.inc.php';
 require_once 'Exceptions/FileSystemExceptions/GambioStoreFileMoveException.inc.php';
-require_once 'Exceptions/FileSystemExceptions/GambioStoreFileRenameException.inc.php';
+require_once 'Exceptions/FileSystemExceptions/GambioStoreRenameException.inc.php';
 require_once 'Exceptions/FileSystemExceptions/GambioStoreFileNotFoundException.inc.php';
 require_once 'Exceptions/FileSystemExceptions/GambioStoreDirectoryContentException.inc.php';
 require_once 'Exceptions/FileSystemExceptions/GambioStoreCreateDirectoryException.inc.php';
@@ -58,22 +58,21 @@ class GambioStoreFileSystem
      * @param $newFileName
      *
      * @return bool
-     * @throws \GambioStoreFileRenameException
+     * @throws \GambioStoreRenameException
      * @throws \GambioStoreFileNotFoundException
      */
-    public function fileRename($oldFileName, $newFileName)
+    public function rename($oldFileName, $newFileName)
     {
         $oldFileName    = $this->getShopDirectory() . '/' . $oldFileName;
-        $newFileBaeName = basename($newFileName);
         
-        if (!file_exists($oldFileName) || !is_file($oldFileName)) {
+        if (!file_exists($oldFileName)) {
             throw new GambioStoreFileNotFoundException('File not found: ' . $oldFileName, 1, [
-                'info' => "File not found on attempt to rename file $oldFileName to $newFileBaeName"
+                'info' => "File or folder not found on attempt to rename $oldFileName"
             ]);
         }
         
-        if (!rename($oldFileName, dirname($oldFileName) . '/' . $newFileBaeName)) {
-            throw new GambioStoreFileRenameException('Could not rename a file ' . $oldFileName, 3, [
+        if (!rename($oldFileName, dirname($oldFileName) . '/' . basename($newFileName))) {
+            throw new GambioStoreRenameException('Could not rename a file ir folder ' . $oldFileName, 2, [
                 'info' => 'Please contact the server administrator'
             ]);
         }
