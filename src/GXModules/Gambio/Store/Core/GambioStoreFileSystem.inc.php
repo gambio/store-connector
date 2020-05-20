@@ -52,27 +52,27 @@ class GambioStoreFileSystem
     
     
     /**
-     * Renames a file. Any folders for the new name will be ignored.
+     * Renames a file or directory. E.g ...rename('directoryName/oldFileName.php', 'newFileName.php');
      *
-     * @param $oldFileName
-     * @param $newFileName
+     * @param $oldName
+     * @param $newName
      *
      * @return bool
-     * @throws \GambioStoreRenameException
      * @throws \GambioStoreFileNotFoundException
+     * @throws \GambioStoreRenameException
      */
-    public function rename($oldFileName, $newFileName)
+    public function rename($oldName, $newName)
     {
-        $oldFileName    = $this->getShopDirectory() . '/' . $oldFileName;
+        $oldName = $this->getShopDirectory() . '/' . $oldName;
         
-        if (!file_exists($oldFileName)) {
-            throw new GambioStoreFileNotFoundException('File not found: ' . $oldFileName, 1, [
-                'info' => "File or folder not found on attempt to rename $oldFileName"
+        if (!file_exists($oldName)) {
+            throw new GambioStoreFileNotFoundException('File not found: ' . $oldName, 1, [
+                'info' => "File or folder not found on attempt to rename $oldName"
             ]);
         }
         
-        if (!rename($oldFileName, dirname($oldFileName) . '/' . basename($newFileName))) {
-            throw new GambioStoreRenameException('Could not rename a file ir folder ' . $oldFileName, 2, [
+        if (!rename($newName, dirname($oldName) . '/' . basename($newName))) {
+            throw new GambioStoreRenameException('Could not rename a file ir folder ' . $oldName, 2, [
                 'info' => 'Please contact the server administrator'
             ]);
         }
