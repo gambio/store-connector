@@ -172,16 +172,17 @@ class GambioStoreFileSystem
         $directory = new RecursiveDirectoryIterator($path, RecursiveDirectoryIterator::SKIP_DOTS);
         $iterator  = new RecursiveIteratorIterator($directory, RecursiveIteratorIterator::CHILD_FIRST);
     
+        $success = true;
+        
         foreach ($iterator as $item) {
             if ($item->isDir()) {
-                @rmdir($item->getRealPath());
+                $success = $success && @rmdir($item->getRealPath());
             } else {
-                @unlink($item->getRealPath());
+                $success = $success && @unlink($item->getRealPath());
             }
         }
     
-        @rmdir($path);
-        return true;
+        return $success && @rmdir($path);
     }
     
     
