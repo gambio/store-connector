@@ -314,13 +314,18 @@ class GambioStoreConnector
      */
     public function uninstallPackage(array $postData)
     {
-        if (isset($postData['folder_name_inside_shop'])) {
-            $fileList[] = $this->fileSystem->getThemeDirectory() . '/' . $postData['folder_name_inside_shop'];
+        $packageData = [];
+        if (isset($postData['folder_name_inside_shop']) || isset($postData['filename'])) {
+            $ThemeDirectoryName   = $postData['folder_name_inside_shop'] ? : $postData['filename'];
+            $ThemeDirectoryPath   = $this->fileSystem->getThemeDirectory() . '/' . $ThemeDirectoryName;
+            $packageData['files'] = $this->fileSystem->getFilesRecursively($ThemeDirectoryPath);
         } else {
-            $fileList = $postData['file_list'];
+            $packageData['files'] = $postData['file_list'];
         }
         
-        $removal = new GambioStoreRemoval($fileList, $this->logger, $this->backup);
+        $packageData['name'] = $postData['repositoryName'];
+        
+        $removal = new GambioStoreRemoval($packageData, $this->logger, $this->backup);
         
         return $removal->perform();
     }
