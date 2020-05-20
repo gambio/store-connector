@@ -1,6 +1,6 @@
 <?php
 /* --------------------------------------------------------------
-   FileDownloadException.inc.php 2020-05-04
+   GambioPackageInstallationException.inc.php 2020-05-04
    Gambio GmbH
    http://www.gambio.de
    Copyright (c) 2020 Gambio GmbH
@@ -9,9 +9,12 @@
    --------------------------------------------------------------
 */
 
+require_once 'GambioStoreException.inc.php';
+
 /**
- * Class CreateFolderException
+ * Class GambioStorePackageInstallationException
  */
-class CreateFolderException extends Exception
+class GambioStorePackageInstallationException extends GambioStoreException
 {
+
 }

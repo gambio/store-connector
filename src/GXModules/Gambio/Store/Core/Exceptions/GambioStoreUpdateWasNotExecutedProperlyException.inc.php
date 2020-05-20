@@ -9,6 +9,12 @@
    --------------------------------------------------------------
 */
 
+require_once 'GambioStoreException.inc.php';
+
+/**
+ * Class GambioStoreUpdateWasNotExecutedProperlyException
+ */
 class GambioStoreUpdateWasNotExecutedProperlyException extends GambioStoreException
 {
+
 }

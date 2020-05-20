@@ -9,8 +9,11 @@
    --------------------------------------------------------------
 */
 
-require_once "GambioStoreException.inc.php";
+require_once 'GambioStoreException.inc.php';
 
+/**
+ * Class GambioStoreCacheException
+ */
 class GambioStoreCacheException extends GambioStoreException
 {
     

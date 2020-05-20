@@ -1,6 +1,6 @@
 <?php
 /* --------------------------------------------------------------
-   GambioStoreInstallationMissingPHPExtensionsException.php 2020-05-18
+   GambioStoreInstallationMissingPHPExtensionsException.inc.php 2020-05-18
    Gambio GmbH
    http://www.gambio.de
    Copyright (c) 2020 Gambio GmbH
@@ -9,8 +9,11 @@
    --------------------------------------------------------------
 */
 
-require_once "GambioStoreException.inc.php";
+require_once 'GambioStoreException.inc.php';
 
+/**
+ * Class GambioStoreInstallationMissingPHPExtensionsException
+ */
 class GambioStoreInstallationMissingPHPExtensionsException extends GambioStoreException
 {
     

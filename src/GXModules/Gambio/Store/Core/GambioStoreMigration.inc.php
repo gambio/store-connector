@@ -9,6 +9,9 @@
    --------------------------------------------------------------
 */
 
+require_once 'Exceptions/GambioStoreDownMigrationException.inc.php';
+require_once 'Exceptions/GambioStoreUpMigrationException.inc.php';
+
 /**
  * Class GambioStoreMigration
  *
@@ -71,7 +74,7 @@ class GambioStoreMigration
             try {
                 require_once $this->fileSystem->getShopDirectory() . '/' . $item;
             } catch (\Exception $exception) {
-                throw new UpMigrationException('Up migration failed. File: ', 0, $item);
+                throw new GambioStoreUpMigrationException('Up migration failed. File: ', 0, $item);
             }
         }
     }
@@ -101,7 +104,7 @@ class GambioStoreMigration
             try {
                 require_once $this->fileSystem->getShopDirectory() . '/' . $item;
             } catch (\Exception $exception) {
-                throw new DownMigrationException('Down migration failed. File: ', 0, $item);
+                throw new GambioStoreDownMigrationException('Down migration failed. File: ', 0, $item);
             }
         }
     }

@@ -9,8 +9,12 @@
    --------------------------------------------------------------
 */
 
-require_once __DIR__ . '/GambioStoreException.inc.php';
+require_once 'GambioStoreException.inc.php';
 
+/**
+ * Class GambioStoreLanguageNotResolvableException
+ */
 class GambioStoreLanguageNotResolvableException extends GambioStoreException
 {
+
 }

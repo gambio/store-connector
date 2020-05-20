@@ -1,6 +1,6 @@
 <?php
 /* --------------------------------------------------------------
-   PackageInstallationException.inc.php 2020-05-04
+   GambioStoreCurlFileDownloadException.inc.php 2020-05-04
    Gambio GmbH
    http://www.gambio.de
    Copyright (c) 2020 Gambio GmbH
@@ -9,9 +9,11 @@
    --------------------------------------------------------------
 */
 
+require_once 'GambioStoreException.inc.php';
+
 /**
- * Class PackageInstallationException
+ * Class GambioStoreCurlFileDownloadException
  */
-class PackageInstallationException extends Exception
+class GambioStoreCurlFileDownloadException extends GambioStoreException
 {
 }

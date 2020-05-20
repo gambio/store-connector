@@ -174,9 +174,13 @@ class GambioStoreConnector
      */
     public function verifyRegistration($storeToken)
     {
+        $this->logger->info('Start verifying registration');
         $result = $this->configuration->get('GAMBIO_STORE_TOKEN') === $storeToken;
         if ($result) {
+            $this->logger->info('Verification succeed');
             $this->configuration->set('GAMBIO_STORE_IS_REGISTERED', 'true');
+        } else {
+            $this->logger->error('Verification failed');
         }
         
         return $result;
@@ -208,12 +212,16 @@ class GambioStoreConnector
     public function getShopInformation()
     {
         try {
-            return $this->shopInformation->getShopInformation();
-        } catch (\GambioStoreException $e) {
-            $this->logger->critical($e->getMessage(), $e->getContext());
+            $this->logger->info('Start collecting shop information');
+            $information = $this->shopInformation->getShopInformation();
+            $this->logger->info('Shop information collected successfully');
+            
+            return $information;
+        } catch (\GambioStoreException $exception) {
+            $this->logger->critical('Could not collected shop information', ['error' => $exception]);
             
             return [
-                'error' => $e->getMessage()
+                'error' => $exception->getMessage()
             ];
         }
     }
@@ -228,7 +236,15 @@ class GambioStoreConnector
      */
     public function isThemeActive($themeName)
     {
-        return $this->themes->isActive($themeName);
+        $active = $this->themes->isActive($themeName);
+        
+        if ($active) {
+            $this->logger->notice('The theme: ' . $themeName . ' is currently active');
+        } else {
+            $this->logger->info('The theme: ' . $themeName . ' is currently inactive');
+        }
+        
+        return $active;
     }
     
     
@@ -275,7 +291,7 @@ class GambioStoreConnector
      * @param $packageData
      *
      * @return bool[]
-     * @throws \PackageInstallationException
+     * @throws \GambioStorePackageInstallationException
      * @throws \GambioStoreCacheException
      */
     public function installPackage($packageData)
@@ -296,15 +312,15 @@ class GambioStoreConnector
      * @throws \Exception
      * @throws \GambioStoreRemovalException
      */
-    public function uninstallPackage( array $postData)
+    public function uninstallPackage(array $postData)
     {
         if (isset($postData['folder_name_inside_shop'])) {
             $fileList[] = $this->fileSystem->getThemeDirectory() . '/' . $postData['folder_name_inside_shop'];
         } else {
             $fileList = $postData['file_list'];
         }
-    
-        $removal = new GambioStoreRemoval($fileList, $this->logger, $this->fileSystem, $this->backup);
+        
+        $removal = new GambioStoreRemoval($fileList, $this->logger, $this->backup);
         
         return $removal->perform();
     }
@@ -329,5 +345,16 @@ class GambioStoreConnector
     public function getCache()
     {
         return $this->cache;
+    }
+    
+    
+    /**
+     * Returns a GambioStoreLogger instance.
+     *
+     * @return \GambioStoreLogger
+     */
+    public function getLogger()
+    {
+        return $this->logger;
     }
 }

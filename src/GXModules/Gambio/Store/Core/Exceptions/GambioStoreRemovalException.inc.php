@@ -9,11 +9,12 @@
    --------------------------------------------------------------
 */
 
-require_once "GambioStoreException.inc.php";
+require_once 'GambioStoreException.inc.php';
 
 /**
- * Class CreateFolderException
+ * Class GambioStoreRemovalException
  */
 class GambioStoreRemovalException extends GambioStoreException
 {
+
 }

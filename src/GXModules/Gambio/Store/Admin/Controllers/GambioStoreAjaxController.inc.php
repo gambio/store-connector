@@ -32,19 +32,14 @@ class GambioStoreAjaxController extends AdminHttpViewController
     private $configuration;
     
     /**
-     * @var \GambioStoreCompatibility
-     */
-    private $compatibility;
-    
-    /**
      * @var \GambioStoreThemes
      */
     private $themes;
     
     /**
-     * @var \GambioStoreFileSystem
+     * @var \GambioStoreLogger
      */
-    private $fileSystem;
+    private $logger;
     
     
     /**
@@ -55,9 +50,8 @@ class GambioStoreAjaxController extends AdminHttpViewController
     {
         $this->connector     = GambioStoreConnector::getInstance();
         $this->configuration = $this->connector->getConfiguration();
-        $this->compatibility = $this->connector->getCompatibility();
         $this->themes        = $this->connector->getThemes();
-        $this->fileSystem    = $this->connector->getFileSystem();
+        $this->logger        = $this->connector->getLogger();
     }
     
     
@@ -107,8 +101,10 @@ class GambioStoreAjaxController extends AdminHttpViewController
     {
         $this->setup();
         
+        $packageData = json_decode(stripcslashes($_POST['gambioStoreData']), true);
+        
         try {
-            $response = $this->connector->uninstallPackage($_POST);
+            $response = $this->connector->uninstallPackage($packageData);
         } catch (\Exception $e) {
             return new JsonHttpControllerResponse(['success' => false]);
         }
@@ -126,6 +122,12 @@ class GambioStoreAjaxController extends AdminHttpViewController
     {
         $this->setup();
         $isAccepted = $this->configuration->get('GAMBIO_STORE_ACCEPTED_DATA_PROCESSING');
+        
+        if ($isAccepted) {
+            $this->logger->info('Data processing is currently accepted');
+        } else {
+            $this->logger->notice('Data processing is currently not accepted');
+        }
         
         return new JsonHttpControllerResponse(['accepted' => $isAccepted]);
     }
@@ -166,7 +168,14 @@ class GambioStoreAjaxController extends AdminHttpViewController
         }
         
         $themeName = $_POST['themeStorageName'];
-        $result    = $this->themes->activateTheme($themeName);
+        $this->logger->info('Try to activate theme: ' . $themeName);
+        $result = $this->themes->activateTheme($themeName);
+        
+        if ($result) {
+            $this->logger->info('Activation of theme: ' . $themeName . ' succeeded');
+        } else {
+            $this->logger->error('Could not activate theme: ' . $themeName);
+        }
         
         return new JsonHttpControllerResponse(['success' => $result]);
     }

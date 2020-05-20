@@ -98,7 +98,7 @@ const isFilePermissionCorrect = async (data) => {
 const uninstallPackage = async (data) => {
 	const formData = new FormData();
 	
-	formData.append('data', JSON.stringify(data));
+	formData.append('gambioStoreData', JSON.stringify(data));
 	
 	try {
 		await GambioStore.callShop('admin.php?do=GambioStoreAjax/uninstallPackage', {

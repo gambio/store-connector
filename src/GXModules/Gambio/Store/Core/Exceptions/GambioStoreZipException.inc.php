@@ -1,6 +1,6 @@
 <?php
 /* --------------------------------------------------------------
-UpMigrationException.inc.php 2020-05-08
+GambioStoreZipException.inc.php 2020-05-19
 Gambio GmbH
 http://www.gambio.de
 Copyright (c) 2020 Gambio GmbH
@@ -10,9 +10,9 @@ Released under the GNU General Public License (Version 2)
 */
 
 /**
- * Class UpMigrationException
+ * Class GambioStoreZipException
  */
-class UpMigrationException extends Exception
+class GambioStoreZipException extends Exception
 {
 
 }
