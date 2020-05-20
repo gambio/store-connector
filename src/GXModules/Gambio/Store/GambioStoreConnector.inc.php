@@ -316,14 +316,14 @@ class GambioStoreConnector
     {
         $packageData = [];
         if (isset($postData['folder_name_inside_shop']) || isset($postData['filename'])) {
-            $ThemeDirectoryName   = $postData['folder_name_inside_shop'] ? : $postData['filename'];
-            $ThemeDirectoryPath   = $this->fileSystem->getThemeDirectory() . '/' . $ThemeDirectoryName;
-            $packageData['files'] = $this->fileSystem->getFilesRecursively($ThemeDirectoryPath);
+            $themeDirectoryName   = $postData['folder_name_inside_shop'] ? : $postData['filename'];
+            $themeDirectoryPath   = $this->fileSystem->getThemeDirectory() . '/' . $themeDirectoryName;
+            $packageData['files_list'] = $this->fileSystem->getFilesRecursively($themeDirectoryPath);
         } else {
-            $packageData['files'] = $postData['file_list'];
+            $packageData['files_list'] = $postData['file_list'];
         }
         
-        $packageData['name'] = $postData['repositoryName'];
+        $packageData['name'] = $postData['name'];
         
         $removal = new GambioStoreRemoval($packageData, $this->logger, $this->backup);
         
