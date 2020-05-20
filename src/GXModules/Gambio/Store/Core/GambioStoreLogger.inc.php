@@ -165,7 +165,7 @@ class GambioStoreLogger
         $logPath  = dirname(__FILE__, 2) . '/Logs/';
         
         if (count($context) === 0) {
-            $contextMessage = '';
+            $contextMessage = PHP_EOL;
         } else {
             ob_start();
             print_r($context);
@@ -175,6 +175,6 @@ class GambioStoreLogger
         
         $logMeta = '[' . $time . '] [' . $level . '] ';
         
-        file_put_contents($logPath . $fileName, $logMeta . $message . $contextMessage, FILE_APPEND);
+        @file_put_contents($logPath . $fileName, $logMeta . $message . $contextMessage, FILE_APPEND);
     }
 }
