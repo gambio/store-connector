@@ -134,6 +134,12 @@ class GambioStoreInstallation
             $this->logger->critical($message);
             throw new GambioStoreInstallationMissingPHPExtensionsException($message);
         }
+    
+        if (!extension_loaded('curl')) {
+            $message = 'The Gambio Store could not locate the curl extension for PHP which is required for installations.';
+            $this->logger->critical($message);
+            throw new GambioStoreInstallationMissingPHPExtensionsException($message);
+        }
         
         if ($this->cache->has($this->getTransactionId())) {
             return $this->cache->get($this->getTransactionId());
@@ -253,7 +259,8 @@ class GambioStoreInstallation
         
         chmod($targetFilePath, 0777);
         
-        /** @todo check the logic here. For some reason the hashes don't match */ //if (md5_file($targetFilePath) !== $this->packageData['fileList']['zip']['hash']) {
+        /** @todo check the logic here. For some reason the hashes don't match */
+        //if (md5_file($targetFilePath) !== $this->packageData['fileList']['zip']['hash']) {
         //    $this->logger->error('Uploaded package zip file has wrong hash.');
         //    return false;
         //}
