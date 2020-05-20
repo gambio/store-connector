@@ -174,10 +174,9 @@ class GambioStoreConnector
      */
     public function verifyRegistration($storeToken)
     {
-        $this->logger->info('Start verifying registration');
         $result = $this->configuration->get('GAMBIO_STORE_TOKEN') === $storeToken;
         if ($result) {
-            $this->logger->info('Verification succeed');
+            $this->logger->notice('Verification succeed');
             $this->configuration->set('GAMBIO_STORE_IS_REGISTERED', 'true');
         } else {
             $this->logger->error('Verification failed');
@@ -212,11 +211,7 @@ class GambioStoreConnector
     public function getShopInformation()
     {
         try {
-            $this->logger->info('Start collecting shop information');
-            $information = $this->shopInformation->getShopInformation();
-            $this->logger->info('Shop information collected successfully');
-            
-            return $information;
+            return $this->shopInformation->getShopInformation();
         } catch (\GambioStoreException $exception) {
             $this->logger->critical('Could not collected shop information', ['error' => $exception]);
             
