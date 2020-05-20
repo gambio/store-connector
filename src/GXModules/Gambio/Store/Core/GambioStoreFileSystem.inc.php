@@ -72,7 +72,7 @@ class GambioStoreFileSystem
         }
         
         if (!rename($oldFileName, dirname($oldFileName) . '/' . basename($newFileName))) {
-            throw new GambioStoreRenameException('Could not rename a file ir folder ' . $oldFileName, 2, [
+            throw new GambioStoreRenameException('Could not rename a file or folder ' . $oldFileName, 2, [
                 'info' => 'Please contact the server administrator'
             ]);
         }
