@@ -82,11 +82,13 @@ class GambioStoreFileSystem
     
     
     /**
-     * Copies a file or directory from source to destination. If destination folder doesn't exist, it will be created.
+     * Copies a file or directory from source to the destination folder.
+     * If the destination folder doesn't exist, it will be created.
      *
      * @param $source
      * @param $destination
      *
+     * @return bool
      * @throws \GambioStoreCreateDirectoryException
      * @throws \GambioStoreFileCopyException
      * @throws \GambioStoreFileNotFoundException
@@ -96,14 +98,20 @@ class GambioStoreFileSystem
         $source      = $this->getShopDirectory() . '/' . $source;
         $destination = $this->getShopDirectory() . '/' . $destination;
     
+        if (is_file($source)) {
+            return $this->fileCopy($source, $destination);
+        }
+    
         $directory = new RecursiveDirectoryIterator($source, RecursiveDirectoryIterator::SKIP_DOTS);
         $iterator  = new RecursiveIteratorIterator($directory, RecursiveIteratorIterator::SELF_FIRST);
-        
+    
         foreach ($iterator as $item) {
             if ($item->isDir()) {
                 $this->createDirectory($destination . DIRECTORY_SEPARATOR . $iterator->getSubPathName());
             } else {
-                $this->fileCopy($item, $destination . DIRECTORY_SEPARATOR . $iterator->getSubPathName());
+                $sourceFolder = dirname($item->getPathname());
+                $subPath = str_replace($source, '', $sourceFolder);
+                $this->fileCopy($item->getPathname(), $destination . $subPath);
             }
         }
     }
