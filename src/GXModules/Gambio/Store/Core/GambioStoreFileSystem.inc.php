@@ -26,7 +26,6 @@ class GambioStoreFileSystem
      * @param $source
      * @param $destination
      *
-     * @return bool
      * @throws \GambioStoreFileNotFoundException
      * @throws \GambioStoreFileMoveException
      * @throws \GambioStoreCreateDirectoryException
@@ -46,8 +45,6 @@ class GambioStoreFileSystem
         if (!rename($source, $destination)) {
             throw new GambioStoreFileMoveException("Could not move file $source to $destination folder");
         }
-        
-        return true;
     }
     
     
@@ -57,7 +54,6 @@ class GambioStoreFileSystem
      * @param $oldName
      * @param $newName
      *
-     * @return bool
      * @throws \GambioStoreFileNotFoundException
      * @throws \GambioStoreRenameException
      */
@@ -76,8 +72,6 @@ class GambioStoreFileSystem
                 'info' => 'Please contact the server administrator'
             ]);
         }
-        
-        return true;
     }
     
     
@@ -88,7 +82,6 @@ class GambioStoreFileSystem
      * @param $source
      * @param $destination
      *
-     * @return bool
      * @throws \GambioStoreCreateDirectoryException
      * @throws \GambioStoreFileCopyException
      * @throws \GambioStoreFileNotFoundException
@@ -99,7 +92,7 @@ class GambioStoreFileSystem
         $destination = $this->getShopDirectory() . '/' . $destination;
     
         if (is_file($source)) {
-            return $this->fileCopy($source, $destination);
+            $this->fileCopy($source, $destination);
         }
     
         $directory = new RecursiveDirectoryIterator($source, RecursiveDirectoryIterator::SKIP_DOTS);
@@ -121,7 +114,6 @@ class GambioStoreFileSystem
      * @param $source
      * @param $destination
      *
-     * @return bool
      * @throws \GambioStoreCreateDirectoryException
      * @throws \GambioStoreFileMoveException
      * @throws \GambioStoreFileNotFoundException
@@ -136,7 +128,7 @@ class GambioStoreFileSystem
         }
         
         if (is_file($source)) {
-            return $this->fileMove($source, $destination);
+            $this->fileMove($source, $destination);
         }
         
         $directory = new RecursiveDirectoryIterator($source, \RecursiveDirectoryIterator::SKIP_DOTS);
@@ -149,8 +141,6 @@ class GambioStoreFileSystem
                 $this->fileMove($item, $destination . DIRECTORY_SEPARATOR . $iterator->getSubPathName());
             }
         }
-        
-        return true;
     }
     
     
@@ -348,12 +338,11 @@ class GambioStoreFileSystem
      *
      * @param string $path
      *
-     * @return bool
      * @throws \GambioStoreCreateDirectoryException
      */
     public function createDirectory($path)
     {
-        if (!mkdir($path, 0777, true) && !is_dir($path)) {
+        if (!@mkdir($path, 0777, true) && !is_dir($path)) {
             
             if (is_file($path)) {
                 throw new GambioStoreCreateDirectoryException('Could not create a folder ' . $path, 1, [
@@ -371,8 +360,6 @@ class GambioStoreFileSystem
                 'info' => 'Please contact the server administrator'
             ]);
         }
-        
-        return true;
     }
     
     
@@ -383,7 +370,6 @@ class GambioStoreFileSystem
      * @param string $source
      * @param string $destination
      *
-     * @return bool
      * @throws \GambioStoreCreateDirectoryException
      * @throws \GambioStoreFileNotFoundException|\GambioStoreFileCopyException
      */
@@ -398,8 +384,6 @@ class GambioStoreFileSystem
         if (!copy($source, $destination . '/' . basename($source))) {
             throw new GambioStoreFileCopyException("Couldn't copy file " . $source);
         }
-        
-        return true;
     }
     
     
