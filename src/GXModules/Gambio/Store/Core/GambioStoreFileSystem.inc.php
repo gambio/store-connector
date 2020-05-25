@@ -100,6 +100,10 @@ class GambioStoreFileSystem
     
         foreach ($iterator as $item) {
             if ($item->isDir()) {
+                /**
+                 * The getSubPathName method might be highlighted in PhpStorm even though it is exists.
+                 * https://www.php.net/manual/en/recursivedirectoryiterator.getsubpathname.php
+                 */
                 $this->createDirectory($destination . DIRECTORY_SEPARATOR . $iterator->getSubPathName());
             } else {
                 $sourceFolder = dirname($item->getPathname());
@@ -136,6 +140,10 @@ class GambioStoreFileSystem
         
         foreach ($iterator as $item) {
             if ($item->isDir()) {
+                /**
+                 * The getSubPathName method might be highlighted in PhpStorm even though it is exists.
+                 * https://www.php.net/manual/en/recursivedirectoryiterator.getsubpathname.php
+                 */
                 $this->createDirectory($destination . DIRECTORY_SEPARATOR . $iterator->getSubPathName());
             } else {
                 $this->fileMove($item, $destination . DIRECTORY_SEPARATOR . $iterator->getSubPathName());
