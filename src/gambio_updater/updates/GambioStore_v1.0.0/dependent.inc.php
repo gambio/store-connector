@@ -13,6 +13,6 @@ $compatibility = new GambioStoreCompatibilityFacade($database);
 $configuration = new GambioStoreConfigurationFacade($database, $compatibility);
 $cache         = new GambioStoreCacheFacade($database);
 $http          = new GambioStoreHttpFacade();
-$log           = new GambioStoreLoggerFacade();
+$log           = new GambioStoreLoggerFacade($cache);
 
 require_once __DIR__ . '/../../../GXModules/Gambio/Store/Core/update.php';

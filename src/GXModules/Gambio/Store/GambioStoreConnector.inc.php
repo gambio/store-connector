@@ -121,12 +121,12 @@ class GambioStoreConnector
         $database        = GambioStoreDatabase::connect($fileSystem);
         $compatibility   = new GambioStoreCompatibility($database);
         $configuration   = new GambioStoreConfiguration($database, $compatibility);
-        $logger          = new GambioStoreLogger();
         $themes          = new GambioStoreThemes($compatibility, $fileSystem);
         $shopInformation = new GambioStoreShopInformation($database, $fileSystem);
         $cache           = new GambioStoreCache($database);
         $backup          = new GambioStoreBackup($fileSystem);
-        
+        $logger          = new GambioStoreLogger($cache);
+    
         return new self($database, $configuration, $compatibility, $logger, $themes, $fileSystem, $shopInformation,
             $cache, $backup);
     }
