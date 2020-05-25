@@ -164,6 +164,8 @@ class GambioStoreLogger
         $fileName = $today . '-' . $suffix . '.log';
         $logPath  = dirname(__FILE__, 2) . '/Logs/';
         
+        $this->deleteOneMonthOldLogsFromNow($now, $logPath, $suffix);
+        
         if (count($context) === 0) {
             $contextMessage = PHP_EOL;
         } else {
@@ -176,5 +178,29 @@ class GambioStoreLogger
         $logMeta = '[' . $time . '] [' . $level . '] ';
         
         @file_put_contents($logPath . $fileName, $logMeta . $message . $contextMessage, FILE_APPEND);
+    }
+    
+    
+    /**
+     * Deletes all logs older than a month from now.
+     *
+     * @param \DateTime $now
+     * @param string    $logPath
+     * @param string    $suffix
+     */
+    private function deleteOneMonthOldLogsFromNow(DateTime $now, $logPath, $suffix)
+    {
+        $logFiles = glob($logPath . '*.log');
+        
+        foreach ($logFiles as $logFile) {
+            $fileName = str_replace($logPath, '', $logFile);
+            $fileDateString = str_replace('-' . $suffix . '.log', '', $fileName);
+            $fileDate       = DateTime::createFromFormat('Y-m-d', $fileDateString);
+            $timeDifference = $now->diff($fileDate);
+            
+            if ((int)$timeDifference->days > 30) {
+                @unlink($logFile);
+            }
+        }
     }
 }
