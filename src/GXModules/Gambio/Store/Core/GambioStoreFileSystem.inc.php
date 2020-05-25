@@ -93,6 +93,7 @@ class GambioStoreFileSystem
     
         if (is_file($source)) {
             $this->fileCopy($source, $destination);
+            return;
         }
     
         $directory = new RecursiveDirectoryIterator($source, RecursiveDirectoryIterator::SKIP_DOTS);
@@ -133,6 +134,7 @@ class GambioStoreFileSystem
         
         if (is_file($source)) {
             $this->fileMove($source, $destination);
+            return;
         }
         
         $directory = new RecursiveDirectoryIterator($source, \RecursiveDirectoryIterator::SKIP_DOTS);
