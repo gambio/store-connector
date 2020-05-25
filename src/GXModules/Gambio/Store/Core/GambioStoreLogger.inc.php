@@ -16,6 +16,24 @@
  */
 class GambioStoreLogger
 {
+    
+    /**
+     * @var \GambioStoreCache
+     */
+    private $cache;
+    
+    
+    /**
+     * GambioStoreLogger constructor.
+     *
+     * @param \GambioStoreCache $cache
+     */
+    public function __construct(GambioStoreCache $cache)
+    {
+        $this->cache = $cache;
+    }
+    
+    
     /**
      * System is unusable.
      *
@@ -163,8 +181,16 @@ class GambioStoreLogger
         
         $fileName = $today . '-' . $suffix . '.log';
         $logPath  = dirname(__FILE__, 2) . '/Logs/';
+        $cacheKey = 'LAST_LOG_FILE_CHECK';
         
-        $this->deleteOneMonthOldLogsFromNow($now, $logPath, $suffix);
+        if ($this->cache->has($cacheKey)) {
+            if ($this->cache->get($cacheKey) !== $fileName) {
+                $this->deleteOneMonthOldLogsFromNow($now, $logPath, $suffix);
+                $this->cache->set($cacheKey, $fileName);
+            }
+        } else {
+            $this->cache->set($cacheKey, $fileName);
+        }
         
         if (count($context) === 0) {
             $contextMessage = PHP_EOL;
@@ -193,7 +219,7 @@ class GambioStoreLogger
         $logFiles = glob($logPath . '*.log');
         
         foreach ($logFiles as $logFile) {
-            $fileName = str_replace($logPath, '', $logFile);
+            $fileName       = str_replace($logPath, '', $logFile);
             $fileDateString = str_replace('-' . $suffix . '.log', '', $fileName);
             $fileDate       = DateTime::createFromFormat('Y-m-d', $fileDateString);
             $timeDifference = $now->diff($fileDate);
