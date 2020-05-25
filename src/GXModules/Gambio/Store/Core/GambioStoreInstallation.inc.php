@@ -322,8 +322,6 @@ class GambioStoreInstallation
             $this->filesystem->remove($targetFilePath);
         }
         
-        foreach ($this->getPackageFilesDestinations() as $file) {
-            @unlink($this->filesystem->getCacheDirectory() . '/backup/' . $file . '.bak');
-        }
+        $this->backup->removePackageFilesFromCache($this->getPackageFilesDestinations());
     }
 }

@@ -57,18 +57,33 @@ class GambioStoreBackup
     public function movePackageFilesToCache(array $files)
     {
         $shopDirectory = $this->fileSystem->getShopDirectory() . '/';
-    
+        
         foreach ($files as $file) {
-            if (strpos($file, $shopDirectory === false)) {
+            if (strpos($file, $shopDirectory) === false) {
                 $packageFileSource = $shopDirectory . $file;
             } else {
                 $packageFileSource = $file;
                 $file              = str_replace($shopDirectory, '', $file);
             }
-        
+            
             if (file_exists($packageFileSource) && is_file($packageFileSource)) {
                 $this->fileSystem->move($file, 'cache/backup/' . $file . '.bak');
             }
+        }
+    }
+    
+    
+    /**
+     * Removes package backup files from cache.
+     *
+     * @param array $files
+     */
+    public function removePackageFilesFromCache(array $files)
+    {
+        $shopDirectory = $this->fileSystem->getCacheDirectory() . '/';
+    
+        foreach ($files as $file) {
+            @unlink($shopDirectory . 'backup/' . $file . '.bak');
         }
     }
 }
