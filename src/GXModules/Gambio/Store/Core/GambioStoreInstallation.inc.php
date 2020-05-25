@@ -152,23 +152,23 @@ class GambioStoreInstallation
             $this->backup->movePackageFilesToCache($destination);
             $this->installPackage();
         } catch (GambioStoreCreateDirectoryException $e) {
-            $message = 'Could not install package: ' . $this->packageData['name'];
+            $message = 'Could not install package: ' . $this->packageData['details']['title']['de'];
             $this->logger->error($message, ['error' => $e, 'package' => $this->packageData]);
             $this->backup->restorePackageFilesFromCache($destination);
             throw new GambioStorePackageInstallationException('Could not install package');
         } catch (GambioStoreFileNotFoundException $e) {
-            $message = 'Could not install package: ' . $this->packageData['name'];
+            $message = 'Could not install package: ' . $this->packageData['details']['title']['de'];
             $this->logger->error($message, ['error' => $e, 'package' => $this->packageData]);
             $this->backup->restorePackageFilesFromCache($destination);
             throw new GambioStorePackageInstallationException('Could not install package');
         } catch (GambioStoreFileMoveException $e) {
-            $message = 'Could not install package: ' . $this->packageData['name'];
+            $message = 'Could not install package: ' . $this->packageData['details']['title']['de'];
             $this->logger->error($message, ['error' => $e, 'package' => $this->packageData]);
             $this->backup->restorePackageFilesFromCache($destination);
             throw new GambioStorePackageInstallationException('Could not install package');
         } catch (Exception $e) {
             $this->backup->restorePackageFilesFromCache($destination);
-            $message = 'Could not install package: ' . $this->packageData['name'];
+            $message = 'Could not install package: ' . $this->packageData['details']['title']['de'];
             $this->logger->error($message, ['error' => $e, 'package' => $this->packageData]);
             throw new GambioStorePackageInstallationException($message);
         }
@@ -176,7 +176,7 @@ class GambioStoreInstallation
             $this->cleanCache();
         }
         
-        $this->logger->notice('Successfully installed package : ' . $this->packageData['name']);
+        $this->logger->notice('Successfully installed package : ' . $this->packageData['details']['title']['de']);
         
         return ['success' => true];
     }
@@ -193,7 +193,7 @@ class GambioStoreInstallation
     {
         if (!$this->downloadPackageZipToCacheFolder()) {
             $this->logger->warning('Could not download zip file: ' . $this->packageData['fileList']['zip']['source']
-                                   . ' from package: ' .$this->packageData['name']);
+                                   . ' from package: ' .$this->packageData['details']['title']['de']);
             $this->downloadPackageFilesToCacheFolder();
         }
     }

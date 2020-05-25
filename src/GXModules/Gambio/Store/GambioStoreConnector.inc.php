@@ -236,7 +236,7 @@ class GambioStoreConnector
         if ($active) {
             $this->logger->notice('The theme: ' . $themeName . ' is currently active');
         } else {
-            $this->logger->info('The theme: ' . $themeName . ' is currently inactive');
+            $this->logger->notice('The theme: ' . $themeName . ' is currently inactive');
         }
         
         return $active;
@@ -318,7 +318,7 @@ class GambioStoreConnector
             $packageData['files_list'] = $postData['file_list'];
         }
         
-        $packageData['name'] = $postData['name'];
+        $packageData['name'] = $postData['title']['de'];
         
         $removal = new GambioStoreRemoval($packageData, $this->logger, $this->backup);
         

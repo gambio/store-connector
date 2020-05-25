@@ -143,6 +143,7 @@ class GambioStoreAjaxController extends AdminHttpViewController
         $this->setup();
         
         if (!isset($_GET, $_GET['themeName'])) {
+            $this->logger->warning('Can not check if theme is active because no theme name was provided',['getParams' => $_GET]);
             return new JsonHttpControllerResponse(['success' => false]);
         }
         
@@ -164,15 +165,15 @@ class GambioStoreAjaxController extends AdminHttpViewController
         $this->setup();
         
         if (!isset($_POST, $_POST['themeStorageName'])) {
+            $this->logger->warning('Can not activate theme, because it was no theme storage name provided',['getParams' => $_POST]);
             return new JsonHttpControllerResponse(['success' => false]);
         }
         
         $themeName = $_POST['themeStorageName'];
-        $this->logger->info('Try to activate theme: ' . $themeName);
         $result = $this->themes->activateTheme($themeName);
         
         if ($result) {
-            $this->logger->info('Activation of theme: ' . $themeName . ' succeeded');
+            $this->logger->notice('Activation of theme: ' . $themeName . ' succeeded');
         } else {
             $this->logger->error('Could not activate theme: ' . $themeName);
         }
