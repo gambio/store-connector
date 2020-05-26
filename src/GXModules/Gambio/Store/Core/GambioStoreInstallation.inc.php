@@ -271,12 +271,14 @@ class GambioStoreInstallation
         $migration->up();
     }
     
+    
     /**
      * Downloads files from the fileList.
      *
      * @return bool
      * @throws \GambioStoreHttpErrorException
      * @throws \GambioStoreCreateDirectoryException
+     * @throws \GambioStoreFileHashMismatchException
      */
     private function downloadPackageFilesToCacheFolder()
     {
@@ -290,6 +292,12 @@ class GambioStoreInstallation
             
             $fileContent = $this->getFileContent($file['source']);
             file_put_contents($destinationFilePath, $fileContent);
+    
+            if (md5_file($destinationFilePath) !== $file['hash']) {
+                throw new GambioStoreFileHashMismatchException('Uploaded file has wrong hash.', [
+                    'file' => $destinationFilePath
+                ]);
+            }
         }
         
         return true;
@@ -305,26 +313,25 @@ class GambioStoreInstallation
      */
     private function downloadPackageZipToCacheFolder()
     {
-        $targetFileName = $this->getTransactionId() . '.zip';
-        $targetFilePath = $this->filesystem->getCacheDirectory() . '/' . $targetFileName;
+        $destinationFileName = $this->getTransactionId() . '.zip';
+        $destinationFilePath = $this->filesystem->getCacheDirectory() . '/' . $destinationFileName;
         $downloadZipUrl = $this->packageData['fileList']['zip']['source'];
         $fileContent    = $this->getFileContent($downloadZipUrl);
-        file_put_contents($targetFilePath, $fileContent);
+        file_put_contents($destinationFilePath, $fileContent);
         
-        chmod($targetFilePath, 0777);
+        chmod($destinationFilePath, 0777);
         
-        /** @todo check the logic here. For some reason the hashes don't match */
-        if (md5_file($targetFilePath) !== $this->packageData['fileList']['zip']['hash']) {
+        if (md5_file($destinationFilePath) !== $this->packageData['fileList']['zip']['hash']) {
             throw new GambioStoreFileHashMismatchException('Uploaded package zip file has wrong hash.', [
-                    'file' => $targetFilePath
+                    'file' => $destinationFilePath
             ]);
         }
         
         $zip = new ZipArchive;
-        $res = $zip->open($targetFilePath);
+        $res = $zip->open($destinationFilePath);
         if ($res !== true) {
             throw new GambioStoreZipException('Cannot extract zip archive.', [
-                'file' => $targetFilePath
+                'file' => $destinationFilePath
             ]);
         }
         
