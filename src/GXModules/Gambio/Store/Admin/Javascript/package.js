@@ -106,8 +106,8 @@ const uninstallPackage = async (data) => {
 			body: formData
 		});
 		GambioStore.messenger.sendMessage('uninstall_succeeded');
-	} catch {
-		GambioStore.messenger.sendMessage('uninstall_failed', data);
+	} catch (error) {
+		GambioStore.messenger.sendMessage('uninstall_failed', error);
 	}
 }
 
@@ -129,7 +129,7 @@ const startPackageInstallation = async (data) => {
 		await installPackage(data, updateProgressCallback);
 		
 		if (data.details.gallery) {
-			const response = isThemeActive(data.details.folder_name_inside_shop || data.details.filename);
+			const response = await isThemeActive(data.details.folder_name_inside_shop || data.details.filename);
 			if (response.isActive === true) {
 				await activateTheme(data.details.folder_name_inside_shop || data.details.filename);
 			}

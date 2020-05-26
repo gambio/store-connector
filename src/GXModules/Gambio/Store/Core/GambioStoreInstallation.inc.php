@@ -143,7 +143,7 @@ class GambioStoreInstallation
             $this->logger->critical($message);
             throw new GambioStoreInstallationMissingPHPExtensionsException($message);
         }
-    
+        
         if (!extension_loaded('curl')) {
             $message = 'The Gambio Store could not locate the curl extension for PHP which is required for installations.';
             $this->logger->critical($message);
@@ -163,23 +163,35 @@ class GambioStoreInstallation
             $this->migrate();
         } catch (GambioStoreCreateDirectoryException $e) {
             $message = 'Could not install package: ' . $this->packageData['details']['title']['de'];
-            $this->logger->error($message, ['error' => $e, 'package' => $this->packageData]);
+            $this->logger->error($message, [
+                'error'            => $e->getMessage(),
+                'packageVersionId' => $this->packageData['details']['id']
+            ]);
             $this->backup->restorePackageFilesFromCache($destination);
             throw new GambioStorePackageInstallationException('Could not install package');
         } catch (GambioStoreFileNotFoundException $e) {
             $message = 'Could not install package: ' . $this->packageData['details']['title']['de'];
-            $this->logger->error($message, ['error' => $e, 'package' => $this->packageData]);
+            $this->logger->error($message, [
+                'error'            => $e->getMessage(),
+                'packageVersionId' => $this->packageData['details']['id']
+            ]);
             $this->backup->restorePackageFilesFromCache($destination);
             throw new GambioStorePackageInstallationException('Could not install package');
         } catch (GambioStoreFileMoveException $e) {
             $message = 'Could not install package: ' . $this->packageData['details']['title']['de'];
-            $this->logger->error($message, ['error' => $e, 'package' => $this->packageData]);
+            $this->logger->error($message, [
+                'error'            => $e->getMessage(),
+                'packageVersionId' => $this->packageData['details']['id']
+            ]);
             $this->backup->restorePackageFilesFromCache($destination);
             throw new GambioStorePackageInstallationException('Could not install package');
         } catch (Exception $e) {
             $this->backup->restorePackageFilesFromCache($destination);
             $message = 'Could not install package: ' . $this->packageData['details']['title']['de'];
-            $this->logger->error($message, ['error' => $e, 'package' => $this->packageData]);
+            $this->logger->error($message, [
+                'error'            => $e->getMessage(),
+                'packageVersionId' => $this->packageData['details']['id']
+            ]);
             throw new GambioStorePackageInstallationException($message);
         }
         finally {
@@ -203,7 +215,7 @@ class GambioStoreInstallation
     {
         if (!$this->downloadPackageZipToCacheFolder()) {
             $this->logger->warning('Could not download zip file: ' . $this->packageData['fileList']['zip']['source']
-                                   . ' from package: ' .$this->packageData['details']['title']['de']);
+                                   . ' from package: ' . $this->packageData['details']['title']['de']);
             $this->downloadPackageFilesToCacheFolder();
         }
     }
@@ -284,8 +296,7 @@ class GambioStoreInstallation
         
         chmod($targetFilePath, 0777);
         
-        /** @todo check the logic here. For some reason the hashes don't match */
-        //if (md5_file($targetFilePath) !== $this->packageData['fileList']['zip']['hash']) {
+        /** @todo check the logic here. For some reason the hashes don't match */ //if (md5_file($targetFilePath) !== $this->packageData['fileList']['zip']['hash']) {
         //    $this->logger->error('Uploaded package zip file has wrong hash.');
         //    return false;
         //}

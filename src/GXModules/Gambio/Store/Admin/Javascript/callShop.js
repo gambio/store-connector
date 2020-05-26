@@ -10,7 +10,7 @@ window.GambioStore = Object.assign({}, {
 		const response = await fetch(...params);
 		const jsonResponse = await response.json();
 		if (jsonResponse.success === false) {
-			throw new Error();
+			throw jsonResponse;
 		}
 		return jsonResponse
 	}
