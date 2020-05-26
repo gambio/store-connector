@@ -17,5 +17,6 @@ $t_language_text_section_content_array = [
     'PACKAGE_INSTALLATION'           => 'Package Installation',
     'INSTALLING_PACKAGE'             => 'Installing package ...',
     'PREPARING_PACKAGE'              => 'Preparing package ...',
-    'WAINING_TITLE'                  => 'Warning:'
+    'WARNING_TITLE'                  => 'Warning:',
+    'LOGS_FOLDER_PERMISSION_ERROR'   => 'The logs folder is not writable. Check permissions.',
 ];

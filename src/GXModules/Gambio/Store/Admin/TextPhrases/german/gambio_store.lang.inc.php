@@ -17,5 +17,6 @@ $t_language_text_section_content_array = [
     'PACKAGE_INSTALLATION'           => 'Paket Installation',
     'INSTALLING_PACKAGE'             => 'Paket wird installiert ...',
     'PREPARING_PACKAGE'              => 'Paket wird vorbereitet ...',
-    'WAINING_TITLE'                  => 'Warnung:'
+    'WARNING_TITLE'                  => 'Warnung:',
+    'LOGS_FOLDER_PERMISSION_ERROR'   => 'Der Ordner logs ist nicht beschreibbar. Prüfen Sie die Berechtigungen.',
 ];

@@ -69,7 +69,11 @@ class GambioStoreController extends AdminHttpViewController
         $contentNavigation = MainFactory::create('ContentNavigationCollection', []);
         $assets            = $this->getIFrameAssets();
         $data              = [];
-        
+
+        if (!$this->connector->getLogger()->isWritable()) {
+            $this->errors[] = 'LOGS_FOLDER_PERMISSION_ERROR';
+        }
+    
         setcookie('auto_updater_admin_check', 'admin_logged_in', time() + 5 * 60, '/');
         
         if ($this->configuration->get('GAMBIO_STORE_ACCEPTED_DATA_PROCESSING') === false) {
