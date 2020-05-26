@@ -18,7 +18,7 @@ class GambioStoreLoggerFacade
 {
     
     /**
-     * @var \GambioStoreCache
+     * @var \GambioStoreCacheFacade
      */
     private $cache;
     
@@ -26,9 +26,9 @@ class GambioStoreLoggerFacade
     /**
      * GambioStoreLogger constructor.
      *
-     * @param \GambioStoreCache $cache
+     * @param \GambioStoreCacheFacade $cache
      */
-    public function __construct(GambioStoreCache $cache)
+    public function __construct(GambioStoreCacheFacade $cache)
     {
         $this->cache = $cache;
     }
