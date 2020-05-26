@@ -126,7 +126,7 @@ class GambioStoreConnector
         $cache           = new GambioStoreCache($database);
         $backup          = new GambioStoreBackup($fileSystem);
         $logger          = new GambioStoreLogger($cache);
-    
+        
         return new self($database, $configuration, $compatibility, $logger, $themes, $fileSystem, $shopInformation,
             $cache, $backup);
     }
@@ -309,18 +309,25 @@ class GambioStoreConnector
      */
     public function uninstallPackage(array $postData)
     {
-        $packageData = [];
+        $packageData         = [];
+        $packageData['name'] = $postData['title']['de'];
+        
         if (isset($postData['folder_name_inside_shop']) || isset($postData['filename'])) {
-            $themeDirectoryName   = $postData['folder_name_inside_shop'] ? : $postData['filename'];
-            $themeDirectoryPath   = $this->fileSystem->getThemeDirectory() . '/' . $themeDirectoryName;
+            $themeDirectoryName        = $postData['folder_name_inside_shop'] ? : $postData['filename'];
+            $themeDirectoryPath        = $this->fileSystem->getThemeDirectory() . '/' . $themeDirectoryName;
             $packageData['files_list'] = $this->fileSystem->getFilesRecursively($themeDirectoryPath);
         } else {
             $packageData['files_list'] = $postData['file_list'];
         }
+    
+        if (isset($postData['migration'])) {
+            $migrations = $postData['migration'];
+        } else {
+            $migrations = ['up' => [], 'down' => []];
+        }
         
-        $packageData['name'] = $postData['title']['de'];
-        
-        $removal = new GambioStoreRemoval($packageData, $this->logger, $this->backup);
+        $migration = new GambioStoreMigration($this->fileSystem, $migrations['up'], $migrations['down']);
+        $removal   = new GambioStoreRemoval($packageData, $this->logger, $this->backup, $migration);
         
         return $removal->perform();
     }
