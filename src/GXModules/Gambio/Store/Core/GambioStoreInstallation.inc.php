@@ -242,7 +242,7 @@ class GambioStoreInstallation
     /**
      * Runs package migrations.
      *
-     * @throws \Exception
+     * @throws \GambioStoreUpMigrationException
      */
     private function migrate()
     {

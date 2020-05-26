@@ -53,7 +53,7 @@ class GambioStoreMigration
     /**
      * Migrate up.
      *
-     * @throws \Exception
+     * @throws \GambioStoreUpMigrationException
      */
     public function up()
     {
