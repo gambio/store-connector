@@ -229,4 +229,26 @@ class GambioStoreLogger
             }
         }
     }
+    
+    
+    /**
+     * Returns Logs directory path.
+     *
+     * @return string
+     */
+    private function getLogsPath()
+    {
+        return dirname(__FILE__, 2) . '/Logs/';
+    }
+    
+    
+    /**
+     * Checks whether logs directory is writable. Returns true if so, false otherwise.
+     *
+     * @return bool
+     */
+    public function isWritable()
+    {
+        return is_writable($this->getLogsPath());
+    }
 }
