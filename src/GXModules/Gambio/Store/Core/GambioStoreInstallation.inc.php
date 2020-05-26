@@ -124,7 +124,7 @@ class GambioStoreInstallation
      */
     private function getPackageMigrations()
     {
-        return $this->packageData['migrations'];
+        return $this->packageData['migrations'] ? : [];
     }
     
     
@@ -246,6 +246,10 @@ class GambioStoreInstallation
      */
     private function migrate()
     {
+        if (!isset($this->getPackageMigrations()['up'])) {
+            return;
+        }
+        
         $migration = new GambioStoreMigration(
             $this->filesystem,
             $this->getPackageMigrations()['up'],
