@@ -1,0 +1,9 @@
+{load_language_text section="gambio_store" name="gambio_store"}
+
+{foreach $content.errors as $error}
+    <div class="alert alert-danger">
+        <b>{$gambio_store['WAINING_TITLE']}</b>
+        <br>
+        {$gambio_store[$error]}
+    </div>
+{/foreach}

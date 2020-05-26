@@ -29,6 +29,13 @@ class GambioStoreController extends AdminHttpViewController
      */
     private $languageTextManager;
     
+    /**
+     * Error array with language keys to show error messages if nessary.
+     *
+     * @var array
+     */
+    private $errors = [];
+    
     
     /**
      * Instantiates our connector and configuration
@@ -53,7 +60,7 @@ class GambioStoreController extends AdminHttpViewController
         if ($this->_getQueryParameter('reset-token') || $this->_getQueryParameter('reset-token') === '') {
             $this->configuration->set('GAMBIO_STORE_TOKEN', '');
             $this->configuration->set('GAMBIO_STORE_IS_REGISTERED', false);
-    
+            
             return new RedirectHttpControllerResponse('./admin.php?do=GambioStore');
         }
         
@@ -62,9 +69,9 @@ class GambioStoreController extends AdminHttpViewController
         $contentNavigation = MainFactory::create('ContentNavigationCollection', []);
         $assets            = $this->getIFrameAssets();
         $data              = [];
-    
+        
         setcookie('auto_updater_admin_check', 'admin_logged_in', time() + 5 * 60, '/');
-    
+        
         if ($this->configuration->get('GAMBIO_STORE_ACCEPTED_DATA_PROCESSING') === false) {
             $data = $this->getIFrameTemplateData('/dataprocessing');
         } elseif ($this->configuration->get('GAMBIO_STORE_IS_REGISTERED') === false) {
@@ -77,7 +84,7 @@ class GambioStoreController extends AdminHttpViewController
         if (empty($data)) {
             throw new GambioStoreUpdateWasNotExecutedProperlyException('The updater was not executed properly. Important database values are missing for the Store.');
         }
-    
+        
         return new AdminLayoutHttpControllerResponse($title, $template, $data, $assets, $contentNavigation);
     }
     
@@ -90,20 +97,20 @@ class GambioStoreController extends AdminHttpViewController
     public function actionInstallations()
     {
         $this->setup();
-    
+        
         if ($this->configuration->get('GAMBIO_STORE_ACCEPTED_DATA_PROCESSING') !== true) {
             return $this->actionDefault();
         }
-    
+        
         $title    = new NonEmptyStringType($this->languageTextManager->get_text('PAGE_TITLE'));
         $template = new ExistingFile(new NonEmptyStringType(dirname(__FILE__, 2) . '/Html/gambio_store.html'));
-    
+        
         setcookie('auto_updater_admin_check', 'admin_logged_in', time() + 5 * 60, '/');
-    
+        
         $data              = $this->getIFrameTemplateData('/installations');
         $assets            = $this->getIFrameAssets();
         $contentNavigation = $this->getStoreNavigation(false, true);
-    
+        
         return new AdminLayoutHttpControllerResponse($title, $template, $data, $assets, $contentNavigation);
     }
     
@@ -116,28 +123,28 @@ class GambioStoreController extends AdminHttpViewController
     public function actionConfiguration()
     {
         $this->setup();
-    
+        
         $gambioStoreUrl = $this->configuration->get('GAMBIO_STORE_URL');
-    
+        
         if (isset($_POST['url'])
             && $_POST['url'] !== $gambioStoreUrl
             && (filter_var($_POST['url'], FILTER_VALIDATE_URL) === $_POST['url'])) {
             $gambioStoreUrl = $_POST['url'];
             $this->configuration->set('GAMBIO_STORE_URL', $gambioStoreUrl);
         }
-    
+        
         $title    = new NonEmptyStringType($this->languageTextManager->get_text('PAGE_TITLE'));
         $template = new ExistingFile(new NonEmptyStringType(dirname(__FILE__, 2)
                                                             . '/Html/gambio_store_configuration.html'));
-    
+        
         $data = new KeyValueCollection(['url' => $gambioStoreUrl]);
-    
+        
         $assets = new AssetCollection([
             new Asset('gambio_store.lang.inc.php')
         ]);
-    
+        
         $contentNavigation = $this->getStoreNavigation(false);
-    
+        
         return new AdminLayoutHttpControllerResponse($title, $template, $data, $assets, $contentNavigation);
     }
     
@@ -150,9 +157,9 @@ class GambioStoreController extends AdminHttpViewController
     public function actionAcceptDataProcessing()
     {
         $this->setup();
-    
+        
         $this->configuration->set('GAMBIO_STORE_ACCEPTED_DATA_PROCESSING', true);
-    
+        
         return $this->actionDefault();
     }
     
@@ -246,12 +253,13 @@ class GambioStoreController extends AdminHttpViewController
     private function getIFrameTemplateData($urlPostfix)
     {
         $translations = $this->languageTextManager->get_section_array('gambio_store', $_SESSION['languages_id']);
-    
+        
         return new KeyValueCollection([
             'storeUrl'      => $this->getGambioStoreUrl() . $urlPostfix,
             'storeToken'    => $this->getGambioStoreToken(),
             'storeLanguage' => $this->connector->getCurrentShopLanguageCode(),
-            'translations'  => $translations
+            'translations'  => $translations,
+            'errors'        => $this->errors
         ]);
     }
 }

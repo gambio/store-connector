@@ -16,5 +16,6 @@ $t_language_text_section_content_array = [
     'CONFIGURATION'                  => 'Configuration',
     'PACKAGE_INSTALLATION'           => 'Package Installation',
     'INSTALLING_PACKAGE'             => 'Installing package ...',
-    'PREPARING_PACKAGE'              => 'Preparing package ...'
+    'PREPARING_PACKAGE'              => 'Preparing package ...',
+    'WAINING_TITLE'                  => 'Warning:'
 ];
