@@ -120,11 +120,12 @@ class GambioStoreInstallation
     
     
     /**
+     * Returns
      * @return mixed
      */
     private function getPackageMigrations()
     {
-        return $this->packageData['migrations'] ? : [];
+        return isset($this->packageData['migrations']) ? $this->packageData['migrations'] : [];
     }
     
     
