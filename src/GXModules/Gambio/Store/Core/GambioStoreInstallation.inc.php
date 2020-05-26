@@ -120,7 +120,8 @@ class GambioStoreInstallation
     
     
     /**
-     * Returns
+     * Returns migrations array.
+     *
      * @return mixed
      */
     private function getPackageMigrations()
