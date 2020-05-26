@@ -120,6 +120,15 @@ class GambioStoreInstallation
     
     
     /**
+     * @return mixed
+     */
+    private function getPackageMigrations()
+    {
+        return $this->packageData['migrations'];
+    }
+    
+    
+    /**
      * Inits installation.
      *
      * @return bool[]
@@ -151,6 +160,7 @@ class GambioStoreInstallation
             $this->downloadPackageToCacheFolder();
             $this->backup->movePackageFilesToCache($destination);
             $this->installPackage();
+            $this->migrate();
         } catch (GambioStoreCreateDirectoryException $e) {
             $message = 'Could not install package: ' . $this->packageData['details']['title']['de'];
             $this->logger->error($message, ['error' => $e, 'package' => $this->packageData]);
@@ -216,6 +226,22 @@ class GambioStoreInstallation
         }
     }
     
+    
+    /**
+     * Runs package migrations.
+     *
+     * @throws \Exception
+     */
+    private function migrate()
+    {
+        $migration = new GambioStoreMigration(
+            $this->filesystem,
+            $this->getPackageMigrations()['up'],
+            []
+        );
+        
+        $migration->up();
+    }
     
     /**
      * Downloads files from the fileList.
