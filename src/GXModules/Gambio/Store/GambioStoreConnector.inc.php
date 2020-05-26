@@ -315,7 +315,7 @@ class GambioStoreConnector
         if (isset($postData['folder_name_inside_shop']) || isset($postData['filename'])) {
             $themeDirectoryName        = $postData['folder_name_inside_shop'] ? : $postData['filename'];
             $themeDirectoryPath        = $this->fileSystem->getThemeDirectory() . '/' . $themeDirectoryName;
-            $packageData['files_list'] = $this->fileSystem->getFilesRecursively($themeDirectoryPath);
+            $packageData['files_list'] = $this->fileSystem->getContentsRecursively($themeDirectoryPath);
         } else {
             $packageData['files_list'] = $postData['file_list'];
         }

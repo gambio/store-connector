@@ -80,10 +80,20 @@ class GambioStoreBackup
      */
     public function removePackageFilesFromCache(array $files)
     {
-        $shopDirectory = $this->fileSystem->getCacheDirectory() . '/';
-    
+        $shopDirectory  = $this->fileSystem->getShopDirectory() . '/';
+        $cacheDirectory = 'cache/backup/';
+        
         foreach ($files as $file) {
-            @unlink($shopDirectory . 'backup/' . $file . '.bak');
+            if (is_file($shopDirectory . $file . '.bak')) {
+                $file .= '.bak';
+            }
+            
+            if (strpos($file, $shopDirectory) === false) {
+                $this->fileSystem->remove($cacheDirectory . $file);
+            } else {
+                $file = str_replace($shopDirectory, '', $file);
+                $this->fileSystem->remove($cacheDirectory . $file);
+            }
         }
     }
 }
