@@ -13,6 +13,7 @@ require_once 'Exceptions/GambioStorePackageInstallationException.inc.php';
 require_once 'Exceptions/GambioStoreInstallationMissingPHPExtensionsException.inc.php';
 require_once 'Exceptions/GambioStoreZipException.inc.php';
 require_once 'Exceptions/GambioStoreHttpErrorException.inc.php';
+require_once 'Exceptions/GambioStoreFileHashMismatchException.inc.php';
 
 /**
  * Class StoreInstallation
@@ -179,6 +180,14 @@ class GambioStoreInstallation
             ]);
             $this->backup->restorePackageFilesFromCache($destination);
             throw new GambioStorePackageInstallationException('Could not install package');
+        } catch (GambioStoreFileHashMismatchException $e) {
+            $message = 'Could not install package: ' . $this->packageData['details']['title']['de'];
+            $this->logger->error($message, [
+                'error'            => $e->getMessage(),
+                'packageVersionId' => $this->packageData['details']['id']
+            ]);
+            $this->backup->restorePackageFilesFromCache($destination);
+            throw new GambioStorePackageInstallationException('Could not install package');
         } catch (GambioStoreFileMoveException $e) {
             $message = 'Could not install package: ' . $this->packageData['details']['title']['de'];
             $this->logger->error($message, [
@@ -212,6 +221,7 @@ class GambioStoreInstallation
      * @throws \GambioStoreZipException
      * @throws \GambioStoreHttpErrorException
      * @throws \GambioStoreCreateDirectoryException
+     * @throws \GambioStoreFileHashMismatchException
      */
     private function downloadPackageToCacheFolder()
     {
@@ -291,6 +301,7 @@ class GambioStoreInstallation
      *
      * @return bool
      * @throws \GambioStoreZipException|\GambioStoreHttpErrorException
+     * @throws \GambioStoreFileHashMismatchException
      */
     private function downloadPackageZipToCacheFolder()
     {
@@ -302,10 +313,12 @@ class GambioStoreInstallation
         
         chmod($targetFilePath, 0777);
         
-        /** @todo check the logic here. For some reason the hashes don't match */ //if (md5_file($targetFilePath) !== $this->packageData['fileList']['zip']['hash']) {
-        //    $this->logger->error('Uploaded package zip file has wrong hash.');
-        //    return false;
-        //}
+        /** @todo check the logic here. For some reason the hashes don't match */
+        if (md5_file($targetFilePath) !== $this->packageData['fileList']['zip']['hash']) {
+            throw new GambioStoreFileHashMismatchException('Uploaded package zip file has wrong hash.', [
+                    'file' => $targetFilePath
+            ]);
+        }
         
         $zip = new ZipArchive;
         $res = $zip->open($targetFilePath);
