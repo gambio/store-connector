@@ -85,6 +85,8 @@ class GambioStoreController extends AdminHttpViewController
             $data              = $this->getIFrameTemplateData('/downloads');
         }
         
+        $data = [];
+        
         if (empty($data)) {
             $this->appendError('DATABASE_INTEGRITY_ERROR');
             return $this->showCriticalErrorPage();
@@ -101,7 +103,7 @@ class GambioStoreController extends AdminHttpViewController
      * @return \AdminLayoutHttpControllerResponse
      */
     private function showCriticalErrorPage() {
-        $template = new ExistingFile(new NonEmptyStringType(dirname(__FILE__, 2) . '/Html/gambio_store_errors.html'));
+        $template = new ExistingFile(new NonEmptyStringType(dirname(__FILE__, 2) . '/Html/gambio_store_critical_errors.html'));
         $assets            = $this->getIFrameAssets();
         $contentNavigation = MainFactory::create('ContentNavigationCollection', []);
         $title    = new NonEmptyStringType($this->languageTextManager->get_text('PAGE_TITLE'));
