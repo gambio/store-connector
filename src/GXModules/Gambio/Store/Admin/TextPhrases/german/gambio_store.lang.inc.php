@@ -19,4 +19,5 @@ $t_language_text_section_content_array = [
     'PREPARING_PACKAGE'              => 'Paket wird vorbereitet ...',
     'WARNING_TITLE'                  => 'Warnung:',
     'LOGS_FOLDER_PERMISSION_ERROR'   => 'Der Ordner logs ist nicht beschreibbar. Prüfen Sie die Berechtigungen.',
+    'DATABASE_INTEGRITY_ERROR'       => 'Wichtige Einträge fehlen in der Datenbank.',
 ];

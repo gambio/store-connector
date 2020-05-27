@@ -71,7 +71,7 @@ class GambioStoreController extends AdminHttpViewController
         $data              = [];
 
         if (!$this->connector->getLogger()->isWritable()) {
-            $this->errors[] = 'LOGS_FOLDER_PERMISSION_ERROR';
+            $this->appendError('LOGS_FOLDER_PERMISSION_ERROR');
         }
     
         setcookie('auto_updater_admin_check', 'admin_logged_in', time() + 5 * 60, '/');
@@ -86,12 +86,40 @@ class GambioStoreController extends AdminHttpViewController
         }
         
         if (empty($data)) {
-            throw new GambioStoreUpdateWasNotExecutedProperlyException('The updater was not executed properly. Important database values are missing for the Store.');
+            $this->appendError('DATABASE_INTEGRITY_ERROR');
+            return $this->showCriticalErrorPage();
         }
         
         return new AdminLayoutHttpControllerResponse($title, $template, $data, $assets, $contentNavigation);
     }
     
+    
+    /**
+     * To be returned upon encountering a critical error.
+     * Make sure to append to the errors array first.
+     * 
+     * @return \AdminLayoutHttpControllerResponse
+     */
+    private function showCriticalErrorPage() {
+        $template = new ExistingFile(new NonEmptyStringType(dirname(__FILE__, 2) . '/Html/gambio_store_errors.html'));
+        $assets            = $this->getIFrameAssets();
+        $contentNavigation = MainFactory::create('ContentNavigationCollection', []);
+        $title    = new NonEmptyStringType($this->languageTextManager->get_text('PAGE_TITLE'));
+        
+        try {
+            $language = $this->connector->getCurrentShopLanguageCode();
+        } catch (GambioStoreLanguageNotResolvableException $e) {
+            $language = 'en';
+        }
+
+        $data = new KeyValueCollection([
+            'storeLanguage' => $language,
+            'translations' => $this->languageTextManager->get_section_array('gambio_store', $_SESSION['languages_id']),
+            'errors' => $this->errors
+        ]);
+
+        return new AdminLayoutHttpControllerResponse($title, $template, $data, $assets, $contentNavigation);
+    }
     
     /**
      * Displays the installations page on the iframe
@@ -265,5 +293,15 @@ class GambioStoreController extends AdminHttpViewController
             'translations'  => $translations,
             'errors'        => $this->errors
         ]);
+    }
+    
+    
+    /**
+     * Appends an error to the errors array.
+     * 
+     * @param $errorIdentifier string the error's translational identifier.
+     */
+    private function appendError($errorIdentifier) {
+        $this->errors[] = $errorIdentifier;
     }
 }
