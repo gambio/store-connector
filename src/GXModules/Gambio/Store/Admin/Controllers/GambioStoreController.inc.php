@@ -246,6 +246,7 @@ class GambioStoreController extends AdminHttpViewController
             new Asset('../GXModules/Gambio/Store/Build/Admin/Javascript/messenger.js'),
             new Asset('../GXModules/Gambio/Store/Build/Admin/Javascript/translation.js'),
             new Asset('../GXModules/Gambio/Store/Build/Admin/Javascript/callShop.js'),
+            new Asset('../GXModules/Gambio/Store/Build/Admin/Javascript/error.js'),
             new Asset('../GXModules/Gambio/Store/Build/Admin/Javascript/iframe.js'),
             new Asset('../GXModules/Gambio/Store/Build/Admin/Javascript/package.js'),
             new Asset('../GXModules/Gambio/Store/Build/Admin/Javascript/shop.js'),

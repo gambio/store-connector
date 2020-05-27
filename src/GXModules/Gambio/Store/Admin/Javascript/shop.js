@@ -22,7 +22,33 @@
  * @returns {Promise<Object>}
  */
 const fetchShopInfo = () => {
-    return GambioStore.callShop('admin.php?do=GambioStoreAjax/collectShopInformation');
+    return new Promise((resolve) => {
+        GambioStore.callShop('admin.php?do=GambioStoreAjax/collectShopInformation')
+            .then(resolve)
+            .catch(err => {
+                switch(err.type) {
+                    case(GambioStore.networkErrors.JSON_PARSE_ERROR):
+                        GambioStore.showError(
+                            GambioStore.translation.translate('WARNING_TITLE'), 
+                            GambioStore.translation.translate('SHOP_INFORMATION_JSON_PARSE_ERROR')
+                        );
+                        break;
+                    case(GambioStore.networkErrors.NETWORK_ERROR):
+                        GambioStore.showError(
+                            GambioStore.translation.translate('WARNING_TITLE'),
+                            GambioStore.translation.translate('SHOP_INFORMATION_NETWORK_ERROR')
+                        );
+                        break;
+                    default:
+                        GambioStore.showError(
+                            GambioStore.translation.translate('WARNING_TITLE'),
+                            GambioStore.translation.translate('UNKOWN_ERROR')
+                        );
+                        break;
+                }
+                return {};
+            });
+    })
 };
 
 /**
