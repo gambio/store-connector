@@ -243,7 +243,7 @@ class GambioStoreInstallation
     private function installPackage()
     {
         foreach ($this->getPackageFilesDestinations() as $file) {
-            $newPackageFile = 'cache/' . $this->getTransactionId() . '/' . $file;
+            $newPackageFile = 'cache/GambioStore/' . $this->getTransactionId() . '/' . $file;
             
             // Replace the old package file with new
             $this->filesystem->move($newPackageFile, $file);
@@ -309,12 +309,13 @@ class GambioStoreInstallation
      *
      * @return bool
      * @throws \GambioStoreZipException|\GambioStoreHttpErrorException
-     * @throws \GambioStoreFileHashMismatchException
+     * @throws \GambioStoreFileHashMismatchException|\GambioStoreCreateDirectoryException
      */
     private function downloadPackageZipToCacheFolder()
     {
         $destinationFileName = $this->getTransactionId() . '.zip';
         $destinationFilePath = $this->filesystem->getCacheDirectory() . '/' . $destinationFileName;
+        $this->filesystem->createDirectory(dirname($destinationFilePath));
         $downloadZipUrl = $this->packageData['fileList']['zip']['source'];
         $fileContent    = $this->getFileContent($downloadZipUrl);
         file_put_contents($destinationFilePath, $fileContent);
@@ -375,16 +376,20 @@ class GambioStoreInstallation
      */
     private function cleanCache()
     {
-        $targetFilePath = 'cache/' . $this->getTransactionId() . '.zip';
-        if (file_exists($this->filesystem->getShopDirectory() . '/' . $targetFilePath)) {
-            $this->filesystem->remove($targetFilePath);
-        }
-        
-        $targetFilePath = 'cache/' . $this->getTransactionId();
-        if (file_exists($this->filesystem->getShopDirectory() . '/' . $targetFilePath)) {
-            $this->filesystem->remove($targetFilePath);
-        }
-        
-        $this->backup->removePackageFilesFromCache($this->getPackageFilesDestinations());
+        $this->filesystem->remove('cache/GambioStore/');
+        //
+        //
+        //
+        //$targetFilePath = 'cache/GambioStore/' . $this->getTransactionId() . '.zip';
+        //if (file_exists($this->filesystem->getShopDirectory() . '/' . $targetFilePath)) {
+        //    $this->filesystem->remove($targetFilePath);
+        //}
+        //
+        //$targetFilePath = 'cache/GambioStore/' . $this->getTransactionId();
+        //if (file_exists($this->filesystem->getShopDirectory() . '/' . $targetFilePath)) {
+        //    $this->filesystem->remove($targetFilePath);
+        //}
+        //
+        //$this->backup->removePackageFilesFromCache($this->getPackageFilesDestinations());
     }
 }

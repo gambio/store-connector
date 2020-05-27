@@ -67,7 +67,7 @@ class GambioStoreBackup
             }
             
             if (file_exists($packageFileSource) && is_file($packageFileSource)) {
-                $this->fileSystem->move($file, 'cache/backup/' . $file . '.bak');
+                $this->fileSystem->move($file, 'cache/backup/GambioStore' . $file . '.bak');
             }
         }
     }

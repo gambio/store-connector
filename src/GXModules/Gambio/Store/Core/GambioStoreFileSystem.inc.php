@@ -440,7 +440,7 @@ class GambioStoreFileSystem
      */
     public function getCacheDirectory()
     {
-        return $this->getShopDirectory() . '/cache';
+        return $this->getShopDirectory() . '/cache/GambioStore';
     }
 }
 
