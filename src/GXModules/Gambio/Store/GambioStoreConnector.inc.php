@@ -68,6 +68,7 @@ class GambioStoreConnector
      * @var \GambioStoreCache
      */
     private $cache;
+    
     /**
      * @var \GambioStoreBackup
      */
