@@ -18,6 +18,6 @@ $t_language_text_section_content_array = [
     'INSTALLING_PACKAGE'             => 'Installing package ...',
     'PREPARING_PACKAGE'              => 'Preparing package ...',
     'WARNING_TITLE'                  => 'Warning:',
-    'LOGS_FOLDER_PERMISSION_ERROR'   => 'The logs folder is not writable. Check permissions.',
+    'LOGS_FOLDER_PERMISSION_ERROR'   => 'The logs directory "GXModules/Gambio/Store/Logs" is not writable. Please ensure write permissions.',
     'DATABASE_INTEGRITY_ERROR'       => 'There are important values missing in the database.',
 ];
