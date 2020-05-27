@@ -76,7 +76,9 @@ class GambioStoreController extends AdminHttpViewController
     
         setcookie('auto_updater_admin_check', 'admin_logged_in', time() + 5 * 60, '/');
         
-        if ($this->configuration->get('GAMBIO_STORE_ACCEPTED_DATA_PROCESSING') === false) {
+        $isDataProcessingAccepted = $this->configuration->get('GAMBIO_STORE_ACCEPTED_DATA_PROCESSING');
+    
+        if ($isDataProcessingAccepted === false || $isDataProcessingAccepted === '') {
             $data = $this->getIFrameTemplateData('/dataprocessing');
         } elseif ($this->configuration->get('GAMBIO_STORE_IS_REGISTERED') === false) {
             $data = $this->getIFrameTemplateData('/register');
