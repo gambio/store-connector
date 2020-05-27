@@ -52,6 +52,7 @@ class GambioStoreController extends AdminHttpViewController
      * Determines whether to display the data processing terms, the registration or the downloads page of the iframe
      *
      * @return mixed
+     * @throws \GambioStoreLanguageNotResolvableException
      */
     public function actionDefault()
     {
@@ -75,14 +76,12 @@ class GambioStoreController extends AdminHttpViewController
         }
     
         setcookie('auto_updater_admin_check', 'admin_logged_in', time() + 5 * 60, '/');
-        
-        $isDataProcessingAccepted = $this->configuration->get('GAMBIO_STORE_ACCEPTED_DATA_PROCESSING');
     
-        if ($isDataProcessingAccepted === false || $isDataProcessingAccepted === '') {
+        if ((bool)$this->configuration->get('GAMBIO_STORE_ACCEPTED_DATA_PROCESSING')) {
             $data = $this->getIFrameTemplateData('/dataprocessing');
-        } elseif ($this->configuration->get('GAMBIO_STORE_IS_REGISTERED') === false) {
+        } elseif ((bool)$this->configuration->get('GAMBIO_STORE_IS_REGISTERED') === false) {
             $data = $this->getIFrameTemplateData('/register');
-        } elseif ($this->configuration->get('GAMBIO_STORE_ACCEPTED_DATA_PROCESSING') === true) {
+        } elseif ((bool)$this->configuration->get('GAMBIO_STORE_ACCEPTED_DATA_PROCESSING') === true) {
             $contentNavigation = $this->getStoreNavigation();
             $data              = $this->getIFrameTemplateData('/downloads');
         }
