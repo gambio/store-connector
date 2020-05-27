@@ -85,8 +85,6 @@ class GambioStoreController extends AdminHttpViewController
             $data              = $this->getIFrameTemplateData('/downloads');
         }
         
-        $data = [];
-        
         if (empty($data)) {
             $this->appendError('DATABASE_INTEGRITY_ERROR');
             return $this->showCriticalErrorPage();
