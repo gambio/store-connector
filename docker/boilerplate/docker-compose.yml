@@ -3,7 +3,7 @@ services:
     server:
         build: ./server
         image: shop/php-{{phpVersion}}:v1
-        container_name: store-connector-server-{{branch}-{{phpVersion}}}
+        container_name: store-connector-server-{{branch}}-{{phpVersion}}}
         ports:
         - "{{serverPort}}:80"
         volumes:
