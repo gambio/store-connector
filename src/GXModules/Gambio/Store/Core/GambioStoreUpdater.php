@@ -57,6 +57,7 @@ class GambioStoreUpdater
     public function update()
     {
         $this->ensureLogsAreWritable();
+        $this->ensureStoreFolderIsWritableForUpdates();
         $this->removeOldStoreFilesInShop();
         $this->updateMenu();
         $this->createDatabaseKeysIfNotExists();
@@ -153,5 +154,14 @@ class GambioStoreUpdater
         $this->fileSystem->remove('admin/javascript/engine/controllers/gambio_store');
         $this->fileSystem->remove('lang/german/original_sections/admin/gambio_store');
         $this->fileSystem->remove('lang/english/original_sections/admin/gambio_store');
+    }
+    
+    
+    /**
+     * Ensures the GambioStore directory is writable for future updates
+     */
+    private function ensureStoreFolderIsWritableForUpdates()
+    {
+        @chmod($this->fileSystem->getShopDirectory() . '/GXModules/Gambio/Store', 777);
     }
 }
