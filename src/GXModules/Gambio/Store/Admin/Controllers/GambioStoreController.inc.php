@@ -81,11 +81,11 @@ class GambioStoreController extends AdminHttpViewController
     
         setcookie('auto_updater_admin_check', 'admin_logged_in', time() + 5 * 60, '/');
     
-        if ((bool)$this->configuration->get('GAMBIO_STORE_ACCEPTED_DATA_PROCESSING') === false) {
+        if ($this->configuration->get('GAMBIO_STORE_ACCEPTED_DATA_PROCESSING') === false) {
             $data = $this->getIFrameTemplateData('/dataprocessing');
-        } elseif ((bool)$this->configuration->get('GAMBIO_STORE_IS_REGISTERED') === false) {
+        } elseif ($this->configuration->get('GAMBIO_STORE_IS_REGISTERED') === false) {
             $data = $this->getIFrameTemplateData('/register');
-        } elseif ((bool)$this->configuration->get('GAMBIO_STORE_ACCEPTED_DATA_PROCESSING') === true) {
+        } elseif ($this->configuration->get('GAMBIO_STORE_ACCEPTED_DATA_PROCESSING') === true) {
             $contentNavigation = $this->getStoreNavigation();
             $data              = $this->getIFrameTemplateData('/downloads');
         }
