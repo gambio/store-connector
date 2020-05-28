@@ -21,13 +21,13 @@
  * @return {Function} Returns the gulp task definition.
  */
 module.exports = (gulp, $) => {
-	const del = require('del');
-	
-	return (done) => {
-		del.sync([
-			'src/GXModules/*/*/Build'
-		]);
-		
-		done();
-	};
+    const del = require('del');
+    
+    return (done) => {
+        del.sync([
+            'src/GXModules/*/*/Build'
+        ]);
+        
+        done();
+    };
 };

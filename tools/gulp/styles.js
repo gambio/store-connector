@@ -21,16 +21,16 @@
  * @return {Function} Returns the gulp task definition.
  */
 module.exports = function(gulp, $) {
-	const fs = require('fs');
-	const path = require('path');
-	
-	const isDir = (file) => {
-		return fs.lstatSync(file.path).isDirectory();
-	};
-	
-	const isHtml = (file) => {
-		return (path.extname(file.path) === '.html');
-	};
+    const fs = require('fs');
+    const path = require('path');
+    
+    const isDir = (file) => {
+        return fs.lstatSync(file.path).isDirectory();
+    };
+    
+    const isHtml = (file) => {
+        return (path.extname(file.path) === '.html');
+    };
     
     const compile = () => {
         return new Promise((resolve, reject) => {
@@ -51,13 +51,13 @@ module.exports = function(gulp, $) {
                 .pipe(gulp.dest(`src/GXModules/Gambio/Store/Build`));
         });
     };
-	
-	return (done) => {
+    
+    return (done) => {
         compile()
             .catch((error) => {
                 $.util.log($.util.colors.red(`Unexpected styles compilation error: ${error}`));
                 // process.exit(1);
             })
             .finally(done);
-	};
+    };
 };

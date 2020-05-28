@@ -21,5 +21,5 @@
  * @return {Function} Returns the gulp task definition.
  */
 module.exports = (gulp, $) => {
-    return gulp.series('clean', 'scripts', 'styles'); 
+    return gulp.series('clean', 'scripts', 'styles');
 };

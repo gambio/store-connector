@@ -21,8 +21,8 @@
  * @return {Function} Returns the gulp task definition.
  */
 module.exports = (gulp, $) => {
-	return (done) => {
-		const information = `
+    return (done) => {
+        const information = `
 \n\n\n
 
 Store Connector - Gulp Workflow
@@ -73,9 +73,9 @@ Gulp Tasks:
 - "gulp watch": Starts the file watches for the project.
 
 \n\n\n`.replace(/\t/g, '');
-
-		$.util.log(information);
-		
-		done();
-	};
+        
+        $.util.log(information);
+        
+        done();
+    };
 };

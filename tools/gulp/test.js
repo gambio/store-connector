@@ -20,7 +20,7 @@
  * @return {Function} Returns the gulp task definition.
  */
 module.exports = (gulp, $) => {
-	return $.shell.task([
-		'php vendor/bin/phpunit --configuration phpunit.xml tests'
-	]);
+    return $.shell.task([
+        'php vendor/bin/phpunit --configuration phpunit.xml tests'
+    ]);
 };

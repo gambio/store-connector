@@ -22,28 +22,28 @@
  * @return {Function} Returns the gulp task definition.
  */
 module.exports = function(gulp, $) {
-	return (done) => {
-		gulp.watch([
-				'src/GXModules/**/*.js',
-				'!src/GXModules/**/*.min.js',
-				'!src/GXModules/*/*/Build/**',
-				'!src/GXModules/**/Templates/**'
-			],
-			gulp.series('scripts'));
-		
-		gulp.watch([
-				'src/GXModules/**/*.css',
-				'!src/GXModules/**/*.min.css',
-				'!src/GXModules/*/*/Build/**',
-				'!src/GXModules/**/Templates/**'
-			],
-			gulp.series('styles'));
-		
-		gulp.watch([
-				'src/**/*',
-			],
-			gulp.series('sync'));
-		
-		done();
-	};
+    return (done) => {
+        gulp.watch([
+                'src/GXModules/**/*.js',
+                '!src/GXModules/**/*.min.js',
+                '!src/GXModules/*/*/Build/**',
+                '!src/GXModules/**/Templates/**'
+            ],
+            gulp.series('scripts'));
+        
+        gulp.watch([
+                'src/GXModules/**/*.css',
+                '!src/GXModules/**/*.min.css',
+                '!src/GXModules/*/*/Build/**',
+                '!src/GXModules/**/Templates/**'
+            ],
+            gulp.series('styles'));
+        
+        gulp.watch([
+                'src/**/*',
+            ],
+            gulp.series('sync'));
+        
+        done();
+    };
 };

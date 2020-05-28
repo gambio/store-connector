@@ -18,20 +18,20 @@
  * @type {Object}
  */
 module.exports = {
-	/**
-	 * Exports a function that returns the values of command line arguments.
-	 *
-	 * Example:
-	 *   // $ node index.js --custom-arg custom-value
-	 *   const environment = require('./lib/environment');
-	 *   const value = environment.getArgument('custom-arg'); // Returns 'custom-value'.
-	 *
-	 * @param {String} name The argument name without the initial '--' characters.
-	 *
-	 * @return {String} Returns the value of the requested parameter.
-	 */
-	getArgument(name) {
-		const index = process.argv.indexOf('--' + name);
-		return index > -1 ? process.argv[index + 1] : undefined;
-	}
+    /**
+     * Exports a function that returns the values of command line arguments.
+     *
+     * Example:
+     *   // $ node index.js --custom-arg custom-value
+     *   const environment = require('./lib/environment');
+     *   const value = environment.getArgument('custom-arg'); // Returns 'custom-value'.
+     *
+     * @param {String} name The argument name without the initial '--' characters.
+     *
+     * @return {String} Returns the value of the requested parameter.
+     */
+    getArgument(name) {
+        const index = process.argv.indexOf('--' + name);
+        return index > -1 ? process.argv[index + 1] : undefined;
+    }
 };

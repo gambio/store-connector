@@ -22,19 +22,19 @@
  * @return {Function} Returns the gulp task definition.
  */
 module.exports = function(gulp, $) {
-	const fs = require('fs');
-	const path = require('path');
-	
-	const isDir = (file) => {
-		return fs.lstatSync(file.path).isDirectory();
-	};
-	
-	const isHtml = (file) => {
-		return path.extname(file.path) === '.html';
-	};
-	
-	const compile = (src, dest) => {
-	    return new Promise((resolve, reject) => {
+    const fs = require('fs');
+    const path = require('path');
+    
+    const isDir = (file) => {
+        return fs.lstatSync(file.path).isDirectory();
+    };
+    
+    const isHtml = (file) => {
+        return path.extname(file.path) === '.html';
+    };
+    
+    const compile = (src, dest) => {
+        return new Promise((resolve, reject) => {
             gulp.src([
                 `${src}/**/*.js`,
                 `!${src}/**/*.min.js`,
@@ -54,31 +54,31 @@ module.exports = function(gulp, $) {
                 .pipe($.rename({suffix: '.min'}))
                 .pipe(gulp.dest(dest));
         });
-	};
-	
-	return (done) => {
-		const vendorNames = fs.readdirSync('src/GXModules')
-			.filter(file => fs.statSync(path.join('src/GXModules', file)).isDirectory());
-		
-		const compilations = [];
-		
-		for (let vendorName of vendorNames) {
-			const moduleNames = fs.readdirSync('src/GXModules/' + vendorName)
-				.filter(file => fs.statSync(path.join('src/GXModules/', vendorName, file)).isDirectory());
-			
-			for (let moduleName of moduleNames) {
-			    const src = path.join('src', 'GXModules', vendorName, moduleName);
-			    const dest = path.join('src', 'GXModules', vendorName, moduleName, 'Build');
-				compilations.push(compile(src, dest));
-			}
-		}
-		
-		Promise
+    };
+    
+    return (done) => {
+        const vendorNames = fs.readdirSync('src/GXModules')
+            .filter(file => fs.statSync(path.join('src/GXModules', file)).isDirectory());
+        
+        const compilations = [];
+        
+        for (let vendorName of vendorNames) {
+            const moduleNames = fs.readdirSync('src/GXModules/' + vendorName)
+                .filter(file => fs.statSync(path.join('src/GXModules/', vendorName, file)).isDirectory());
+            
+            for (let moduleName of moduleNames) {
+                const src = path.join('src', 'GXModules', vendorName, moduleName);
+                const dest = path.join('src', 'GXModules', vendorName, moduleName, 'Build');
+                compilations.push(compile(src, dest));
+            }
+        }
+        
+        Promise
             .all(compilations)
             .catch((error) => {
                 $.util.log($.util.colors.red(`Unexpected scripts compilation error: ${error}`));
                 // process.exit(1);
             })
             .finally(done)
-	};
+    };
 };

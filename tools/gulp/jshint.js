@@ -21,44 +21,44 @@
  * @return {Function} Returns the gulp task definition.
  */
 module.exports = function(gulp, $) {
-	return (done) => {
-		
-		const config = {
-			jquery: true,
-			browser: true,
-			esversion: 6,
-			camelcase: false,
-			eqeqeq: true,
-			indent: 4,
-			latedef: true,
-			maxlen: 120,
-			newcap: true,
-			quotmark: 'single',
-			strict: true,
-			undef: true,
-			unused: false,
-			predef: [
-				'gx',
-				'js_options',
-				'CKEDITOR',
-				'Mustache',
-				'Morris',
-				'alert',
-				'console',
-				'moment'
-			],
-			eqnull: true,
-			laxbreak: true,
-			laxcomma: true
-		};
-		
-		gulp.src([
-			'src/GXModules/**/*.js',
-			'!src/GXModules/*/*/Build/**/*.js',
-		])
-			.pipe($.jshint(config))
-			.pipe($.jshint.reporter('jshint-stylish'));
-		
-		done();
-	};
+    return (done) => {
+        
+        const config = {
+            jquery: true,
+            browser: true,
+            esversion: 6,
+            camelcase: false,
+            eqeqeq: true,
+            indent: 4,
+            latedef: true,
+            maxlen: 120,
+            newcap: true,
+            quotmark: 'single',
+            strict: true,
+            undef: true,
+            unused: false,
+            predef: [
+                'gx',
+                'js_options',
+                'CKEDITOR',
+                'Mustache',
+                'Morris',
+                'alert',
+                'console',
+                'moment'
+            ],
+            eqnull: true,
+            laxbreak: true,
+            laxcomma: true
+        };
+        
+        gulp.src([
+            'src/GXModules/**/*.js',
+            '!src/GXModules/*/*/Build/**/*.js',
+        ])
+            .pipe($.jshint(config))
+            .pipe($.jshint.reporter('jshint-stylish'));
+        
+        done();
+    };
 };

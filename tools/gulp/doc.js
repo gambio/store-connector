@@ -23,5 +23,5 @@
  * @return {Function} Returns the gulp task definition.
  */
 module.exports = (gulp, $) => {
-	return $.shell.task(['bash docs/generate-docs.sh']);
+    return $.shell.task(['bash docs/generate-docs.sh']);
 };
