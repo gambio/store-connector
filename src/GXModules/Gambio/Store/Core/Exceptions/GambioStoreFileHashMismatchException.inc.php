@@ -1,18 +1,20 @@
 <?php
 /* --------------------------------------------------------------
-GambioStoreFileHashMismatchException.inc.php 2020-05-26
-Gambio GmbH
-http://www.gambio.de
-Copyright (c) 2020 Gambio GmbH
-Released under the GNU General Public License (Version 2)
-[http://www.gnu.org/licenses/gpl-2.0.html]
+  GambioStoreFileHashMismatchException.inc.php 2020-05-28
+  Gambio GmbH
+  http://www.gambio.de
+  Copyright (c) 2020 Gambio GmbH
+  Released under the GNU General Public License (Version 2)
+  [http://www.gnu.org/licenses/gpl-2.0.html]
 --------------------------------------------------------------
 */
+
+require_once 'GambioStoreException.inc.php';
 
 /**
  * Class GambioStoreFileHashMismatchException
  */
-class GambioStoreFileHashMismatchException extends Exception
+class GambioStoreFileHashMismatchException extends GambioStoreException
 {
 
 }
