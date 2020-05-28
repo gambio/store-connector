@@ -118,6 +118,7 @@ class GambioStoreUpdater
         if (!$this->configuration->has('GAMBIO_STORE_ACCEPTED_DATA_PROCESSING')) {
             if ($this->configuration->has('ADMIN_FEED_ACCEPTED_SHOP_INFORMATION_DATA_PROCESSING')) {
                 $value = $this->configuration->get('ADMIN_FEED_ACCEPTED_SHOP_INFORMATION_DATA_PROCESSING');
+                $value = $value == '1' || (strcasecmp($value, 'true') == 0);
                 $this->configuration->create('GAMBIO_STORE_ACCEPTED_DATA_PROCESSING', $value);
             } else {
                 $this->configuration->create('GAMBIO_STORE_ACCEPTED_DATA_PROCESSING', false);
