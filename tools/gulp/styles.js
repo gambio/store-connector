@@ -56,7 +56,6 @@ module.exports = function(gulp, $) {
         compile()
             .catch((error) => {
                 $.util.log($.util.colors.red(`Unexpected styles compilation error: ${error}`));
-                // process.exit(1);
             })
             .finally(done);
     };

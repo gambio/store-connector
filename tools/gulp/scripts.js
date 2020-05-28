@@ -77,7 +77,6 @@ module.exports = function(gulp, $) {
             .all(compilations)
             .catch((error) => {
                 $.util.log($.util.colors.red(`Unexpected scripts compilation error: ${error}`));
-                // process.exit(1);
             })
             .finally(done)
     };
