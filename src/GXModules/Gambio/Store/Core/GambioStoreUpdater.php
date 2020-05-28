@@ -70,7 +70,7 @@ class GambioStoreUpdater
      */
     private function ensureLogsAreWritable()
     {
-        @chmod($this->fileSystem->getShopDirectory() . '/GXModules/Gambio/Store/Logs', 755);
+        @chmod($this->fileSystem->getShopDirectory() . '/GXModules/Gambio/Store/Logs', 777);
     }
     
     
@@ -162,6 +162,6 @@ class GambioStoreUpdater
      */
     private function ensureStoreFolderIsWritableForUpdates()
     {
-        @chmod($this->fileSystem->getShopDirectory() . '/GXModules/Gambio/Store', 755);
+        @chmod($this->fileSystem->getShopDirectory() . '/GXModules/Gambio/Store', 777);
     }
 }
