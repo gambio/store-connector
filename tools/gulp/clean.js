@@ -15,7 +15,7 @@
  *
  * This task will remove all the "Build" directory.
  *
- * @param {Gulp} gulp Gulp Instance
+ * @param {Gulp} gulp Gulp instance.
  * @param {Object} $ Contains the automatically loaded gulp plugins.
  *
  * @return {Function} Returns the gulp task definition.
@@ -23,9 +23,11 @@
 module.exports = (gulp, $) => {
 	const del = require('del');
 	
-	return () => {
+	return (done) => {
 		del.sync([
 			'src/GXModules/*/*/Build'
 		]);
+		
+		done();
 	};
 };

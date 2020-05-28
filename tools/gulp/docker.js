@@ -13,7 +13,7 @@
 /**
  * Gulp Docker Task
  *
- * @param {Gulp} gulp Gulp Instance
+ * @param {Gulp} gulp Gulp instance.
  * @param {Object} $ Contains the automatically loaded gulp plugins.
  *
  * @return {Function} Returns the gulp task definition.
@@ -38,7 +38,7 @@ module.exports = (gulp, $) => {
 		fs.writeFileSync(filePath, contents, 'utf8');
 	};
 
-	return () => {
+	return (done) => {
 		const shopBranchName = environment.getArgument('branch') || '4.1_develop'
 
 		if (!shopBranchName) {
@@ -140,5 +140,7 @@ Once they're running, execute the "install.sh" script from within "${clonePath}"
 		`;
 
 		console.info(usage);
+		
+		done();
 	};
 };

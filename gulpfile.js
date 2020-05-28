@@ -81,7 +81,7 @@ Gulp workflow brought to you by ...
                                                    Copyright © ${new Date().getFullYear()}
 
 
-* This gulp configuration has a minimum requirement of NodeJS v10.
+* This gulp configuration has a minimum requirement of NodeJS v12.
 
 * Execute 'gulp' to build all the dynamic resources of the project.
 
@@ -116,9 +116,7 @@ gulp.src = function() {
 
 [
     'archive',
-    'build',
     'clean',
-    'dev',
     'doc',
     'docker',
     'help',
@@ -127,8 +125,10 @@ gulp.src = function() {
     'styles',
     'sync',
     'test',
-    'watch'
+    'watch',
+    'dev',
+    'build',
 ]
     .forEach(task => gulp.task(task, require('./tools/gulp/' + task)(gulp, $)));
 
-gulp.task('default', ['build']);
+gulp.task('default', gulp.series('build'));

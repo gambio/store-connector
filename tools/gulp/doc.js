@@ -15,7 +15,7 @@
  *
  * This task will generate the Store Connector documentation.
  *
- * @param {Gulp} gulp Gulp Instance
+ * @param {Gulp} gulp Gulp instance.
  * @param {Object} $ Contains the automatically loaded gulp plugins.
  *
  * @todo There is a known phpdox issue with php 7.2 --> https://github.com/theseer/phpdox/issues/315

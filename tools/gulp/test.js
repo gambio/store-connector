@@ -14,7 +14,7 @@
  *
  * This task will execute all the connector tests.
  *
- * @param {Gulp} gulp Gulp Instance
+ * @param {Gulp} gulp Gulp instance.
  * @param {Object} $ Contains the automatically loaded gulp plugins.
  *
  * @return {Function} Returns the gulp task definition.

@@ -15,35 +15,47 @@
  *
  * This task will generate the Store Connector documentation.
  *
- * @param {Gulp} gulp Gulp Instance
+ * @param {Gulp} gulp Gulp instance.
  * @param {Object} $ Contains the automatically loaded gulp plugins.
  *
  * @return {Function} Returns the gulp task definition.
  */
 module.exports = (gulp, $) => {
 	const environment = require('./lib/environment');
-	const fsExtra = require('fs-extra');
-	const fs = require('fs');
+	const fs = require('fs-extra');
 	
-	return () => {
-		const shopVersions = fs.readdirSync('docker').filter(dir => dir !== 'boilerplate');
+	const syncWithTarget = (target) => {
+        if (!fs.existsSync(target)) {
+            target = `docker/${target}/shop/src`;
+            
+            if (!fs.existsSync(target)) {
+                throw new Error('Target directory was not found at ' + target);
+            }
+        }
+        
+        gulp.src('src/**/*')
+            .pipe(gulp.dest(target));
+    };
+	
+	const syncWithDockerShops = (dockerShops) => {
+	    dockerShops.forEach((dockerShop) => syncWithTarget(`docker/${dockerShop}/shop/src`));
+    }; 
+	
+	return (done) => {
+		const dockerShops = fs.readdirSync('docker').filter((directory) => directory !== 'boilerplate'); 
 		
-		if(shopVersions.length === 0)
-		{
-			throw new Error('"docker/" directory has no version in it.')
+		if (!dockerShops.length) {
+			throw new Error('No local docker shops found, clone one by running "gulp docker".');
 		}
 		
-		let target = environment.getArgument('target') || `docker/${shopVersions[0]}/shop/src`;
+		let target = environment.getArgument('target');
 		
-		if (!fsExtra.existsSync(target)) {
-			target = 'docker/' + target + '/shop/src';
-			
-			if (!fsExtra.existsSync(target)) {
-				throw new Error('Target directory was not found at ' + target);
-			}
-		}
+		if (target) {
+		    syncWithTarget(target); 
+        } else {
+		    syncWithDockerShops(dockerShops);
+        }
 		
-		return gulp.src('src/**/*')
-			.pipe(gulp.dest(target));
+		done();
 	}
 };

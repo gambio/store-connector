@@ -15,33 +15,31 @@
  *
  * This task will initialize the required sub-tasks for development.
  *
- * @param {Gulp} gulp Gulp Instance
+ * @param {Gulp} gulp Gulp instance.
  * @param {Object} $ Contains the automatically loaded gulp plugins.
  *
  * @return {Function} Returns the gulp task definition.
  */
 module.exports = (gulp, $) => {
-	const gulpSync = require('gulp-sync')(gulp);
-	const del = require('del');
-	const fs = require('fs');
-	const environment = require('./lib/environment');
-	
-	return () => {
-		global.devEnvironment = true;
-		const shopVersions = fs.readdirSync('docker').filter(dir => dir !== 'boilerplate');
-		
-		if (shopVersions.length === 0) {
-			throw new Error('"docker/" directory has no version in it.')
-		}
-		
-		let target = environment.getArgument('target') || `docker/${shopVersions[0]}/shop/src`;
-		
-		del.sync([
-			target + '/GXModules/Gambio/Hub'
-		]);
-		
-		gulp.start(gulpSync.sync([
-			'clean', 'scripts', 'styles', 'watch', 'sync'
-		], 'dev'));
-	};
+    const del = require('del');
+    const fs = require('fs');
+    const environment = require('./lib/environment');
+    
+    const boot = (done) => {
+        const shopVersions = fs.readdirSync('docker').filter(dir => dir !== 'boilerplate');
+        
+        if (shopVersions.length === 0) {
+            throw new Error('"docker/" directory has no version in it.')
+        }
+        
+        let target = environment.getArgument('target') || `docker/${shopVersions[0]}/shop/src`;
+        
+        del.sync([
+            target + '/GXModules/Gambio/Hub'
+        ]);
+        
+        done();
+    };
+    
+    return gulp.series(boot, 'clean', 'scripts', 'styles', 'watch', 'sync');
 };

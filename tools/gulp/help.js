@@ -15,21 +15,18 @@
  *
  * This task will output verbose information regarding the Gulp tasks.
  *
- * @param {Gulp} gulp Gulp Instance
+ * @param {Gulp} gulp Gulp instance.
  * @param {Object} $ Contains the automatically loaded gulp plugins.
  *
  * @return {Function} Returns the gulp task definition.
  */
 module.exports = (gulp, $) => {
-	return () => {
+	return (done) => {
 		const information = `
 \n\n\n
 
 Store Connector - Gulp Workflow
 ------------------------------
-
-The gulp workflow provided for this repository is quite similar to GX, with the only difference being the lack of
-multiple task domains (e.g. general, admin, jsengine etc). Therefore you do not need to prefix the tasks.
 
 Docker Support:
 
@@ -78,5 +75,7 @@ Gulp Tasks:
 \n\n\n`.replace(/\t/g, '');
 
 		$.util.log(information);
+		
+		done();
 	};
 };

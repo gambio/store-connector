@@ -15,7 +15,7 @@
  *
  * This task will create a zip archive with the connector files.
  *
- * @param {Gulp} gulp Gulp Instance
+ * @param {Gulp} gulp Gulp instance.
  * @param {Object} $ Contains the automatically loaded gulp plugins.
  *
  * @return {Function} Returns the gulp task definition.
@@ -25,7 +25,7 @@ module.exports = (gulp, $) => {
 	const del = require('del');
 	const zip = require('zip-dir');
 	
-	return (async) => {
+	return (done) => {
 		del.sync('build');
         
         fs.mkdirSync('build');
@@ -37,7 +37,6 @@ module.exports = (gulp, $) => {
         fs.copySync('archive/Lizenzen', 'build/Shopsystem/Lizenzen');
         fs.copySync('src', 'build/Shopsystem/Dateien');
 
-
 		zip('build', {saveTo: 'Gambio Store Connector 0.0.0.zip'}, function(error, buffer) {
 			if (error) {
 				console.error('Zip Error', error);
@@ -45,7 +44,7 @@ module.exports = (gulp, $) => {
 
 			del.sync('build');
 
-			async();
+			done();
 		});
 	};
 };

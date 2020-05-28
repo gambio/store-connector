@@ -16,20 +16,20 @@
  * This task will place a watcher upon the Store Connector scripts and styles and it will execute the
  * required operations whenever a file is changed.
  *
- * @param {Gulp} gulp Gulp Instance
+ * @param {Gulp} gulp Gulp instance.
  * @param {Object} $ Contains the automatically loaded gulp plugins.
  *
  * @return {Function} Returns the gulp task definition.
  */
 module.exports = function(gulp, $) {
-	return () => {
+	return (done) => {
 		gulp.watch([
 				'src/GXModules/**/*.js',
 				'!src/GXModules/**/*.min.js',
 				'!src/GXModules/*/*/Build/**',
 				'!src/GXModules/**/Templates/**'
 			],
-			['scripts']);
+			gulp.series('scripts'));
 		
 		gulp.watch([
 				'src/GXModules/**/*.css',
@@ -37,11 +37,13 @@ module.exports = function(gulp, $) {
 				'!src/GXModules/*/*/Build/**',
 				'!src/GXModules/**/Templates/**'
 			],
-			['styles']);
+			gulp.series('styles'));
 		
 		gulp.watch([
 				'src/**/*',
 			],
-			['sync']);
+			gulp.series('sync'));
+		
+		done();
 	};
 };

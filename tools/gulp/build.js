@@ -15,13 +15,11 @@
  *
  * This task will build the javascript and style files.
  *
- * @param {Gulp} gulp Gulp Instance
+ * @param {Gulp} gulp Gulp instance.
  * @param {Object} $ Contains the automatically loaded gulp plugins.
  *
  * @return {Function} Returns the gulp task definition.
  */
 module.exports = (gulp, $) => {
-	const gulpSync = require('gulp-sync')(gulp);
-	
-	return gulpSync.sync(['clean', 'scripts', 'styles'], 'build');
+    return gulp.series('clean', 'scripts', 'styles'); 
 };

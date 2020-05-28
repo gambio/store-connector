@@ -16,7 +16,7 @@
  * This task will concatenate and minify the javascript files. The final files will be
  * placed in the GXModules/Gambio/Store/Build directory.
  *
- * @param {Gulp} gulp Gulp Instance
+ * @param {Gulp} gulp Gulp instance.
  * @param {Object} $ Contains the automatically loaded gulp plugins.
  *
  * @return {Function} Returns the gulp task definition.
@@ -56,7 +56,7 @@ module.exports = function(gulp, $) {
         });
 	};
 	
-	return (async) => {
+	return (done) => {
 		const vendorNames = fs.readdirSync('src/GXModules')
 			.filter(file => fs.statSync(path.join('src/GXModules', file)).isDirectory());
 		
@@ -73,11 +73,12 @@ module.exports = function(gulp, $) {
 			}
 		}
 		
-		Promise.all(compilations)
-            .then(() => async())
+		Promise
+            .all(compilations)
             .catch((error) => {
                 $.util.log($.util.colors.red(`Unexpected scripts compilation error: ${error}`));
-                process.exit(1);
-            });
+                // process.exit(1);
+            })
+            .finally(done)
 	};
 };

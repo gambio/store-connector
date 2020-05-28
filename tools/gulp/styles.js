@@ -15,7 +15,7 @@
  *
  * This task will handle the compilation of CSS files.
  *
- * @param {Gulp} gulp Gulp Instance
+ * @param {Gulp} gulp Gulp instance.
  * @param {Object} $ Contains the automatically loaded gulp plugins.
  *
  * @return {Function} Returns the gulp task definition.
@@ -52,12 +52,12 @@ module.exports = function(gulp, $) {
         });
     };
 	
-	return (async) => {
+	return (done) => {
         compile()
-            .then(() => async())
             .catch((error) => {
                 $.util.log($.util.colors.red(`Unexpected styles compilation error: ${error}`));
-                process.exit(1);
-            });
+                // process.exit(1);
+            })
+            .finally(done);
 	};
 };

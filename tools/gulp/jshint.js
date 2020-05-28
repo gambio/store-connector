@@ -15,13 +15,13 @@
  *
  * Perform JSHint checks in the javascript files.
  *
- * @param {Gulp} gulp Gulp Instance
+ * @param {Gulp} gulp Gulp instance.
  * @param {Object} $ Contains the automatically loaded gulp plugins.
  *
  * @return {Function} Returns the gulp task definition.
  */
 module.exports = function(gulp, $) {
-	return () => {
+	return (done) => {
 		
 		const config = {
 			jquery: true,
@@ -52,11 +52,13 @@ module.exports = function(gulp, $) {
 			laxcomma: true
 		};
 		
-		return gulp.src([
+		gulp.src([
 			'src/GXModules/**/*.js',
 			'!src/GXModules/*/*/Build/**/*.js',
 		])
 			.pipe($.jshint(config))
 			.pipe($.jshint.reporter('jshint-stylish'));
+		
+		done();
 	};
 };
