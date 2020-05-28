@@ -107,7 +107,7 @@ const uninstallPackage = async (data) => {
 		});
 		GambioStore.messenger.sendMessage('uninstall_succeeded');
 	} catch (error) {
-		GambioStore.messenger.sendMessage('uninstall_failed', error);
+		GambioStore.messenger.sendMessage('uninstall_failed', error.context || error);
 	}
 }
 
