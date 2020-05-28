@@ -54,6 +54,11 @@ class GambioStoreInstallation
      */
     private $filesystem;
     
+    /**
+     * @var \GambioStoreMigration
+     */
+    private $migration;
+    
     
     /**
      * GambioStoreInstallation constructor.
@@ -64,6 +69,7 @@ class GambioStoreInstallation
      * @param \GambioStoreLogger     $logger
      * @param \GambioStoreFileSystem $filesystem
      * @param \GambioStoreBackup     $backup
+     * @param \GambioStoreMigration  $migration
      */
     public function __construct(
         array $packageData,
@@ -71,7 +77,8 @@ class GambioStoreInstallation
         GambioStoreCache $cache,
         GambioStoreLogger $logger,
         GambioStoreFileSystem $filesystem,
-        GambioStoreBackup $backup
+        GambioStoreBackup $backup,
+        GambioStoreMigration $migration
     ) {
         $this->packageData = $packageData;
         $this->token       = $token;
@@ -79,6 +86,7 @@ class GambioStoreInstallation
         $this->logger      = $logger;
         $this->filesystem  = $filesystem;
         $this->backup      = $backup;
+        $this->migration   = $migration;
         
         register_shutdown_function([$this, 'registerShutdownFunction']);
     }
@@ -163,7 +171,7 @@ class GambioStoreInstallation
             $this->downloadPackageToCacheFolder();
             $this->backup->movePackageFilesToCache($destination);
             $this->installPackage();
-            $this->migrate();
+            $this->migration->up();
         } catch (GambioStoreCreateDirectoryException $e) {
             $message = 'Could not install package: ' . $this->packageData['details']['title']['de'];
             $this->logger->error($message, [
@@ -248,27 +256,6 @@ class GambioStoreInstallation
             // Replace the old package file with new
             $this->filesystem->move($newPackageFile, $file);
         }
-    }
-    
-    
-    /**
-     * Runs package migrations.
-     *
-     * @throws \GambioStoreUpMigrationException
-     */
-    private function migrate()
-    {
-        if (!isset($this->getPackageMigrations()['up'])) {
-            return;
-        }
-        
-        $migration = new GambioStoreMigration(
-            $this->filesystem,
-            $this->getPackageMigrations()['up'],
-            []
-        );
-        
-        $migration->up();
     }
     
     

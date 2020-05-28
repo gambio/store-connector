@@ -292,8 +292,14 @@ class GambioStoreConnector
      */
     public function installPackage($packageData)
     {
+        $migration = new GambioStoreMigration(
+            $this->fileSystem,
+            isset($packageData['migrations']['up']) ? $packageData['migrations']['up'] : [],
+            isset($packageData['migrations']['down']) ? $packageData['migrations']['down'] : []
+        );
+        
         $installation = new GambioStoreInstallation($packageData, $this->configuration->get('GAMBIO_STORE_TOKEN'),
-            $this->cache, $this->logger, $this->fileSystem, $this->backup);
+            $this->cache, $this->logger, $this->fileSystem, $this->backup, $migration);
         
         return $installation->perform();
     }
