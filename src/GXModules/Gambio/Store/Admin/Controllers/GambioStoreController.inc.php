@@ -75,6 +75,10 @@ class GambioStoreController extends AdminHttpViewController
             $this->appendError('LOGS_FOLDER_PERMISSION_ERROR');
         }
     
+        if (!is_writable($this->connector->getFileSystem()->getShopDirectory() . '/GXModules/Gambio/Store')) {
+            $this->appendError('STORE_FOLDER_PERMISSION_ERROR');
+        }
+    
         setcookie('auto_updater_admin_check', 'admin_logged_in', time() + 5 * 60, '/');
     
         if ((bool)$this->configuration->get('GAMBIO_STORE_ACCEPTED_DATA_PROCESSING') === false) {
