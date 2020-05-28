@@ -78,8 +78,8 @@ class GambioStoreRemoval
         
         try {
             $this->backup->movePackageFilesToCache($files);
-            $this->backup->removePackageFilesFromCache($files);
             $this->migration->down();
+            $this->backup->removePackageFilesFromCache($files);
         } catch (Exception $exception) {
             $message = 'Could not remove package: ' . $name;
             $this->logger->error($message, ['package' => $this->packageData, 'error' => $exception]);
