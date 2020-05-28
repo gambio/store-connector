@@ -4,7 +4,7 @@
 /vendor
 /node_modules
 /build
-/src/GXModules/Gambio/Hub/Build
+/src/GXModules/Gambio/Store/Build
 /docker/*
 !/docker/boilerplate
 /*.zip
