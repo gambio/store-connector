@@ -294,8 +294,8 @@ class GambioStoreConnector
     {
         $migration = new GambioStoreMigration(
             $this->fileSystem,
-            isset($packageData['migrations']['up']) ? $packageData['migrations']['up'] : [],
-            isset($packageData['migrations']['down']) ? $packageData['migrations']['down'] : []
+            isset($packageData['migration']['up']) ? $packageData['migration']['up'] : [],
+            isset($packageData['migration']['down']) ? $packageData['migration']['down'] : []
         );
         
         $installation = new GambioStoreInstallation($packageData, $this->configuration->get('GAMBIO_STORE_TOKEN'),
@@ -327,13 +327,12 @@ class GambioStoreConnector
             $packageData['files_list'] = $postData['file_list'];
         }
     
-        if (isset($postData['migration'])) {
-            $migrations = $postData['migration'];
-        } else {
-            $migrations = ['up' => [], 'down' => []];
-        }
+        $migration = new GambioStoreMigration(
+            $this->fileSystem,
+            isset($postData['migration']['up']) ? $postData['migration']['up'] : [],
+            isset($postData['migration']['down']) ? $postData['migration']['down'] : []
+        );
         
-        $migration = new GambioStoreMigration($this->fileSystem, $migrations['up'], $migrations['down']);
         $removal   = new GambioStoreRemoval($packageData, $this->logger, $this->backup, $migration);
         
         return $removal->perform();
