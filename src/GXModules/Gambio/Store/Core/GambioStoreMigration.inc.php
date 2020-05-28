@@ -53,7 +53,7 @@ class GambioStoreMigration
     /**
      * Migrate up.
      *
-     * @throws \Exception
+     * @throws \GambioStoreUpMigrationException
      */
     public function up()
     {
@@ -68,7 +68,7 @@ class GambioStoreMigration
         $configuration = new GambioStoreConfigurationFacade($database, $compatibility);
         $cache         = new GambioStoreCacheFacade($database);
         $http          = new GambioStoreHttpFacade();
-        $log           = new GambioStoreLoggerFacade();
+        $log           = new GambioStoreLoggerFacade($cache);
     
         foreach ($this->up as $item) {
             try {
@@ -98,7 +98,7 @@ class GambioStoreMigration
         $configuration = new GambioStoreConfigurationFacade($database, $compatibility);
         $cache         = new GambioStoreCacheFacade($database);
         $http          = new GambioStoreHttpFacade();
-        $log           = new GambioStoreLoggerFacade();
+        $log           = new GambioStoreLoggerFacade($cache);
     
         foreach ($this->down as $item) {
             try {

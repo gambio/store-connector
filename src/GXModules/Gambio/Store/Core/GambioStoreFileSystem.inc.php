@@ -26,7 +26,6 @@ class GambioStoreFileSystem
      * @param $source
      * @param $destination
      *
-     * @return bool
      * @throws \GambioStoreFileNotFoundException
      * @throws \GambioStoreFileMoveException
      * @throws \GambioStoreCreateDirectoryException
@@ -46,43 +45,39 @@ class GambioStoreFileSystem
         if (!rename($source, $destination)) {
             throw new GambioStoreFileMoveException("Could not move file $source to $destination folder");
         }
-        
-        return true;
     }
     
     
     /**
-     * Renames a file. Any folders for the new name will be ignored.
+     * Renames a file or directory. E.g ...rename('directoryName/oldFileName.php', 'newFileName.php');
      *
-     * @param $oldFileName
-     * @param $newFileName
+     * @param $oldName
+     * @param $newName
      *
-     * @return bool
-     * @throws \GambioStoreRenameException
      * @throws \GambioStoreFileNotFoundException
+     * @throws \GambioStoreRenameException
      */
-    public function rename($oldFileName, $newFileName)
+    public function rename($oldName, $newName)
     {
-        $oldFileName    = $this->getShopDirectory() . '/' . $oldFileName;
+        $oldName = $this->getShopDirectory() . '/' . $oldName;
         
-        if (!file_exists($oldFileName)) {
-            throw new GambioStoreFileNotFoundException('File not found: ' . $oldFileName, 1, [
-                'info' => "File or folder not found on attempt to rename $oldFileName"
+        if (!file_exists($oldName)) {
+            throw new GambioStoreFileNotFoundException('File not found: ' . $oldName, 1, [
+                'info' => "File or folder not found on attempt to rename $oldName"
             ]);
         }
         
-        if (!rename($oldFileName, dirname($oldFileName) . '/' . basename($newFileName))) {
-            throw new GambioStoreRenameException('Could not rename a file ir folder ' . $oldFileName, 2, [
+        if (!rename($newName, dirname($oldName) . '/' . basename($newName))) {
+            throw new GambioStoreRenameException('Could not rename a file or folder ' . $oldName, 2, [
                 'info' => 'Please contact the server administrator'
             ]);
         }
-        
-        return true;
     }
     
     
     /**
-     * Copies a file or directory from source to destination. If destination folder doesn't exist, it will be created.
+     * Copies a file or directory from source to the destination folder.
+     * If the destination folder doesn't exist, it will be created.
      *
      * @param $source
      * @param $destination
@@ -96,14 +91,25 @@ class GambioStoreFileSystem
         $source      = $this->getShopDirectory() . '/' . $source;
         $destination = $this->getShopDirectory() . '/' . $destination;
     
+        if (is_file($source)) {
+            $this->fileCopy($source, $destination);
+            return;
+        }
+    
         $directory = new RecursiveDirectoryIterator($source, RecursiveDirectoryIterator::SKIP_DOTS);
         $iterator  = new RecursiveIteratorIterator($directory, RecursiveIteratorIterator::SELF_FIRST);
-        
+    
         foreach ($iterator as $item) {
             if ($item->isDir()) {
+                /**
+                 * The getSubPathName method might be highlighted in PhpStorm even though it is exists.
+                 * https://www.php.net/manual/en/recursivedirectoryiterator.getsubpathname.php
+                 */
                 $this->createDirectory($destination . DIRECTORY_SEPARATOR . $iterator->getSubPathName());
             } else {
-                $this->fileCopy($item, $destination . DIRECTORY_SEPARATOR . $iterator->getSubPathName());
+                $sourceFolder = dirname($item->getPathname());
+                $subPath = str_replace($source, '', $sourceFolder);
+                $this->fileCopy($item->getPathname(), $destination . $subPath);
             }
         }
     }
@@ -113,7 +119,6 @@ class GambioStoreFileSystem
      * @param $source
      * @param $destination
      *
-     * @return bool
      * @throws \GambioStoreCreateDirectoryException
      * @throws \GambioStoreFileMoveException
      * @throws \GambioStoreFileNotFoundException
@@ -128,7 +133,8 @@ class GambioStoreFileSystem
         }
         
         if (is_file($source)) {
-            return $this->fileMove($source, $destination);
+            $this->fileMove($source, $destination);
+            return;
         }
         
         $directory = new RecursiveDirectoryIterator($source, \RecursiveDirectoryIterator::SKIP_DOTS);
@@ -136,13 +142,15 @@ class GambioStoreFileSystem
         
         foreach ($iterator as $item) {
             if ($item->isDir()) {
+                /**
+                 * The getSubPathName method might be highlighted in PhpStorm even though it is exists.
+                 * https://www.php.net/manual/en/recursivedirectoryiterator.getsubpathname.php
+                 */
                 $this->createDirectory($destination . DIRECTORY_SEPARATOR . $iterator->getSubPathName());
             } else {
                 $this->fileMove($item, $destination . DIRECTORY_SEPARATOR . $iterator->getSubPathName());
             }
         }
-        
-        return true;
     }
     
     
@@ -172,16 +180,17 @@ class GambioStoreFileSystem
         $directory = new RecursiveDirectoryIterator($path, RecursiveDirectoryIterator::SKIP_DOTS);
         $iterator  = new RecursiveIteratorIterator($directory, RecursiveIteratorIterator::CHILD_FIRST);
     
+        $success = true;
+        
         foreach ($iterator as $item) {
             if ($item->isDir()) {
-                @rmdir($item->getRealPath());
+                $success = $success && @rmdir($item->getRealPath());
             } else {
-                @unlink($item->getRealPath());
+                $success = $success && @unlink($item->getRealPath());
             }
         }
     
-        @rmdir($path);
-        return true;
+        return $success && @rmdir($path);
     }
     
     
@@ -339,12 +348,11 @@ class GambioStoreFileSystem
      *
      * @param string $path
      *
-     * @return bool
      * @throws \GambioStoreCreateDirectoryException
      */
     public function createDirectory($path)
     {
-        if (!mkdir($path, 0777, true) && !is_dir($path)) {
+        if (!@mkdir($path, 0777, true) && !is_dir($path)) {
             
             if (is_file($path)) {
                 throw new GambioStoreCreateDirectoryException('Could not create a folder ' . $path, 1, [
@@ -362,8 +370,6 @@ class GambioStoreFileSystem
                 'info' => 'Please contact the server administrator'
             ]);
         }
-        
-        return true;
     }
     
     
@@ -374,7 +380,6 @@ class GambioStoreFileSystem
      * @param string $source
      * @param string $destination
      *
-     * @return bool
      * @throws \GambioStoreCreateDirectoryException
      * @throws \GambioStoreFileNotFoundException|\GambioStoreFileCopyException
      */
@@ -384,13 +389,11 @@ class GambioStoreFileSystem
             throw new GambioStoreFileNotFoundException('No such file: ' . $source);
         }
         
-        $this->createDirectory(dirname($destination));
-        
-        if (!copy($source, $destination)) {
+        $this->createDirectory($destination);
+    
+        if (!copy($source, $destination . '/' . basename($source))) {
             throw new GambioStoreFileCopyException("Couldn't copy file " . $source);
         }
-        
-        return true;
     }
     
     
@@ -437,7 +440,7 @@ class GambioStoreFileSystem
      */
     public function getCacheDirectory()
     {
-        return $this->getShopDirectory() . '/cache';
+        return $this->getShopDirectory() . '/cache/GambioStore';
     }
 }
 

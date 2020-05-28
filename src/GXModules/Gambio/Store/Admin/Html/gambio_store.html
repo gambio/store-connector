@@ -1,14 +1,16 @@
 {extends file="get_usermod:layouts/main/layout.html"}
 
 {block name="content"}
-<div class="gambio-store downloads">
-	<div id="gambio-store-iframe"
-	     data-store-token="{$content.storeToken}"
-	     data-store-url="{$content.storeUrl}"
-	     data-store-language="{$content.storeLanguage}"
-	     data-store-translations="{$content.translations|json_encode}">
-	</div>
-	
-	{include file="get_usermod:/../../../GXModules/Gambio/Store/Admin/Html/gambio_store_installing_package_modal.html"}
-</div>
+    {include file="get_usermod:/../../../GXModules/Gambio/Store/Admin/Html/gambio_store_errors.html"}
+
+    <div class="gambio-store downloads">
+        <div id="gambio-store-iframe"
+             data-store-token="{$content.storeToken}"
+             data-store-url="{$content.storeUrl}"
+             data-store-language="{$content.storeLanguage}"
+             data-store-translations="{$content.translations|json_encode}">
+        </div>
+
+        {include file="get_usermod:/../../../GXModules/Gambio/Store/Admin/Html/gambio_store_installing_package_modal.html"}
+    </div>
 {/block}

@@ -13,6 +13,7 @@ require_once 'Exceptions/GambioStorePackageInstallationException.inc.php';
 require_once 'Exceptions/GambioStoreInstallationMissingPHPExtensionsException.inc.php';
 require_once 'Exceptions/GambioStoreZipException.inc.php';
 require_once 'Exceptions/GambioStoreHttpErrorException.inc.php';
+require_once 'Exceptions/GambioStoreFileHashMismatchException.inc.php';
 
 /**
  * Class StoreInstallation
@@ -120,6 +121,17 @@ class GambioStoreInstallation
     
     
     /**
+     * Returns migrations array.
+     *
+     * @return mixed
+     */
+    private function getPackageMigrations()
+    {
+        return isset($this->packageData['migrations']) ? $this->packageData['migrations'] : [];
+    }
+    
+    
+    /**
      * Inits installation.
      *
      * @return bool[]
@@ -134,7 +146,7 @@ class GambioStoreInstallation
             $this->logger->critical($message);
             throw new GambioStoreInstallationMissingPHPExtensionsException($message);
         }
-    
+        
         if (!extension_loaded('curl')) {
             $message = 'The Gambio Store could not locate the curl extension for PHP which is required for installations.';
             $this->logger->critical($message);
@@ -151,32 +163,53 @@ class GambioStoreInstallation
             $this->downloadPackageToCacheFolder();
             $this->backup->movePackageFilesToCache($destination);
             $this->installPackage();
+            $this->migrate();
         } catch (GambioStoreCreateDirectoryException $e) {
-            $message = 'Could not install package: ' . $this->packageData['name'];
-            $this->logger->error($message, ['error' => $e, 'package' => $this->packageData]);
+            $message = 'Could not install package: ' . $this->packageData['details']['title']['de'];
+            $this->logger->error($message, [
+                'error'            => $e->getMessage(),
+                'packageVersionId' => $this->packageData['details']['id']
+            ]);
             $this->backup->restorePackageFilesFromCache($destination);
             throw new GambioStorePackageInstallationException('Could not install package');
         } catch (GambioStoreFileNotFoundException $e) {
-            $message = 'Could not install package: ' . $this->packageData['name'];
-            $this->logger->error($message, ['error' => $e, 'package' => $this->packageData]);
+            $message = 'Could not install package: ' . $this->packageData['details']['title']['de'];
+            $this->logger->error($message, [
+                'error'            => $e->getMessage(),
+                'packageVersionId' => $this->packageData['details']['id']
+            ]);
+            $this->backup->restorePackageFilesFromCache($destination);
+            throw new GambioStorePackageInstallationException('Could not install package');
+        } catch (GambioStoreFileHashMismatchException $e) {
+            $message = 'Could not install package: ' . $this->packageData['details']['title']['de'];
+            $this->logger->error($message, [
+                'error'            => $e->getMessage(),
+                'packageVersionId' => $this->packageData['details']['id']
+            ]);
             $this->backup->restorePackageFilesFromCache($destination);
             throw new GambioStorePackageInstallationException('Could not install package');
         } catch (GambioStoreFileMoveException $e) {
-            $message = 'Could not install package: ' . $this->packageData['name'];
-            $this->logger->error($message, ['error' => $e, 'package' => $this->packageData]);
+            $message = 'Could not install package: ' . $this->packageData['details']['title']['de'];
+            $this->logger->error($message, [
+                'error'            => $e->getMessage(),
+                'packageVersionId' => $this->packageData['details']['id']
+            ]);
             $this->backup->restorePackageFilesFromCache($destination);
             throw new GambioStorePackageInstallationException('Could not install package');
         } catch (Exception $e) {
             $this->backup->restorePackageFilesFromCache($destination);
-            $message = 'Could not install package: ' . $this->packageData['name'];
-            $this->logger->error($message, ['error' => $e, 'package' => $this->packageData]);
+            $message = 'Could not install package: ' . $this->packageData['details']['title']['de'];
+            $this->logger->error($message, [
+                'error'            => $e->getMessage(),
+                'packageVersionId' => $this->packageData['details']['id']
+            ]);
             throw new GambioStorePackageInstallationException($message);
         }
         finally {
             $this->cleanCache();
         }
         
-        $this->logger->notice('Successfully installed package : ' . $this->packageData['name']);
+        $this->logger->notice('Successfully installed package : ' . $this->packageData['details']['title']['de']);
         
         return ['success' => true];
     }
@@ -188,12 +221,13 @@ class GambioStoreInstallation
      * @throws \GambioStoreZipException
      * @throws \GambioStoreHttpErrorException
      * @throws \GambioStoreCreateDirectoryException
+     * @throws \GambioStoreFileHashMismatchException
      */
     private function downloadPackageToCacheFolder()
     {
         if (!$this->downloadPackageZipToCacheFolder()) {
             $this->logger->warning('Could not download zip file: ' . $this->packageData['fileList']['zip']['source']
-                                   . ' from package: ' .$this->packageData['name']);
+                                   . ' from package: ' . $this->packageData['details']['title']['de']);
             $this->downloadPackageFilesToCacheFolder();
         }
     }
@@ -209,11 +243,32 @@ class GambioStoreInstallation
     private function installPackage()
     {
         foreach ($this->getPackageFilesDestinations() as $file) {
-            $newPackageFile = 'cache/' . $this->getTransactionId() . '/' . $file;
+            $newPackageFile = 'cache/GambioStore/' . $this->getTransactionId() . '/' . $file;
             
             // Replace the old package file with new
             $this->filesystem->move($newPackageFile, $file);
         }
+    }
+    
+    
+    /**
+     * Runs package migrations.
+     *
+     * @throws \GambioStoreUpMigrationException
+     */
+    private function migrate()
+    {
+        if (!isset($this->getPackageMigrations()['up'])) {
+            return;
+        }
+        
+        $migration = new GambioStoreMigration(
+            $this->filesystem,
+            $this->getPackageMigrations()['up'],
+            []
+        );
+        
+        $migration->up();
     }
     
     
@@ -223,6 +278,7 @@ class GambioStoreInstallation
      * @return bool
      * @throws \GambioStoreHttpErrorException
      * @throws \GambioStoreCreateDirectoryException
+     * @throws \GambioStoreFileHashMismatchException
      */
     private function downloadPackageFilesToCacheFolder()
     {
@@ -236,6 +292,12 @@ class GambioStoreInstallation
             
             $fileContent = $this->getFileContent($file['source']);
             file_put_contents($destinationFilePath, $fileContent);
+    
+            if (md5_file($destinationFilePath) !== $file['hash']) {
+                throw new GambioStoreFileHashMismatchException('Uploaded file has wrong hash.', [
+                    'file' => $destinationFilePath
+                ]);
+            }
         }
         
         return true;
@@ -247,28 +309,30 @@ class GambioStoreInstallation
      *
      * @return bool
      * @throws \GambioStoreZipException|\GambioStoreHttpErrorException
+     * @throws \GambioStoreFileHashMismatchException|\GambioStoreCreateDirectoryException
      */
     private function downloadPackageZipToCacheFolder()
     {
-        $targetFileName = $this->getTransactionId() . '.zip';
-        $targetFilePath = $this->filesystem->getCacheDirectory() . '/' . $targetFileName;
+        $destinationFileName = $this->getTransactionId() . '.zip';
+        $destinationFilePath = $this->filesystem->getCacheDirectory() . '/' . $destinationFileName;
+        $this->filesystem->createDirectory(dirname($destinationFilePath));
         $downloadZipUrl = $this->packageData['fileList']['zip']['source'];
         $fileContent    = $this->getFileContent($downloadZipUrl);
-        file_put_contents($targetFilePath, $fileContent);
+        file_put_contents($destinationFilePath, $fileContent);
         
-        chmod($targetFilePath, 0777);
+        chmod($destinationFilePath, 0777);
         
-        /** @todo check the logic here. For some reason the hashes don't match */
-        //if (md5_file($targetFilePath) !== $this->packageData['fileList']['zip']['hash']) {
-        //    $this->logger->error('Uploaded package zip file has wrong hash.');
-        //    return false;
-        //}
+        if (md5_file($destinationFilePath) !== $this->packageData['fileList']['zip']['hash']) {
+            throw new GambioStoreFileHashMismatchException('Uploaded package zip file has wrong hash.', [
+                    'file' => $destinationFilePath
+            ]);
+        }
         
         $zip = new ZipArchive;
-        $res = $zip->open($targetFilePath);
+        $res = $zip->open($destinationFilePath);
         if ($res !== true) {
             throw new GambioStoreZipException('Cannot extract zip archive.', [
-                'file' => $targetFilePath
+                'file' => $destinationFilePath
             ]);
         }
         
@@ -312,18 +376,20 @@ class GambioStoreInstallation
      */
     private function cleanCache()
     {
-        $targetFilePath = 'cache/' . $this->getTransactionId() . '.zip';
-        if (file_exists($this->filesystem->getShopDirectory() . '/' . $targetFilePath)) {
-            $this->filesystem->remove($targetFilePath);
-        }
-        
-        $targetFilePath = 'cache/' . $this->getTransactionId();
-        if (file_exists($this->filesystem->getShopDirectory() . '/' . $targetFilePath)) {
-            $this->filesystem->remove($targetFilePath);
-        }
-        
-        foreach ($this->getPackageFilesDestinations() as $file) {
-            @unlink($this->filesystem->getCacheDirectory() . '/backup/' . $file . '.bak');
-        }
+        $this->filesystem->remove('cache/GambioStore/');
+        //
+        //
+        //
+        //$targetFilePath = 'cache/GambioStore/' . $this->getTransactionId() . '.zip';
+        //if (file_exists($this->filesystem->getShopDirectory() . '/' . $targetFilePath)) {
+        //    $this->filesystem->remove($targetFilePath);
+        //}
+        //
+        //$targetFilePath = 'cache/GambioStore/' . $this->getTransactionId();
+        //if (file_exists($this->filesystem->getShopDirectory() . '/' . $targetFilePath)) {
+        //    $this->filesystem->remove($targetFilePath);
+        //}
+        //
+        //$this->backup->removePackageFilesFromCache($this->getPackageFilesDestinations());
     }
 }

@@ -125,6 +125,7 @@ class GambioStoreConfiguration
         
         if ($this->compatibility->has(GambioStoreCompatibility::RESOURCE_GM_CONFIGURATION_TABLE)) {
             $this->gmSet($key, $value);
+            return;
         }
         
         $this->gxSet($key, $value);
@@ -213,11 +214,15 @@ class GambioStoreConfiguration
     /**
      * Creates the configuration value with the provided key.
      *
-     * @param string $key
-     * @param string $value
+     * @param  $key
+     * @param  $value
      */
     public function create($key, $value)
     {
+        if (is_bool($value)) {
+            $value = $value ? 'true' : 'false';
+        }
+        
         if ($this->compatibility->has(GambioStoreCompatibility::RESOURCE_GM_CONFIGURATION_TABLE)) {
             $this->gmCreate($key, $value);
         } else {

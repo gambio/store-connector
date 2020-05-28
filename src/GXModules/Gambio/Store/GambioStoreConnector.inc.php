@@ -68,6 +68,7 @@ class GambioStoreConnector
      * @var \GambioStoreCache
      */
     private $cache;
+    
     /**
      * @var \GambioStoreBackup
      */
@@ -121,11 +122,11 @@ class GambioStoreConnector
         $database        = GambioStoreDatabase::connect($fileSystem);
         $compatibility   = new GambioStoreCompatibility($database);
         $configuration   = new GambioStoreConfiguration($database, $compatibility);
-        $logger          = new GambioStoreLogger();
         $themes          = new GambioStoreThemes($compatibility, $fileSystem);
         $shopInformation = new GambioStoreShopInformation($database, $fileSystem);
         $cache           = new GambioStoreCache($database);
         $backup          = new GambioStoreBackup($fileSystem);
+        $logger          = new GambioStoreLogger($cache);
         
         return new self($database, $configuration, $compatibility, $logger, $themes, $fileSystem, $shopInformation,
             $cache, $backup);
@@ -174,10 +175,9 @@ class GambioStoreConnector
      */
     public function verifyRegistration($storeToken)
     {
-        $this->logger->info('Start verifying registration');
         $result = $this->configuration->get('GAMBIO_STORE_TOKEN') === $storeToken;
         if ($result) {
-            $this->logger->info('Verification succeed');
+            $this->logger->notice('Verification succeed');
             $this->configuration->set('GAMBIO_STORE_IS_REGISTERED', 'true');
         } else {
             $this->logger->error('Verification failed');
@@ -212,11 +212,7 @@ class GambioStoreConnector
     public function getShopInformation()
     {
         try {
-            $this->logger->info('Start collecting shop information');
-            $information = $this->shopInformation->getShopInformation();
-            $this->logger->info('Shop information collected successfully');
-            
-            return $information;
+            return $this->shopInformation->getShopInformation();
         } catch (\GambioStoreException $exception) {
             $this->logger->critical('Could not collected shop information', ['error' => $exception]);
             
@@ -241,7 +237,7 @@ class GambioStoreConnector
         if ($active) {
             $this->logger->notice('The theme: ' . $themeName . ' is currently active');
         } else {
-            $this->logger->info('The theme: ' . $themeName . ' is currently inactive');
+            $this->logger->notice('The theme: ' . $themeName . ' is currently inactive');
         }
         
         return $active;
@@ -314,18 +310,25 @@ class GambioStoreConnector
      */
     public function uninstallPackage(array $postData)
     {
-        $packageData = [];
+        $packageData         = [];
+        $packageData['name'] = $postData['title']['de'];
+        
         if (isset($postData['folder_name_inside_shop']) || isset($postData['filename'])) {
-            $ThemeDirectoryName   = $postData['folder_name_inside_shop'] ? : $postData['filename'];
-            $ThemeDirectoryPath   = $this->fileSystem->getThemeDirectory() . '/' . $ThemeDirectoryName;
-            $packageData['files'] = $this->fileSystem->getFilesRecursively($ThemeDirectoryPath);
+            $themeDirectoryName        = $postData['folder_name_inside_shop'] ? : $postData['filename'];
+            $themeDirectoryPath        = $this->fileSystem->getThemeDirectory() . '/' . $themeDirectoryName;
+            $packageData['files_list'] = $this->fileSystem->getContentsRecursively($themeDirectoryPath);
         } else {
-            $packageData['files'] = $postData['file_list'];
+            $packageData['files_list'] = $postData['file_list'];
+        }
+    
+        if (isset($postData['migration'])) {
+            $migrations = $postData['migration'];
+        } else {
+            $migrations = ['up' => [], 'down' => []];
         }
         
-        $packageData['name'] = $postData['repositoryName'];
-        
-        $removal = new GambioStoreRemoval($packageData, $this->logger, $this->backup);
+        $migration = new GambioStoreMigration($this->fileSystem, $migrations['up'], $migrations['down']);
+        $removal   = new GambioStoreRemoval($packageData, $this->logger, $this->backup, $migration);
         
         return $removal->perform();
     }

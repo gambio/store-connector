@@ -15,7 +15,7 @@
  */
 const activateTheme = async (data) => {
 	const formData = new FormData();
-	formData.append('folderNameInsideShop', data.folderNameInsideShop);
+	formData.append('themeStorageName', data.folder_name_inside_shop || data.filename);
 	
 	try {
 		await GambioStore.callShop('./admin.php?do=GambioStoreAjax/ActivateTheme', {
@@ -106,8 +106,8 @@ const uninstallPackage = async (data) => {
 			body: formData
 		});
 		GambioStore.messenger.sendMessage('uninstall_succeeded');
-	} catch {
-		GambioStore.messenger.sendMessage('uninstall_failed', data);
+	} catch (error) {
+		GambioStore.messenger.sendMessage('uninstall_failed', error);
 	}
 }
 
@@ -129,9 +129,9 @@ const startPackageInstallation = async (data) => {
 		await installPackage(data, updateProgressCallback);
 		
 		if (data.details.gallery) {
-			const response = isThemeActive(data.details.folderNameInsideShop);
+			const response = await isThemeActive(data.details.folder_name_inside_shop || data.details.filename);
 			if (response.isActive === true) {
-				await activateTheme(data.details.folderNameInsideShop);
+				await activateTheme(data.details.folder_name_inside_shop || data.details.filename);
 			}
 		}
 		

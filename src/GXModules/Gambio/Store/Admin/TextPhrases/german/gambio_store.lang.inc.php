@@ -16,5 +16,11 @@ $t_language_text_section_content_array = [
     'CONFIGURATION'                  => 'Konfiguration',
     'PACKAGE_INSTALLATION'           => 'Paket Installation',
     'INSTALLING_PACKAGE'             => 'Paket wird installiert ...',
-    'PREPARING_PACKAGE'              => 'Paket wird vorbereitet ...'
+    'PREPARING_PACKAGE'              => 'Paket wird vorbereitet ...',
+    'WARNING_TITLE'                  => 'Warnung:',
+    'UNKOWN_ERROR'                   => 'Ein unerwarteter Fehler ist aufgetreten.',
+    'LOGS_FOLDER_PERMISSION_ERROR'   => 'Der Logs-Ordner "GXModules/Gambio/Store/Logs" ist nicht beschreibbar. Prüfen Sie die Berechtigungen.',
+    'DATABASE_INTEGRITY_ERROR'       => 'Wichtige Einträge fehlen in der Datenbank.',
+    'SHOP_INFORMATION_JSON_PARSE_ERROR' => 'Dem Gambio Store wurden fehlende oder fehlerhafte Informationen übermittelt.',
+    'SHOP_INFORMATION_NETWORK_ERROR'    => 'Der Gambio Store konnte keine Informationen des Shops einholen.'
 ];

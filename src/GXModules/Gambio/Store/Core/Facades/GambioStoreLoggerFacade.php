@@ -16,6 +16,24 @@
  */
 class GambioStoreLoggerFacade
 {
+    
+    /**
+     * @var \GambioStoreCacheFacade
+     */
+    private $cache;
+    
+    
+    /**
+     * GambioStoreLogger constructor.
+     *
+     * @param \GambioStoreCacheFacade $cache
+     */
+    public function __construct(GambioStoreCacheFacade $cache)
+    {
+        $this->cache = $cache;
+    }
+    
+    
     /**
      * System is unusable.
      *
@@ -27,46 +45,6 @@ class GambioStoreLoggerFacade
     public function emergency($message, array $context = [])
     {
         $this->log('EMERGENCY', $message, $context);
-    }
-    
-    
-    /**
-     * Logs with an arbitrary level.
-     *
-     * @param mixed  $level
-     * @param string $message
-     * @param array  $context
-     *
-     * @return void
-     */
-    public function log($level, $message, array $context = [])
-    {
-        if (isset($context['actionName'])) {
-            $suffix = $context['actionName'];
-            unset($context['actionName']);
-        } else {
-            $suffix = 'general';
-        }
-        
-        $now   = new DateTime();
-        $today = $now->format('Y-m-d');
-        $time  = $now->format('H:i:s');
-        
-        $fileName = $today . '-' . $suffix . '.log';
-        $logPath  = __DIR__ . '/../../Logs/';
-        
-        if (count($context) === 0) {
-            $contextMessage = '';
-        } else {
-            ob_start();
-            print_r($context);
-            $prettifiedContext = ob_get_clean();
-            $contextMessage    = PHP_EOL . 'context: ' . $prettifiedContext;
-        }
-        
-        $logMeta = '[' . $time . '] [' . $level . '] ';
-        
-        file_put_contents($logPath . $fileName, $logMeta . $message . $contextMessage, FILE_APPEND);
     }
     
     
@@ -176,5 +154,79 @@ class GambioStoreLoggerFacade
     public function debug($message, array $context = [])
     {
         $this->log('DEBUG', $message, $context);
+    }
+    
+    
+    /**
+     * Logs with an arbitrary level.
+     *
+     * @param mixed  $level
+     * @param string $message
+     * @param array  $context
+     *
+     * @return void
+     */
+    public function log($level, $message, array $context = [])
+    {
+        if (isset($context['actionName'])) {
+            $suffix = $context['actionName'];
+            unset($context['actionName']);
+        } else {
+            $suffix = 'general';
+        }
+        
+        $now   = new DateTime();
+        $today = $now->format('Y-m-d');
+        $time  = $now->format('H:i:s');
+        
+        $fileName = $today . '-' . $suffix . '.log';
+        $logPath  = dirname(__FILE__, 2) . '/Logs/';
+        $cacheKey = 'LAST_LOG_FILE_CHECK';
+        
+        if ($this->cache->has($cacheKey)) {
+            if ($this->cache->get($cacheKey) !== $fileName) {
+                $this->deleteOneMonthOldLogsFromNow($now, $logPath, $suffix);
+                $this->cache->set($cacheKey, $fileName);
+            }
+        } else {
+            $this->cache->set($cacheKey, $fileName);
+        }
+        
+        if (count($context) === 0) {
+            $contextMessage = PHP_EOL;
+        } else {
+            ob_start();
+            print_r($context);
+            $prettifiedContext = ob_get_clean();
+            $contextMessage    = PHP_EOL . 'context: ' . $prettifiedContext;
+        }
+        
+        $logMeta = '[' . $time . '] [' . $level . '] ';
+        
+        @file_put_contents($logPath . $fileName, $logMeta . $message . $contextMessage, FILE_APPEND);
+    }
+    
+    
+    /**
+     * Deletes all logs older than a month from now.
+     *
+     * @param \DateTime $now
+     * @param string    $logPath
+     * @param string    $suffix
+     */
+    private function deleteOneMonthOldLogsFromNow(DateTime $now, $logPath, $suffix)
+    {
+        $logFiles = glob($logPath . '*.log');
+        
+        foreach ($logFiles as $logFile) {
+            $fileName       = str_replace($logPath, '', $logFile);
+            $fileDateString = str_replace('-' . $suffix . '.log', '', $fileName);
+            $fileDate       = DateTime::createFromFormat('Y-m-d', $fileDateString);
+            $timeDifference = $now->diff($fileDate);
+            
+            if ((int)$timeDifference->days > 30) {
+                @unlink($logFile);
+            }
+        }
     }
 }

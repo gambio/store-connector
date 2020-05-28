@@ -2,8 +2,8 @@ version: "3.1"
 services:
     server:
         build: ./server
-        image: shop/php:v1
-        container_name: store-connector-server-{{branch}}
+        image: shop/php-{{phpVersion}}:v1
+        container_name: store-connector-server-{{branch}}-{{phpVersion}}
         ports:
         - "{{serverPort}}:80"
         volumes:

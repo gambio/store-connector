@@ -16,6 +16,24 @@
  */
 class GambioStoreLogger
 {
+    
+    /**
+     * @var \GambioStoreCache
+     */
+    private $cache;
+    
+    
+    /**
+     * GambioStoreLogger constructor.
+     *
+     * @param \GambioStoreCache $cache
+     */
+    public function __construct(GambioStoreCache $cache)
+    {
+        $this->cache = $cache;
+    }
+    
+    
     /**
      * System is unusable.
      *
@@ -163,6 +181,16 @@ class GambioStoreLogger
         
         $fileName = $today . '-' . $suffix . '.log';
         $logPath  = dirname(__FILE__, 2) . '/Logs/';
+        $cacheKey = 'LAST_LOG_FILE_CHECK';
+        
+        if ($this->cache->has($cacheKey)) {
+            if ($this->cache->get($cacheKey) !== $fileName) {
+                $this->deleteOneMonthOldLogsFromNow($now, $logPath, $suffix);
+                $this->cache->set($cacheKey, $fileName);
+            }
+        } else {
+            $this->cache->set($cacheKey, $fileName);
+        }
         
         if (count($context) === 0) {
             $contextMessage = PHP_EOL;
@@ -176,5 +204,51 @@ class GambioStoreLogger
         $logMeta = '[' . $time . '] [' . $level . '] ';
         
         @file_put_contents($logPath . $fileName, $logMeta . $message . $contextMessage, FILE_APPEND);
+    }
+    
+    
+    /**
+     * Deletes all logs older than a month from now.
+     *
+     * @param \DateTime $now
+     * @param string    $logPath
+     * @param string    $suffix
+     */
+    private function deleteOneMonthOldLogsFromNow(DateTime $now, $logPath, $suffix)
+    {
+        $logFiles = glob($logPath . '*.log');
+        
+        foreach ($logFiles as $logFile) {
+            $fileName       = str_replace($logPath, '', $logFile);
+            $fileDateString = str_replace('-' . $suffix . '.log', '', $fileName);
+            $fileDate       = DateTime::createFromFormat('Y-m-d', $fileDateString);
+            $timeDifference = $now->diff($fileDate);
+            
+            if ((int)$timeDifference->days > 30) {
+                @unlink($logFile);
+            }
+        }
+    }
+    
+    
+    /**
+     * Returns Logs directory path.
+     *
+     * @return string
+     */
+    private function getLogsPath()
+    {
+        return dirname(__FILE__, 2) . '/Logs/';
+    }
+    
+    
+    /**
+     * Checks whether logs directory is writable. Returns true if so, false otherwise.
+     *
+     * @return bool
+     */
+    public function isWritable()
+    {
+        return is_writable($this->getLogsPath());
     }
 }

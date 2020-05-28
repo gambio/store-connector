@@ -79,6 +79,7 @@ module.exports = (gulp, $) => {
 
 		replace(clonePath + '/docker-compose.yml', {
 			branch: shopBranchName,
+			phpVersion: phpVersion,
 			serverPort,
 			mysqlPort
 		});

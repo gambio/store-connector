@@ -38,10 +38,8 @@ class GambioStoreBackup
     public function restorePackageFilesFromCache(array $toRestore)
     {
         foreach ($toRestore as $file) {
-            if (file_exists($this->fileSystem->getShopDirectory() . '/cache/backup/' . $file . '.bak')) {
-                $this->fileSystem->move('cache/backup/' . $file . '.bak', $file);
-            } elseif(file_exists($this->fileSystem->getShopDirectory() . '/' . $file)) {
-                @unlink($this->fileSystem->getShopDirectory() . '/' . $file);
+            if (file_exists($this->fileSystem->getShopDirectory() . '/cache/GambioStore/backup/' . $file . '.bak')) {
+                $this->fileSystem->move('cache/GambioStore/backup/' . $file . '.bak', $file);
             }
         }
     }
@@ -56,11 +54,43 @@ class GambioStoreBackup
      */
     public function movePackageFilesToCache(array $files)
     {
-        foreach ($files as $file) {
-            $packageFileSource = $this->fileSystem->getShopDirectory() . '/' . $file;
+        $shopDirectory = $this->fileSystem->getShopDirectory() . '/';
         
+        foreach ($files as $file) {
+            if (strpos($file, $shopDirectory) === false) {
+                $packageFileSource = $shopDirectory . $file;
+            } else {
+                $packageFileSource = $file;
+                $file              = str_replace($shopDirectory, '', $file);
+            }
+            
             if (file_exists($packageFileSource) && is_file($packageFileSource)) {
-                $this->fileSystem->move($file, 'cache/backup/' . $file . '.bak');
+                $this->fileSystem->move($file, 'cache/GambioStore/backup/' . $file . '.bak');
+            }
+        }
+    }
+    
+    
+    /**
+     * Removes package backup files from cache.
+     *
+     * @param array $files
+     */
+    public function removePackageFilesFromCache(array $files)
+    {
+        $shopDirectory  = $this->fileSystem->getShopDirectory() . '/';
+        $cacheDirectory = 'cache/backup/';
+        
+        foreach ($files as $file) {
+            if (is_file($shopDirectory . $file . '.bak')) {
+                $file .= '.bak';
+            }
+            
+            if (strpos($file, $shopDirectory) === false) {
+                $this->fileSystem->remove($cacheDirectory . $file);
+            } else {
+                $file = str_replace($shopDirectory, '', $file);
+                $this->fileSystem->remove($cacheDirectory . $file);
             }
         }
     }
