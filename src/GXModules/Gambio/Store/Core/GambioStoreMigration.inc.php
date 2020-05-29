@@ -57,6 +57,11 @@ class GambioStoreMigration
      */
     public function up()
     {
+        // Prevent the MainFactory from loading our files
+        if (!defined('StoreKey_MigrationScript')) {
+            define('StoreKey_MigrationScript', true);
+        }
+    
         /**
          * Require and instantiate all facades
          */
@@ -87,6 +92,11 @@ class GambioStoreMigration
      */
     public function down()
     {
+        // Prevent the MainFactory from loading our files
+        if (!defined('StoreKey_MigrationScript')) {
+            define('StoreKey_MigrationScript', true);
+        }
+    
         /**
          * Require and instantiate all facades
          */
