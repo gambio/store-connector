@@ -42,7 +42,7 @@ const fetchShopInfo = () => {
                     default:
                         GambioStore.showError(
                             GambioStore.translation.translate('WARNING_TITLE'),
-                            GambioStore.translation.translate('UNKOWN_ERROR')
+                            GambioStore.translation.translate('UNKNOWN_ERROR')
                         );
                         break;
                 }
