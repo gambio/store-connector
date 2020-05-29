@@ -61,12 +61,12 @@ class GambioStoreMigration
         if (!defined('StoreKey_MigrationScript')) {
             define('StoreKey_MigrationScript', true);
         }
-    
+        
         /**
          * Require and instantiate all facades
          */
         $this->requireFacades();
-    
+        
         $fileSystem    = new GambioStoreFileSystemFacade();
         $database      = GambioStoreDatabaseFacade::connect($fileSystem);
         $compatibility = new GambioStoreCompatibilityFacade($database);
@@ -74,7 +74,7 @@ class GambioStoreMigration
         $cache         = new GambioStoreCacheFacade($database);
         $http          = new GambioStoreHttpFacade();
         $log           = new GambioStoreLoggerFacade($cache);
-    
+        
         foreach ($this->up as $item) {
             try {
                 require_once $this->fileSystem->getShopDirectory() . '/' . $item;
@@ -96,12 +96,12 @@ class GambioStoreMigration
         if (!defined('StoreKey_MigrationScript')) {
             define('StoreKey_MigrationScript', true);
         }
-    
+        
         /**
          * Require and instantiate all facades
          */
         $this->requireFacades();
-    
+        
         $fileSystem    = new GambioStoreFileSystemFacade();
         $database      = GambioStoreDatabaseFacade::connect($fileSystem);
         $compatibility = new GambioStoreCompatibilityFacade($database);
@@ -109,7 +109,7 @@ class GambioStoreMigration
         $cache         = new GambioStoreCacheFacade($database);
         $http          = new GambioStoreHttpFacade();
         $log           = new GambioStoreLoggerFacade($cache);
-    
+        
         foreach ($this->down as $item) {
             try {
                 require_once $this->fileSystem->getShopDirectory() . '/' . $item;
