@@ -1,5 +1,5 @@
 <?php
-define('GambioStoreCacheFacade_included', true);
+define('StoreKey_MigrationScript', true);
 
 require __DIR__ . '/../../../GXModules/Gambio/Store/Core/Facades/GambioStoreFileSystemFacade.php';
 require __DIR__ . '/../../../GXModules/Gambio/Store/Core/Facades/GambioStoreCompatibilityFacade.php';
