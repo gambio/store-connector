@@ -71,13 +71,7 @@ class GambioStoreController extends AdminHttpViewController
         $assets            = $this->getIFrameAssets();
         $data              = [];
 
-        if (!$this->connector->getLogger()->isWritable()) {
-            $this->appendError('LOGS_FOLDER_PERMISSION_ERROR');
-        }
-    
-        if (!is_writable($this->connector->getFileSystem()->getShopDirectory() . '/GXModules/Gambio/Store')) {
-            $this->appendError('STORE_FOLDER_PERMISSION_ERROR');
-        }
+        $this->checkForErrors();
     
         setcookie('auto_updater_admin_check', 'admin_logged_in', time() + 5 * 60, '/');
     
@@ -134,16 +128,18 @@ class GambioStoreController extends AdminHttpViewController
     public function actionInstallations()
     {
         $this->setup();
-        
+    
         if ($this->configuration->get('GAMBIO_STORE_ACCEPTED_DATA_PROCESSING') !== true) {
             return $this->actionDefault();
         }
-        
+    
+        $this->checkForErrors();
+    
         $title    = new NonEmptyStringType($this->languageTextManager->get_text('PAGE_TITLE'));
         $template = new ExistingFile(new NonEmptyStringType(dirname(__FILE__, 2) . '/Html/gambio_store.html'));
-        
+    
         setcookie('auto_updater_admin_check', 'admin_logged_in', time() + 5 * 60, '/');
-        
+    
         $data              = $this->getIFrameTemplateData('/installations');
         $assets            = $this->getIFrameAssets();
         $contentNavigation = $this->getStoreNavigation(false, true);
@@ -209,14 +205,29 @@ class GambioStoreController extends AdminHttpViewController
     private function getGambioStoreUrl()
     {
         $gambioUrl = $this->configuration->get('GAMBIO_STORE_URL');
-        
+    
         // Fall back to the production Gambio Store URL if none is set.
         if (empty($gambioUrl)) {
             $gambioUrl = 'https://store.gambio.com/a';
             $this->configuration->set('GAMBIO_STORE_URL', $gambioUrl);
         }
-        
+    
         return $gambioUrl;
+    }
+    
+    
+    /**
+     * Checks for general errors with the Store and displays them in the frontend
+     */
+    private function checkForErrors()
+    {
+        if (!$this->connector->getLogger()->isWritable()) {
+            $this->appendError('LOGS_FOLDER_PERMISSION_ERROR');
+        }
+        
+        if (!is_writable($this->connector->getFileSystem()->getShopDirectory() . '/GXModules/Gambio/Store')) {
+            $this->appendError('STORE_FOLDER_PERMISSION_ERROR');
+        }
     }
     
     
