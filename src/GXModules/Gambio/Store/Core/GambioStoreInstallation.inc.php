@@ -128,18 +128,6 @@ class GambioStoreInstallation
         return array_column($this->packageData['fileList']['includedFiles'], 'destination');
     }
     
-    
-    /**
-     * Returns migrations array.
-     *
-     * @return mixed
-     */
-    private function getPackageMigrations()
-    {
-        return isset($this->packageData['migrations']) ? $this->packageData['migrations'] : [];
-    }
-    
-    
     /**
      * Inits installation.
      *
