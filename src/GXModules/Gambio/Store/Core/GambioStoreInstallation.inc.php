@@ -173,42 +173,6 @@ class GambioStoreInstallation
             $this->backup->movePackageFilesToCache($destination);
             $this->installPackage();
             $this->migration->up();
-        } catch (GambioStoreCreateDirectoryException $e) {
-            $message = 'Could not install package: ' . $this->packageData['details']['title']['de'];
-            $this->logger->error($message, [
-                'error'            => $e->getMessage(),
-                'context'          => $e->getContext(),
-                'packageVersionId' => $this->packageData['details']['id'],
-            ]);
-            $this->backup->restorePackageFilesFromCache($destination);
-            throw new GambioStorePackageInstallationException('Could not install package');
-        } catch (GambioStoreFileNotFoundException $e) {
-            $message = 'Could not install package: ' . $this->packageData['details']['title']['de'];
-            $this->logger->error($message, [
-                'error'            => $e->getMessage(),
-                'context'          => $e->getContext(),
-                'packageVersionId' => $this->packageData['details']['id']
-            ]);
-            $this->backup->restorePackageFilesFromCache($destination);
-            throw new GambioStorePackageInstallationException('Could not install package');
-        } catch (GambioStoreFileHashMismatchException $e) {
-            $message = 'Could not install package: ' . $this->packageData['details']['title']['de'];
-            $this->logger->error($message, [
-                'errorMessage'     => $e->getMessage(),
-                'context'          => $e->getContext(),
-                'packageVersionId' => $this->packageData['details']['id'],
-            ]);
-            $this->backup->restorePackageFilesFromCache($destination);
-            throw new GambioStorePackageInstallationException('Could not install package');
-        } catch (GambioStoreFileMoveException $e) {
-            $message = 'Could not install package: ' . $this->packageData['details']['title']['de'];
-            $this->logger->error($message, [
-                'error'            => $e->getMessage(),
-                'context'          => $e->getContext(),
-                'packageVersionId' => $this->packageData['details']['id']
-            ]);
-            $this->backup->restorePackageFilesFromCache($destination);
-            throw new GambioStorePackageInstallationException('Could not install package');
         } catch (GambioStoreException $e) {
             $this->backup->restorePackageFilesFromCache($destination);
             $message = 'Could not install package: ' . $this->packageData['details']['title']['de'];
