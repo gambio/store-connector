@@ -21,7 +21,7 @@ $t_language_text_section_content_array = [
     'UNKNOWN_ERROR'                     => 'Ein unerwarteter Fehler ist aufgetreten.',
     'LOGS_FOLDER_PERMISSION_ERROR'      => 'Der Store-Logs-Ordner "GXModules/Gambio/Store/Logs" ist nicht beschreibbar. Prüfen Sie die Berechtigungen.',
     'STORE_FOLDER_PERMISSION_ERROR'     => 'Der Store-Ordner "GXModules/Gambio/Store" ist nicht beschreibbar. Prüfen Sie die Berechtigungen.',
-    'DATABASE_INTEGRITY_ERROR'          => 'Wichtige Einträge fehlen in der Datenbank.',
+    'DATABASE_INTEGRITY_ERROR'          => 'Wichtige Einträge fehlen in der Datenbank. Bitte kontaktiere den Gambio Support.',
     'SHOP_INFORMATION_JSON_PARSE_ERROR' => 'Dem Gambio Store wurden fehlende oder fehlerhafte Informationen übermittelt.',
     'SHOP_INFORMATION_NETWORK_ERROR'    => 'Der Gambio Store konnte keine Informationen des Shops einholen.'
 ];
