@@ -131,7 +131,8 @@ class GambioStoreRemoval
     {
         // We'll only remove folders inside themes and GXModules
         $foldersOfInterest = array_filter($files, function ($value) {
-            return strpos($value, 'themes/') === 0 || strpos($value, 'GXModules/');
+            return strpos($value, 'themes/') === 0
+                   || strpos($value, 'GXModules/') === 0;
         });
         
         // Lets make sure we only have folders
