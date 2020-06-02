@@ -76,7 +76,7 @@ if (defined('StoreKey_MigrationScript')) {
              */
             private function ensureLogsAreWritable()
             {
-                @chmod($this->fileSystem->getShopDirectory() . '/GXModules/Gambio/Store/Logs', 777);
+                @chmod($this->fileSystem->getShopDirectory() . '/GXModules/Gambio/Store/Logs', 0777);
             }
             
             
@@ -169,7 +169,7 @@ if (defined('StoreKey_MigrationScript')) {
              */
             private function ensureStoreFolderIsWritableForUpdates()
             {
-                @chmod($this->fileSystem->getShopDirectory() . '/GXModules/Gambio/Store', 777);
+                @chmod($this->fileSystem->getShopDirectory() . '/GXModules/Gambio/Store', 0777);
             }
         }
     }
