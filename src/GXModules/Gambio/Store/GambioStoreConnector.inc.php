@@ -319,9 +319,14 @@ class GambioStoreConnector
         $packageData['name'] = $postData['title']['de'];
         
         if (isset($postData['folder_name_inside_shop']) || isset($postData['filename'])) {
-            $themeDirectoryName        = $postData['folder_name_inside_shop'] ? : $postData['filename'];
-            $themeDirectoryPath        = $this->fileSystem->getThemeDirectory() . '/' . $themeDirectoryName;
-            $packageData['files_list'] = $this->fileSystem->getContentsRecursively($themeDirectoryPath);
+            $themeDirectoryName      = $postData['folder_name_inside_shop'] ? : $postData['filename'];
+            $themeDirectoryPath      = $this->fileSystem->getThemeDirectory() . '/' . $themeDirectoryName;
+            $fileList                = $this->fileSystem->getContentsRecursively($themeDirectoryPath);
+            $shopDirectoryPathLength = strlen($this->fileSystem->getShopDirectory() . '/');
+            array_walk($fileList, function (&$item) use ($shopDirectoryPathLength) {
+                $item = substr($item, $shopDirectoryPathLength);
+            });
+            $packageData['files_list'] = $fileList;
         } else {
             $packageData['files_list'] = $postData['file_list'];
         }
@@ -331,8 +336,8 @@ class GambioStoreConnector
             isset($postData['migration']['up']) ? $postData['migration']['up'] : [],
             isset($postData['migration']['down']) ? $postData['migration']['down'] : []
         );
-        
-        $removal   = new GambioStoreRemoval($packageData, $this->logger, $this->backup, $migration);
+    
+        $removal = new GambioStoreRemoval($packageData, $this->logger, $this->backup, $migration, $this->fileSystem);
         
         return $removal->perform();
     }

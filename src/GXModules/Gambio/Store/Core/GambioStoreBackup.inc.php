@@ -9,6 +9,9 @@
    --------------------------------------------------------------
 */
 
+require_once "GambioStoreFileSystem.inc.php";
+require_once "Exceptions/FileSystemExceptions/GambioStoreFileNotFoundException.inc.php";
+
 class GambioStoreBackup
 {
     /**
@@ -38,8 +41,11 @@ class GambioStoreBackup
     public function restorePackageFilesFromCache(array $toRestore)
     {
         foreach ($toRestore as $file) {
-            if (file_exists($this->fileSystem->getShopDirectory() . '/cache/GambioStore/backup/' . $file . '.bak')) {
+            try {
                 $this->fileSystem->move('cache/GambioStore/backup/' . $file . '.bak', $file);
+            } catch (GambioStoreFileNotFoundException $e) {
+                // Do nothing if the backup file was not found since it simply means that file
+                // didnt exist previously so no backup was made.
             }
         }
     }
@@ -54,18 +60,12 @@ class GambioStoreBackup
      */
     public function movePackageFilesToCache(array $files)
     {
-        $shopDirectory = $this->fileSystem->getShopDirectory() . '/';
-        
         foreach ($files as $file) {
-            if (strpos($file, $shopDirectory) === false) {
-                $packageFileSource = $shopDirectory . $file;
-            } else {
-                $packageFileSource = $file;
-                $file              = str_replace($shopDirectory, '', $file);
-            }
-            
-            if (file_exists($packageFileSource) && is_file($packageFileSource)) {
+            try {
                 $this->fileSystem->move($file, 'cache/GambioStore/backup/' . $file . '.bak');
+            } catch (GambioStoreFileNotFoundException $e) {
+                // If the file we're trying to move doesnt exist we can ignore it because it means
+                // that the file didnt exist in the previous version of the package.
             }
         }
     }
@@ -78,20 +78,12 @@ class GambioStoreBackup
      */
     public function removePackageFilesFromCache(array $files)
     {
-        $shopDirectory  = $this->fileSystem->getShopDirectory() . '/';
         $cacheDirectory = 'cache/backup/';
         
         foreach ($files as $file) {
-            if (is_file($shopDirectory . $file . '.bak')) {
-                $file .= '.bak';
-            }
-            
-            if (strpos($file, $shopDirectory) === false) {
-                $this->fileSystem->remove($cacheDirectory . $file);
-            } else {
-                $file = str_replace($shopDirectory, '', $file);
-                $this->fileSystem->remove($cacheDirectory . $file);
-            }
+            $file .= '.bak';
+    
+            $this->fileSystem->remove($cacheDirectory . $file);
         }
     }
 }

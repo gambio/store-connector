@@ -129,7 +129,7 @@ class GambioStoreFileSystem
         $destination = $this->getShopDirectory() . '/' . $destination;
         
         if (!file_exists($source)) {
-            throw new GambioStoreFileNotFoundException('');
+            throw new GambioStoreFileNotFoundException('Could not find file to move: ' . $source);
         }
         
         if (is_file($source)) {
