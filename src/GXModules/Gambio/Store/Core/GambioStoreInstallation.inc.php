@@ -154,11 +154,11 @@ class GambioStoreInstallation
             return $this->cache->get($this->getTransactionId());
         }
         
-        $destination = $this->getPackageFilesDestinations();
+        $destinations = $this->getPackageFilesDestinations();
         
         try {
             $this->downloadPackageToCacheFolder();
-            $this->backup->movePackageFilesToCache($destination);
+            $this->backup->movePackageFilesToCache($destinations);
             $this->installPackage();
             $this->migration->up();
         } catch (GambioStoreException $e) {
@@ -168,7 +168,7 @@ class GambioStoreInstallation
                 'context'          => $e->getContext(),
                 'packageVersionId' => $this->packageData['details']['id']
             ]);
-            $this->backup->restorePackageFilesFromCache($destination);
+            $this->backup->restorePackageFilesFromCache($destinations);
             throw new GambioStorePackageInstallationException($message);
         } catch (Exception $e) {
             $message = 'Could not install package: ' . $this->packageData['details']['title']['de'];
@@ -176,7 +176,7 @@ class GambioStoreInstallation
                 'error'            => $e->getMessage(),
                 'packageVersionId' => $this->packageData['details']['id']
             ]);
-            $this->backup->restorePackageFilesFromCache($destination);
+            $this->backup->restorePackageFilesFromCache($destinations);
             throw new GambioStorePackageInstallationException($message);
         }
         finally {
