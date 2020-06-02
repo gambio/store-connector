@@ -137,7 +137,7 @@ class GambioStoreRemoval
         
         // Lets make sure we only have folders
         array_walk($foldersOfInterest, function (&$item) {
-            if (!is_dir($item)) {
+            if (!is_dir($this->fileSystem->getShopDirectory() . '/' . $item)) {
                 $item = dirname($item);
             }
         });
@@ -162,10 +162,6 @@ class GambioStoreRemoval
      */
     private function removeEmptyFoldersRecursively($path)
     {
-        if (!is_dir($path)) {
-            $path = dirname($path);
-        }
-        
         if ($path === 'themes'
             || $path === 'GXModules'
             || !$this->isFolderEmpty($path)) {
@@ -187,7 +183,7 @@ class GambioStoreRemoval
     private function isFolderEmpty($folder)
     {
         $path = $this->fileSystem->getShopDirectory() . '/' . $folder;
-        
-        return count(scandir($path)) === 2;
+    
+        return count(@scandir($path)) === 2;
     }
 }
