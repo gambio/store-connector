@@ -184,6 +184,6 @@ class GambioStoreRemoval
     {
         $path = $this->fileSystem->getShopDirectory() . '/' . $folder;
     
-        return count(@scandir($path)) === 2;
+        return @count(@scandir($path)) === 2;
     }
 }
