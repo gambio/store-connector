@@ -40,14 +40,17 @@ class GambioStoreBackup
      */
     public function restorePackageFilesFromCache(array $toRestore)
     {
+        $filesToRemove = $this->getDifferenceBetweenBackupAndActualPackage($toRestore);
+        foreach ($filesToRemove as $fileToRemove) {
+            $this->fileSystem->remove($fileToRemove);
+        }
+        
         foreach ($toRestore as $file) {
             try {
                 $this->fileSystem->move('cache/GambioStore/backup/' . $file . '.bak', $file);
             } catch (GambioStoreFileNotFoundException $e) {
-                $filesToRemove = $this->getDifferenceBetweenBackupAndActualPackage($toRestore);
-                foreach ($filesToRemove as $fileToRemove) {
-                    $this->fileSystem->remove($fileToRemove);
-                }
+                // If the file we're trying to move doesnt exist we can ignore it because it means
+                // that the file didnt exist in the previous version of the package.
             }
         }
     }

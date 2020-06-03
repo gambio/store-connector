@@ -164,7 +164,6 @@ class GambioStoreInstallation
                 'error'            => $e->getMessage(),
                 'packageVersionId' => $this->packageData['details']['id']
             ]);
-            $this->backup->restorePackageFilesFromCache($destinations);
             $this->cleanCache();
             throw new GambioStorePackageInstallationException($message);
         }
