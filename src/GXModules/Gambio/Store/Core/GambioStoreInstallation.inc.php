@@ -222,9 +222,6 @@ class GambioStoreInstallation
     
         $this->logger->notice('Successfully installed package : ' . $this->packageData['details']['title']['de']);
     
-        restore_error_handler();
-        restore_exception_handler();
-    
         return ['success' => true];
     }
     

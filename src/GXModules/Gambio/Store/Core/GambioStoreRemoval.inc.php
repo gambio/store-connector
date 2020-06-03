@@ -103,9 +103,6 @@ class GambioStoreRemoval
     
         $this->logger->notice('Successfully removed package: ' . $name);
     
-        restore_error_handler();
-        restore_exception_handler();
-    
         return ['success' => true];
     }
     
