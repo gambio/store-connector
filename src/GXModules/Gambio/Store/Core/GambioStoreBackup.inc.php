@@ -94,6 +94,8 @@ class GambioStoreBackup
     
     
     /**
+     * Returns an array of files are different between backup and actual package.
+     *
      * @param array $files
      *
      * @return array

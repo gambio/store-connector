@@ -291,16 +291,25 @@ class GambioStoreConnector
      */
     public function installPackage($packageData)
     {
-        $migration = new GambioStoreMigration(
-            $this->fileSystem,
+        $migration = new GambioStoreMigration($this->fileSystem,
             isset($packageData['migration']['up']) ? $packageData['migration']['up'] : [],
-            isset($packageData['migration']['down']) ? $packageData['migration']['down'] : []
-        );
-        
+            isset($packageData['migration']['down']) ? $packageData['migration']['down'] : []);
+    
         $installation = new GambioStoreInstallation($packageData, $this->configuration->get('GAMBIO_STORE_TOKEN'),
             $this->cache, $this->logger, $this->fileSystem, $this->backup, $migration);
-        
-        return $installation->perform();
+    
+        try {
+            $response = $installation->perform();
+        } catch (\Exception $e) {
+            restore_error_handler();
+            restore_exception_handler();
+            throw $e;
+        }
+    
+        restore_error_handler();
+        restore_exception_handler();
+    
+        return $response;
     }
     
     
@@ -331,15 +340,24 @@ class GambioStoreConnector
             $packageData['files_list'] = $postData['file_list'];
         }
     
-        $migration = new GambioStoreMigration(
-            $this->fileSystem,
+        $migration = new GambioStoreMigration($this->fileSystem,
             isset($postData['migration']['up']) ? $postData['migration']['up'] : [],
-            isset($postData['migration']['down']) ? $postData['migration']['down'] : []
-        );
+            isset($postData['migration']['down']) ? $postData['migration']['down'] : []);
     
         $removal = new GambioStoreRemoval($packageData, $this->logger, $this->backup, $migration, $this->fileSystem);
-        
-        return $removal->perform();
+    
+        try {
+            $response = $removal->perform();
+        } catch (\Exception $e) {
+            restore_error_handler();
+            restore_exception_handler();
+            throw $e;
+        }
+    
+        restore_error_handler();
+        restore_exception_handler();
+    
+        return $response;
     }
     
     
