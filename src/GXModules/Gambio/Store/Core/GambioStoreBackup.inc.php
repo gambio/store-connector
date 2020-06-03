@@ -9,8 +9,8 @@
    --------------------------------------------------------------
 */
 
-require_once "GambioStoreFileSystem.inc.php";
-require_once "Exceptions/FileSystemExceptions/GambioStoreFileNotFoundException.inc.php";
+require_once 'GambioStoreFileSystem.inc.php';
+require_once 'Exceptions/FileSystemExceptions/GambioStoreFileNotFoundException.inc.php';
 
 class GambioStoreBackup
 {
@@ -44,8 +44,10 @@ class GambioStoreBackup
             try {
                 $this->fileSystem->move('cache/GambioStore/backup/' . $file . '.bak', $file);
             } catch (GambioStoreFileNotFoundException $e) {
-                // Do nothing if the backup file was not found since it simply means that file
-                // didnt exist previously so no backup was made.
+                $filesToRemove = $this->getDifferenceBetweenBackupAndActualPackage($toRestore);
+                foreach ($filesToRemove as $fileToRemove) {
+                    $this->fileSystem->remove($fileToRemove);
+                }
             }
         }
     }
@@ -85,5 +87,24 @@ class GambioStoreBackup
     
             $this->fileSystem->remove($cacheDirectory . $file);
         }
+    }
+    
+    
+    /**
+     * @param array $files
+     *
+     * @return array
+     */
+    public function getDifferenceBetweenBackupAndActualPackage(array $files)
+    {
+        $difference = [];
+
+        foreach($files as $file) {
+            if (!is_file($this->fileSystem->getShopDirectory() . '/cache/GambioStore/backup/' . $file . '.bak')) {
+                $difference[] = $file;
+            }
+        }
+        
+        return $difference;
     }
 }
