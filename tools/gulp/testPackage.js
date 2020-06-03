@@ -1,5 +1,5 @@
 /* --------------------------------------------------------------
- docker.js 2020-04-30
+ testPackage.js 2020-04-30
  Gambio GmbH
  http://www.gambio.de
  Copyright (c) 2020 Gambio GmbH
@@ -26,15 +26,27 @@ module.exports = (gulp, $) => {
 	const execSync = require('child_process').execSync;
 	const environment = require('./lib/environment');
 	
+	const zipVersions = function(from, saveTo) {
+		return new Promise(resolve => {
+			zip(from, {saveTo: saveTo}, function(error, buffer) {
+				if (error) {
+					console.error('Zip Error', error);
+				}
+				resolve();
+			});
+		})
+		
+	};
+	
 	return (done) => {
-		const registry = environment.getArgument('registry');
+		const registry = environment.getArgument('registry') + '/storage/packages/gambio/store-connector';
 		
 		if (!registry) {
-			throw  new Error('his gulp task requires a registry path (example: /var/www/html/store-registry) ')
+			throw  new Error('his gulp task requires a registry path (example: /var/www/html/store-package-registry) ')
 		}
 		
 		const basePath = path.resolve(__dirname, '../../src');
-		const storePackages = 'testPackage/storePackages';
+		const storePackages = 'tools/storePackages';
 		const firstStorePackage = storePackages + '/v1.0.0';
 		const secondStorePackage = storePackages + '/v1.0.2';
 		
@@ -51,26 +63,22 @@ module.exports = (gulp, $) => {
 		fs.removeSync(secondStorePackage + '/GXModules/Gambio/Store/Core/GambioStoreUpdater.php');
 		fs.removeSync(secondStorePackage + '/GXModules/Gambio/Store/Core/Facades/GambioStoreFileSystemFacade.php');
 		
-		fs.copySync('testPackage/boilerplate/GambioStoreFileSystemFacade.php', secondStorePackage
+		fs.copySync('tools/boilerplate/GambioStoreFileSystemFacade.php', secondStorePackage
 			+ '/GXModules/Gambio/Store/Core/GambioStoreUpdater.php')
-		fs.copySync('testPackage/boilerplate/GambioStoreFileSystemFacade.php', secondStorePackage
+		fs.copySync('tools/boilerplate/GambioStoreFileSystemFacade.php', secondStorePackage
 			+ '/GXModules/Gambio/Store/Core/Facades/GambioStoreFileSystemFacade.php')
 		
-		execSync('sudo chmod 777 -R .', {cwd: storePackages})
+		execSync('chmod 777 -R .', {cwd: storePackages})
 		
-		zip(firstStorePackage, {saveTo: storePackages + '/v.1.0.0.zip'}, function(error, buffer) {
-			if (error) {
-				console.error('Zip Error', error);
-			}
-			
-			done();
-		});
+		const fistZip = zipVersions(firstStorePackage, storePackages + '/v.1.0.0.zip')
+		const secondZip = zipVersions(secondStorePackage, storePackages + '/v.1.0.2.zip')
 		
-		zip(secondStorePackage, {saveTo: storePackages + '/v.1.0.2.zip'}, function(error, buffer) {
-			if (error) {
-				console.error('Zip Error', error);
-			}
-			
+		del.sync(registry, {force: true});
+		Promise.all([fistZip, secondZip]).then(() => {
+			fs.mkdirSync(registry);
+			fs.copySync(storePackages, registry);
+			execSync('chmod 777 -R .', {cwd: registry});
+			del.sync(storePackages);
 			done();
 		});
 	};
