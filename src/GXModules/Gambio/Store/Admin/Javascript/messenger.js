@@ -20,6 +20,9 @@ window.GambioStore = Object.assign({}, {
 		 */
 		sendMessage(type, payload) {
 			const iframe = document.getElementById('storeIframe');
+            if(payload === undefined) {
+                payload = null;
+            }
 			iframe.contentWindow.postMessage({type, payload}, '*');
 		},
 		/**
