@@ -68,7 +68,7 @@ module.exports = (gulp, $) => {
         const serverPort = environment.getArgument('port') || '8000';
         const mysqlPort = String(parseInt(serverPort) + 1);
         
-        if (['5.6', '7.0', '7.1', '7.2'].includes(phpVersion) === false) {
+        if (['5.6', '7.0', '7.1', '7.2', '7.3', '7.4'].includes(phpVersion) === false) {
             throw new Error('The provided PHP version ' + phpVersion + ' is not supported by this Docker '
                 + 'configuration.');
         }
