@@ -70,8 +70,9 @@ class GambioStoreRemoval
         $this->backup      = $backup;
         $this->migration   = $migration;
         $this->fileSystem  = $fileSystem;
-        
-        register_shutdown_function([$this, 'shutdownCallback']);
+    
+        set_error_handler([$this, 'handleUnexpectedError']);
+        set_exception_handler([$this, 'handleUnexpectedException']);
     }
     
     
@@ -99,26 +100,52 @@ class GambioStoreRemoval
             $this->backup->restorePackageFilesFromCache($files);
             throw new GambioStoreRemovalException($message);
         }
-        
+    
         $this->logger->notice('Successfully removed package: ' . $name);
-        
+    
+        restore_error_handler();
+        restore_exception_handler();
+    
         return ['success' => true];
     }
     
     
     /**
-     * Shutdown callback function.
+     * Error handler function.
+     *
+     * @param $code
+     * @param $message
+     * @param $file
+     * @param $line
      *
      * @throws \Exception
      */
-    public function shutdownCallback()
+    public function handleUnexpectedError($code, $message, $file, $line)
     {
-        $error = error_get_last();
-        if ($error) {
-            $this->logger->critical('Critical error during package removal from package: ' . $this->packageData['name'],
-                ['package' => $this->packageData, 'error' => $error]);
-            $this->backup->restorePackageFilesFromCache($this->packageData['files_list']);
-        }
+        $this->logger->critical('Critical error during package removal from package: ' . $this->packageData['name'], [
+                'error' => [
+                    'code'    => $code,
+                    'message' => $message,
+                    'file'    => $file,
+                    'line'    => $line
+                ]
+            ]);
+        $this->backup->restorePackageFilesFromCache($this->packageData['files_list']);
+    }
+    
+    
+    /**
+     * Exception handler function.
+     *
+     * @param $exception
+     *
+     * @throws \Exception
+     */
+    public function handleUnexpectedException($exception)
+    {
+        $this->logger->critical('Critical error during package removal from package: ' . $this->packageData['name'],
+            ['package' => $this->packageData, 'error' => $exception]);
+        $this->backup->restorePackageFilesFromCache($this->packageData['files_list']);
     }
     
     

@@ -88,22 +88,47 @@ class GambioStoreInstallation
         $this->filesystem  = $filesystem;
         $this->backup      = $backup;
         $this->migration   = $migration;
-        
-        register_shutdown_function([$this, 'registerShutdownFunction']);
+    
+        set_error_handler([$this, 'handleUnexpectedError']);
+        set_exception_handler([$this, 'handleUnexpectedException']);
     }
     
     
     /**
-     * Shutdown callback function.
+     * Error handler function.
+     *
+     * @param $code
+     * @param $message
+     * @param $file
+     * @param $line
      *
      * @throws \Exception
      */
-    public function registerShutdownFunction()
+    public function handleUnexpectedError($code, $message, $file, $line)
     {
-        if ($error = error_get_last()) {
-            $this->logger->critical('Critical error during package installation', ['error' => $error]);
-            $this->backup->restorePackageFilesFromCache($this->getPackageFilesDestinations());
-        }
+        $this->logger->critical('Critical error during package installation', [
+                'error' => [
+                    'code'    => $code,
+                    'message' => $message,
+                    'file'    => $file,
+                    'line'    => $line
+                ]
+            ]);
+        $this->backup->restorePackageFilesFromCache($this->getPackageFilesDestinations());
+    }
+    
+    
+    /**
+     * Exception handler function.
+     *
+     * @param $exception
+     *
+     * @throws \Exception
+     */
+    public function handleUnexpectedException($exception)
+    {
+        $this->logger->critical('Critical error during package installation', ['error' => $exception]);
+        $this->backup->restorePackageFilesFromCache($this->getPackageFilesDestinations());
     }
     
     
@@ -127,6 +152,7 @@ class GambioStoreInstallation
     {
         return array_column($this->packageData['fileList']['includedFiles'], 'destination');
     }
+    
     
     /**
      * Inits installation.
@@ -193,9 +219,12 @@ class GambioStoreInstallation
         finally {
             $this->cleanCache();
         }
-        
+    
         $this->logger->notice('Successfully installed package : ' . $this->packageData['details']['title']['de']);
-        
+    
+        restore_error_handler();
+        restore_exception_handler();
+    
         return ['success' => true];
     }
     
