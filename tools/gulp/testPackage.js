@@ -39,11 +39,13 @@ module.exports = (gulp, $) => {
 	};
 	
 	return (done) => {
-		const registry = environment.getArgument('registry') + '/storage/packages/gambio/store-connector';
+		let registry = environment.getArgument('registry');
 		
 		if (!registry) {
 			throw  new Error('his gulp task requires a registry path (example: /var/www/html/store-package-registry) ')
 		}
+		
+		registry += '/storage/packages/gambio/store-connector';
 		
 		const basePath = path.resolve(__dirname, '../../src');
 		const storePackages = 'tools/storePackages';
@@ -70,8 +72,8 @@ module.exports = (gulp, $) => {
 		
 		execSync('chmod 777 -R .', {cwd: storePackages})
 		
-		const fistZip = zipVersions(firstStorePackage, storePackages + '/v.1.0.0.zip')
-		const secondZip = zipVersions(secondStorePackage, storePackages + '/v.1.0.2.zip')
+		const fistZip = zipVersions(firstStorePackage, storePackages + '/v1.0.0.zip')
+		const secondZip = zipVersions(secondStorePackage, storePackages + '/v1.0.2.zip')
 		
 		del.sync(registry, {force: true});
 		Promise.all([fistZip, secondZip]).then(() => {
