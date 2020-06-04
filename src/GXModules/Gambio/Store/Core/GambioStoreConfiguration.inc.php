@@ -159,6 +159,47 @@ class GambioStoreConfiguration
     
     
     /**
+     * Removes the configuration value with the provided key.
+     *
+     * @param string $key
+     */
+    public function remove($key)
+    {
+        if (!empty($key)) {
+            if ($this->compatibility->has(GambioStoreCompatibility::RESOURCE_GM_CONFIGURATION_TABLE)) {
+                $this->gmRemove($key);
+                
+                return;
+            }
+            
+            $this->gxRemove($key);
+        }
+    }
+    
+    
+    /**
+     * Remove the value from gm configurations
+     *
+     * @param $key
+     */
+    private function gmRemove($key)
+    {
+        $this->database->query('DELETE FROM gm_configuration WHERE gm_key = :key', [':key' => $key]);
+    }
+    
+    
+    /**
+     * Remove the value from gx configurations
+     *
+     * @param $key
+     */
+    private function gxRemove($key)
+    {
+        $this->database->query('DELETE FROM gx_configurations `key` = :key', [':key' => 'gm_configuration/' . $key]);
+    }
+    
+    
+    /**
      * Checks if it has the configuration key.
      *
      * @param string $key

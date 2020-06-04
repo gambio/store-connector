@@ -86,13 +86,17 @@ if (defined('StoreKey_MigrationScript')) {
             private function updateMenu()
             {
                 $menuPath = $this->fileSystem->getShopDirectory() . '/system/conf/admin_menu/gambio_menu.xml';
-                
+    
                 $menuContent = file_get_contents($menuPath);
-                
-                $gambioMenuRegex = '/.<menugroup id="BOX_HEADING_GAMBIO_STORE.*\s.*\s.*\s.*\s.<\/menugroup>/i';
-                
-                $menuContent = preg_replace($gambioMenuRegex, '', $menuContent);
-                
+    
+                $gambioStoreMenuRegex = '/.<menugroup id="BOX_HEADING_GAMBIO_STORE.*\s.*\s.*\s.*\s.<\/menugroup>/i';
+    
+                $menuContent = preg_replace($gambioStoreMenuRegex, '', $menuContent);
+    
+                $appStoreMenuRegex = '/.<menugroup id="BOX_HEADING_APP_STORE.*\s.*\s.*\s.*\s.<\/menugroup>/i';
+    
+                $menuContent = preg_replace($appStoreMenuRegex, '', $menuContent);
+    
                 file_put_contents($menuPath, $menuContent);
             }
             
@@ -102,10 +106,29 @@ if (defined('StoreKey_MigrationScript')) {
              */
             private function createDatabaseKeysIfNotExists()
             {
+                if ($this->configuration->has('APP_STORE_URL')) {
+                    $this->configuration->create('GAMBIO_STORE_URL', $this->configuration->get('APP_STORE_URL'));
+                    $this->configuration->remove('APP_STORE_URL');
+                }
+    
+                if ($this->configuration->has('APP_STORE_TOKEN')) {
+                    $token = $this->configuration->get('APP_STORE_TOKEN');
+                    if (!empty($token)) {
+                        $this->configuration->create('GAMBIO_STORE_TOKEN', $token);
+                    }
+                    $this->configuration->remove('APP_STORE_TOKEN');
+                }
+    
+                if ($this->configuration->has('APP_STORE_IS_REGISTERED')) {
+                    $this->configuration->create('GAMBIO_STORE_IS_REGISTERED',
+                        $this->configuration->get('APP_STORE_IS_REGISTERED'));
+                    $this->configuration->remove('APP_STORE_IS_REGISTERED');
+                }
+    
                 if (!$this->configuration->has('GAMBIO_STORE_URL')) {
                     $this->configuration->create('GAMBIO_STORE_URL', 'https://store.gambio.com/a');
                 }
-                
+    
                 if (!$this->configuration->has('GAMBIO_STORE_TOKEN')) {
                     $prefix    = 'STORE';
                     $date      = date('Ymd');
@@ -161,6 +184,15 @@ if (defined('StoreKey_MigrationScript')) {
                 $this->fileSystem->remove('admin/javascript/engine/controllers/gambio_store');
                 $this->fileSystem->remove('lang/german/original_sections/admin/gambio_store');
                 $this->fileSystem->remove('lang/english/original_sections/admin/gambio_store');
+    
+                $this->fileSystem->remove('GXMainComponents/Controllers/HttpView/Admin/AppStoreController.inc.php');
+                $this->fileSystem->remove('GXMainComponents/Controllers/HttpView/AdminAjax/AppStoreAjaxController.inc.php');
+                $this->fileSystem->remove('GXMainComponents/Controllers/HttpView/Shop/AppStoreCallbackController.inc.php');
+                $this->fileSystem->remove('GXMainComponents/Extensions/AppStore');
+                $this->fileSystem->remove('admin/html/content/app_store');
+                $this->fileSystem->remove('admin/javascript/engine/controllers/app_store');
+                $this->fileSystem->remove('lang/german/original_sections/admin/app_store');
+                $this->fileSystem->remove('lang/english/original_sections/admin/app_store');
             }
             
             
