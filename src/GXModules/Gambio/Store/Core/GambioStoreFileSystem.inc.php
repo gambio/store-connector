@@ -423,7 +423,7 @@ class GambioStoreFileSystem
      */
     public function getShopDirectory()
     {
-        return dirname(__FILE__, 5);
+        return __DIR__ . '/../../../..';
     }
     
      /**

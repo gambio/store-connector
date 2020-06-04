@@ -65,7 +65,7 @@ class GambioStoreController extends AdminHttpViewController
         }
         
         $title             = new NonEmptyStringType($this->languageTextManager->get_text('PAGE_TITLE'));
-        $template          = new ExistingFile(new NonEmptyStringType(dirname(__FILE__, 2) . '/Html/gambio_store.html'));
+        $template          = new ExistingFile(new NonEmptyStringType(__DIR__ . '/../Html/gambio_store.html'));
         $contentNavigation = MainFactory::create('ContentNavigationCollection', []);
         $assets            = $this->getIFrameAssets();
         $data              = [];
@@ -99,7 +99,7 @@ class GambioStoreController extends AdminHttpViewController
      * @return \AdminLayoutHttpControllerResponse
      */
     private function showCriticalErrorPage() {
-        $template = new ExistingFile(new NonEmptyStringType(dirname(__FILE__, 2) . '/Html/gambio_store_critical_errors.html'));
+        $template = new ExistingFile(new NonEmptyStringType(__DIR__ . '/../Html/gambio_store_critical_errors.html'));
         $assets            = $this->getIFrameAssets();
         $contentNavigation = MainFactory::create('ContentNavigationCollection', []);
         $title    = new NonEmptyStringType($this->languageTextManager->get_text('PAGE_TITLE'));
@@ -135,7 +135,7 @@ class GambioStoreController extends AdminHttpViewController
         $this->checkForErrors();
     
         $title    = new NonEmptyStringType($this->languageTextManager->get_text('PAGE_TITLE'));
-        $template = new ExistingFile(new NonEmptyStringType(dirname(__FILE__, 2) . '/Html/gambio_store.html'));
+        $template = new ExistingFile(new NonEmptyStringType(__DIR__ . '/../Html/gambio_store.html'));
     
         setcookie('auto_updater_admin_check', 'admin_logged_in', time() + 5 * 60, '/');
     
@@ -166,8 +166,7 @@ class GambioStoreController extends AdminHttpViewController
         }
         
         $title    = new NonEmptyStringType($this->languageTextManager->get_text('PAGE_TITLE'));
-        $template = new ExistingFile(new NonEmptyStringType(dirname(__FILE__, 2)
-                                                            . '/Html/gambio_store_configuration.html'));
+        $template = new ExistingFile(new NonEmptyStringType(__DIR__ . '/../Html/gambio_store_configuration.html'));
         
         $data = new KeyValueCollection(['url' => $gambioStoreUrl]);
         

@@ -61,7 +61,7 @@ if (defined('StoreKey_MigrationScript')) {
              */
             public function getShopDirectory()
             {
-                return dirname(__FILE__, 6);
+                return __DIR__ . '/../../../../..';
             }
             
             

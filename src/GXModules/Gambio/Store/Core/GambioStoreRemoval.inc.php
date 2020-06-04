@@ -70,7 +70,7 @@ class GambioStoreRemoval
         $this->backup      = $backup;
         $this->migration   = $migration;
         $this->fileSystem  = $fileSystem;
-    
+        
         set_error_handler([$this, 'handleUnexpectedError']);
         set_exception_handler([$this, 'handleUnexpectedException']);
     }
@@ -96,13 +96,16 @@ class GambioStoreRemoval
             $this->backup->removePackageFilesFromCache($files);
         } catch (Exception $exception) {
             $message = 'Could not remove package: ' . $name;
-            $this->logger->error($message, ['package' => $this->packageData, 'error' => $exception]);
+            $this->logger->error($message, [
+                'error'   => $exception,
+                'package' => $this->packageData
+            ]);
             $this->backup->restorePackageFilesFromCache($files);
             throw new GambioStoreRemovalException($message);
         }
-    
+        
         $this->logger->notice('Successfully removed package: ' . $name);
-    
+        
         return ['success' => true];
     }
     
@@ -132,7 +135,7 @@ class GambioStoreRemoval
             $this->backup->restorePackageFilesFromCache($this->packageData['files_list']);
             die();
         }
-    
+        
         if ($code !== 2) {
             $this->logger->warning('Minor error during package removal from package: ' . $this->packageData['name'], [
                 'error' => [
@@ -155,8 +158,10 @@ class GambioStoreRemoval
      */
     public function handleUnexpectedException($exception)
     {
-        $this->logger->critical('Critical error during package removal from package: ' . $this->packageData['name'],
-            ['package' => $this->packageData, 'error' => $exception]);
+        $this->logger->critical('Critical error during package removal from package: ' . $this->packageData['name'], [
+                'package' => $this->packageData,
+                'error'   => $exception
+            ]);
         $this->backup->restorePackageFilesFromCache($this->packageData['files_list']);
     }
     
@@ -222,7 +227,7 @@ class GambioStoreRemoval
     private function isFolderEmpty($folder)
     {
         $path = $this->fileSystem->getShopDirectory() . '/' . $folder;
-    
+        
         return @count(@scandir($path)) === 2;
     }
 }
