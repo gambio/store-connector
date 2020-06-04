@@ -352,14 +352,18 @@ class GambioStoreFileSystem
      */
     public function createDirectory($path)
     {
+        if (is_dir($path)) {
+            return;
+        }
+    
         if (!@mkdir($path, 0777, true) && !is_dir($path)) {
-            
+        
             if (is_file($path)) {
                 throw new GambioStoreCreateDirectoryException('Could not create a folder ' . $path, 1, [
                     'info' => 'There is already a file exists for the path: ' . $path
                 ]);
             }
-            
+        
             if (is_link($path)) {
                 throw new GambioStoreCreateDirectoryException('Could not create a folder ' . $path, 2, [
                     'info' => 'There is already a symlink exists for this path! ' . $path
