@@ -19,5 +19,6 @@ RUN docker-php-ext-configure zip --with-libzip \
 
 RUN a2enmod rewrite
 
-RUN pecl install xdebug-2.7.0 || pecl install xdebug-2.5.5
+RUN pecl install {{xdebugVersion}}
+
 RUN docker-php-ext-enable xdebug soap zip
