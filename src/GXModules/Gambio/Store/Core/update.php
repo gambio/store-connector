@@ -9,7 +9,7 @@
    --------------------------------------------------------------
 */
 
-require __DIR__ . '/../Core/GambioStoreUpdater.php';
+require 'GambioStoreUpdater.php';
 
 $updater = new GambioStoreUpdater($configuration, $database, $fileSystem);
 $updater->update();
