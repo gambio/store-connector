@@ -180,7 +180,7 @@ class GambioStoreLogger
         $time  = $now->format('H:i:s');
         
         $fileName = $today . '-' . $suffix . '.log';
-        $logPath  = dirname(__FILE__, 2) . '/Logs/';
+        $logPath  = __DIR__ . '/../Logs/';
         $cacheKey = 'LAST_LOG_FILE_CHECK';
         
         if ($this->cache->has($cacheKey)) {
@@ -238,7 +238,7 @@ class GambioStoreLogger
      */
     private function getLogsPath()
     {
-        return dirname(__FILE__, 2) . '/Logs/';
+        return __DIR__ . '/../Logs/';
     }
     
     
