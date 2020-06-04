@@ -15,6 +15,12 @@ require_once 'Exceptions/GambioStoreInstallationMissingPHPExtensionsException.in
 require_once 'Exceptions/GambioStoreZipException.inc.php';
 require_once 'Exceptions/GambioStoreHttpErrorException.inc.php';
 require_once 'Exceptions/GambioStoreFileHashMismatchException.inc.php';
+require_once 'GambioStoreHttp.inc.php';
+require_once 'GambioStoreCache.inc.php';
+require_once 'GambioStoreLogger.inc.php';
+require_once 'GambioStoreBackup.inc.php';
+require_once 'GambioStoreFileSystem.inc.php';
+require_once 'GambioStoreMigration.inc.php';
 
 /**
  * Class StoreInstallation
@@ -106,7 +112,8 @@ class GambioStoreInstallation
      */
     public function handleUnexpectedError($code, $message, $file, $line)
     {
-        $this->logger->critical('Critical error during package installation', [
+        if ($code === E_USER_ERROR) {
+            $this->logger->critical('Critical error during package installation', [
                 'error' => [
                     'code'    => $code,
                     'message' => $message,
@@ -114,7 +121,18 @@ class GambioStoreInstallation
                     'line'    => $line
                 ]
             ]);
-        $this->backup->restorePackageFilesFromCache($this->getPackageFilesDestinations());
+            $this->backup->restorePackageFilesFromCache($this->getPackageFilesDestinations());
+            die();
+        }
+    
+        $this->logger->warning('Minor error during package installation', [
+            'error' => [
+                'code'    => $code,
+                'message' => $message,
+                'file'    => $file,
+                'line'    => $line
+            ]
+        ]);
     }
     
     

@@ -119,7 +119,21 @@ class GambioStoreRemoval
      */
     public function handleUnexpectedError($code, $message, $file, $line)
     {
-        $this->logger->critical('Critical error during package removal from package: ' . $this->packageData['name'], [
+        if ($code === E_USER_ERROR) {
+            $this->logger->critical('Critical error during package removal from package: ' . $this->packageData['name'],
+                [
+                    'error' => [
+                        'code'    => $code,
+                        'message' => $message,
+                        'file'    => $file,
+                        'line'    => $line
+                    ]
+                ]);
+            $this->backup->restorePackageFilesFromCache($this->packageData['files_list']);
+            die();
+        }
+    
+        $this->logger->warning('Minor error during package removal from package: ' . $this->packageData['name'], [
                 'error' => [
                     'code'    => $code,
                     'message' => $message,
@@ -127,7 +141,6 @@ class GambioStoreRemoval
                     'line'    => $line
                 ]
             ]);
-        $this->backup->restorePackageFilesFromCache($this->packageData['files_list']);
     }
     
     
