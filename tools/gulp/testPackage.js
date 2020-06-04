@@ -72,8 +72,8 @@ module.exports = (gulp, $) => {
 		
 		execSync('chmod 777 -R .', {cwd: storePackages})
 		
-		const fistZip = zipVersions(firstStorePackage, storePackages + '/v.1.0.0.zip')
-		const secondZip = zipVersions(secondStorePackage, storePackages + '/v.1.0.2.zip')
+		const fistZip = zipVersions(firstStorePackage, storePackages + '/v1.0.0.zip')
+		const secondZip = zipVersions(secondStorePackage, storePackages + '/v1.0.2.zip')
 		
 		del.sync(registry, {force: true});
 		Promise.all([fistZip, secondZip]).then(() => {
