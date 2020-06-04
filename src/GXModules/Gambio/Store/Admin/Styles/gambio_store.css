@@ -1,0 +1,36 @@
+/*
+	Gambio Store Page
+    ==========================================================================
+
+	Styles for the admin Gambio Store page.
+
+*/
+
+.gambio-store {
+    width:  100%;
+    border: none;
+}
+
+.gambio-store iframe {
+    width:        100%;
+    border:       none;
+    min-width:    1250px;
+    margin-left:  -24px;
+    margin-right: -24px;
+    min-height:   1000px !important;
+}
+
+.gambio-store-updates-counter {
+    background:    #E66554;
+    border-radius: 100%;
+    color:         #FFFFFF;
+    margin-top:    -8px;
+    display:       inline-block;
+    text-align:    center;
+    float:         right;
+    margin-left:   5px;
+    font-size:     9px;
+    width:         17px;
+    height:        17px;
+    line-height:   16px;
+}
