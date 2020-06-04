@@ -226,7 +226,6 @@ class GambioStoreInstallation
             $this->downloadPackageToCacheFolder();
             $this->installPackage();
             $this->migration->up();
-            throw Exception();
         } catch (GambioStoreException $e) {
             $message = 'Could not install package: ' . $this->packageData['details']['title']['de'];
             $this->logger->error($message, [
