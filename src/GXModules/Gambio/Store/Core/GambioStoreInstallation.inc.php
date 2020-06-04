@@ -266,6 +266,7 @@ class GambioStoreInstallation
         foreach ($filesToRemove as $fileToRemove) {
             $this->fileSystem->remove($fileToRemove);
         }
+        $this->removeEmptyFolders($filesToRemove);
     }
     
     
