@@ -185,7 +185,7 @@ if (defined('StoreKey_MigrationScript')) {
                 $time  = $now->format('H:i:s');
                 
                 $fileName = $today . '-' . $suffix . '.log';
-                $logPath  = __DIR__ . '/../Logs/';
+                $logPath  = __DIR__ . '/../../Logs/';
                 $cacheKey = 'LAST_LOG_FILE_CHECK';
                 
                 if ($this->cache->has($cacheKey)) {

@@ -61,7 +61,7 @@ if (defined('StoreKey_MigrationScript')) {
              */
             public function getShopDirectory()
             {
-                return dirname(__FILE__, 6);
+                return realpath(__DIR__ . '/../../../../..');
             }
             
             
@@ -436,13 +436,6 @@ if (defined('StoreKey_MigrationScript')) {
             public function getCacheDirectory()
             {
                 return $this->getShopDirectory() . '/cache';
-            }
-            
-            
-            public function test()
-            {
-                file_put_contents($this->getShopDirectory() . '/GXModules/Gambio/Store/Logs/works.txt',
-                    'Yes self updated worked');
             }
         }
     }

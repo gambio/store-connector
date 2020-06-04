@@ -1,4 +1,4 @@
-<?php
+<?php /** @noinspection ALL */
 /* --------------------------------------------------------------
    GambioStoreFileSystem.php 2020-05-14
    Gambio GmbH
@@ -423,7 +423,7 @@ class GambioStoreFileSystem
      */
     public function getShopDirectory()
     {
-        return __DIR__ . '/../../../..';
+        return realpath(__DIR__ . '/../../../..');
     }
     
      /**
