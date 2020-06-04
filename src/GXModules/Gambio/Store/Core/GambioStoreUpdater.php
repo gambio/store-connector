@@ -68,9 +68,31 @@ if (defined('StoreKey_MigrationScript')) {
                 $this->updateMenu();
                 $this->createDatabaseKeysIfNotExists();
                 $this->createCacheTableIfNotExists();
+                $this->updateBoilerplateScss();
             }
-            
-            
+    
+    
+            /**
+             * Removes the import in the _boilerplate.scss in older shops that still shipped with the Store
+             */
+            private function updateBoilerplateScss()
+            {
+                $boilerplatePath = $this->fileSystem->getShopDirectory() . '/admin/styles/admin/_boilerplate.scss';
+        
+                $boilerplateContent = file_get_contents($boilerplatePath);
+        
+                $importAppStoreRegex = '/@import "app_store\/app_store";/i';
+        
+                $boilerplateContent = preg_replace($importAppStoreRegex, '', $boilerplateContent);
+        
+                $importGambioStoreRegex = '/@import "gambio_store\/gambio_store";/i';
+        
+                $boilerplateContent = preg_replace($importGambioStoreRegex, '', $boilerplateContent);
+        
+                file_put_contents($boilerplatePath, $boilerplateContent);
+            }
+    
+    
             /**
              * Make sure our Logs directory is writable
              */
@@ -184,6 +206,7 @@ if (defined('StoreKey_MigrationScript')) {
                 $this->fileSystem->remove('admin/javascript/engine/controllers/gambio_store');
                 $this->fileSystem->remove('lang/german/original_sections/admin/gambio_store');
                 $this->fileSystem->remove('lang/english/original_sections/admin/gambio_store');
+                $this->fileSystem->remove('admin/styles/admin/gambio_store');
     
                 $this->fileSystem->remove('GXMainComponents/Controllers/HttpView/Admin/AppStoreController.inc.php');
                 $this->fileSystem->remove('GXMainComponents/Controllers/HttpView/AdminAjax/AppStoreAjaxController.inc.php');
@@ -193,6 +216,7 @@ if (defined('StoreKey_MigrationScript')) {
                 $this->fileSystem->remove('admin/javascript/engine/controllers/app_store');
                 $this->fileSystem->remove('lang/german/original_sections/admin/app_store');
                 $this->fileSystem->remove('lang/english/original_sections/admin/app_store');
+                $this->fileSystem->remove('admin/styles/admin/app_store');
             }
             
             
