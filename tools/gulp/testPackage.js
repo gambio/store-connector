@@ -68,6 +68,8 @@ module.exports = (gulp, $) => {
 		fs.copySync('tools/boilerplate/GambioStoreUpdater.php', `${secondStorePackage}/GXModules/Gambio/Store/Core/GambioStoreUpdater.php`);
 		fs.copySync('tools/boilerplate/GambioStoreFileSystemFacade.php', `${secondStorePackage}/GXModules/Gambio/Store/Core/Facades/GambioStoreFileSystemFacade.php`);
 		
+		fs.moveSync(`${secondStorePackage}/version_info/gambio_store-1_0_0.php`, `${secondStorePackage}/version_info/gambio_store-1_0_2.php`);
+		
 		execSync('chmod 777 -R .', {cwd: storePackages});
 		
 		const fistZip = zipVersions(firstStorePackage, `${storePackages}/v1.0.0.zip`);
