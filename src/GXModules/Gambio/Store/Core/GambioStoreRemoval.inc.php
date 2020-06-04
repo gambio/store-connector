@@ -133,7 +133,8 @@ class GambioStoreRemoval
             die();
         }
     
-        $this->logger->warning('Minor error during package removal from package: ' . $this->packageData['name'], [
+        if ($code !== 2) {
+            $this->logger->warning('Minor error during package removal from package: ' . $this->packageData['name'], [
                 'error' => [
                     'code'    => $code,
                     'message' => $message,
@@ -141,6 +142,7 @@ class GambioStoreRemoval
                     'line'    => $line
                 ]
             ]);
+        }
     }
     
     

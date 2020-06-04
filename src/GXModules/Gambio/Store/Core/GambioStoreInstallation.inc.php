@@ -66,6 +66,11 @@ class GambioStoreInstallation
      */
     private $migration;
     
+    /**
+     * @var \GambioStoreHttp
+     */
+    private $http;
+    
     
     /**
      * GambioStoreInstallation constructor.
@@ -77,6 +82,7 @@ class GambioStoreInstallation
      * @param \GambioStoreFileSystem $filesystem
      * @param \GambioStoreBackup     $backup
      * @param \GambioStoreMigration  $migration
+     * @param \GambioStoreHttp       $http
      */
     public function __construct(
         array $packageData,
@@ -85,7 +91,8 @@ class GambioStoreInstallation
         GambioStoreLogger $logger,
         GambioStoreFileSystem $filesystem,
         GambioStoreBackup $backup,
-        GambioStoreMigration $migration
+        GambioStoreMigration $migration,
+        GambioStoreHttp $http
     ) {
         $this->packageData = $packageData;
         $this->token       = $token;
@@ -94,6 +101,7 @@ class GambioStoreInstallation
         $this->filesystem  = $filesystem;
         $this->backup      = $backup;
         $this->migration   = $migration;
+        $this->http        = $http;
     
         set_error_handler([$this, 'handleUnexpectedError']);
         set_exception_handler([$this, 'handleUnexpectedException']);
@@ -125,14 +133,16 @@ class GambioStoreInstallation
             die();
         }
     
-        $this->logger->warning('Minor error during package installation', [
-            'error' => [
-                'code'    => $code,
-                'message' => $message,
-                'file'    => $file,
-                'line'    => $line
-            ]
-        ]);
+        if ($code !== 2) {
+            $this->logger->warning('Minor error during package installation', [
+                'error' => [
+                    'code'    => $code,
+                    'message' => $message,
+                    'file'    => $file,
+                    'line'    => $line
+                ]
+            ]);
+        }
     }
     
     
@@ -361,8 +371,7 @@ class GambioStoreInstallation
      */
     public function getFileContent($url)
     {
-        $http     = new GambioStoreHttp;
-        $response = $http->get($url, [
+        $response = $this->http->get($url, [
             CURLOPT_HTTPHEADER => ["X-STORE-TOKEN: $this->token"]
         ]);
         

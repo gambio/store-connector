@@ -295,8 +295,10 @@ class GambioStoreConnector
             isset($packageData['migration']['up']) ? $packageData['migration']['up'] : [],
             isset($packageData['migration']['down']) ? $packageData['migration']['down'] : []);
     
+        $http = new GambioStoreHttp;
+    
         $installation = new GambioStoreInstallation($packageData, $this->configuration->get('GAMBIO_STORE_TOKEN'),
-            $this->cache, $this->logger, $this->fileSystem, $this->backup, $migration);
+            $this->cache, $this->logger, $this->fileSystem, $this->backup, $migration, $http);
     
         try {
             $response = $installation->perform();
