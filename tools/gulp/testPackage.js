@@ -65,7 +65,7 @@ module.exports = (gulp, $) => {
 		fs.removeSync(`${secondStorePackage}/GXModules/Gambio/Store/Core/GambioStoreUpdater.php`);
 		fs.removeSync(`${secondStorePackage}/GXModules/Gambio/Store/Core/Facades/GambioStoreFileSystemFacade.php`);
 		
-		fs.copySync('tools/boilerplate/GambioStoreFileSystemFacade.php', `${secondStorePackage}/GXModules/Gambio/Store/Core/GambioStoreUpdater.php`);
+		fs.copySync('tools/boilerplate/GambioStoreUpdater.php', `${secondStorePackage}/GXModules/Gambio/Store/Core/GambioStoreUpdater.php`);
 		fs.copySync('tools/boilerplate/GambioStoreFileSystemFacade.php', `${secondStorePackage}/GXModules/Gambio/Store/Core/Facades/GambioStoreFileSystemFacade.php`);
 		
 		execSync('chmod 777 -R .', {cwd: storePackages});
