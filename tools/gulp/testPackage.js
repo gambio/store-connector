@@ -39,11 +39,13 @@ module.exports = (gulp, $) => {
 	};
 	
 	return (done) => {
-		const registry = environment.getArgument('registry') + '/storage/packages/gambio/store-connector';
+		let registry = environment.getArgument('registry');
 		
 		if (!registry) {
 			throw  new Error('his gulp task requires a registry path (example: /var/www/html/store-package-registry) ')
 		}
+		
+		registry += '/storage/packages/gambio/store-connector';
 		
 		const basePath = path.resolve(__dirname, '../../src');
 		const storePackages = 'tools/storePackages';
