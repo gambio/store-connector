@@ -40,11 +40,6 @@ class GambioStoreBackup
      */
     public function restorePackageFilesFromCache(array $toRestore)
     {
-        $filesToRemove = $this->getDifferenceBetweenBackupAndActualPackage($toRestore);
-        foreach ($filesToRemove as $fileToRemove) {
-            $this->fileSystem->remove($fileToRemove);
-        }
-        
         foreach ($toRestore as $file) {
             try {
                 $this->fileSystem->move('cache/GambioStore/backup/' . $file . '.bak', $file);

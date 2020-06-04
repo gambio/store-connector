@@ -59,7 +59,7 @@ class GambioStoreInstallation
     /**
      * @var \GambioStoreFileSystem
      */
-    private $filesystem;
+    private $fileSystem;
     
     /**
      * @var \GambioStoreMigration
@@ -98,7 +98,7 @@ class GambioStoreInstallation
         $this->token       = $token;
         $this->cache       = $cache;
         $this->logger      = $logger;
-        $this->filesystem  = $filesystem;
+        $this->fileSystem  = $filesystem;
         $this->backup      = $backup;
         $this->migration   = $migration;
         $this->http        = $http;
@@ -226,6 +226,7 @@ class GambioStoreInstallation
             $this->downloadPackageToCacheFolder();
             $this->installPackage();
             $this->migration->up();
+            throw Exception();
         } catch (GambioStoreException $e) {
             $message = 'Could not install package: ' . $this->packageData['details']['title']['de'];
             $this->logger->error($message, [
@@ -233,7 +234,7 @@ class GambioStoreInstallation
                 'context'          => $e->getContext(),
                 'packageVersionId' => $this->packageData['details']['id']
             ]);
-            $this->backup->restorePackageFilesFromCache($destinations);
+            $this->restore($destinations);
             throw new GambioStorePackageInstallationException($message);
         } catch (Exception $e) {
             $message = 'Could not install package: ' . $this->packageData['details']['title']['de'];
@@ -241,7 +242,7 @@ class GambioStoreInstallation
                 'error'            => $e->getMessage(),
                 'packageVersionId' => $this->packageData['details']['id']
             ]);
-            $this->backup->restorePackageFilesFromCache($destinations);
+            $this->restore($destinations);
             throw new GambioStorePackageInstallationException($message);
         }
         finally {
@@ -251,6 +252,21 @@ class GambioStoreInstallation
         $this->logger->notice('Successfully installed package : ' . $this->packageData['details']['title']['de']);
     
         return ['success' => true];
+    }
+    
+    
+    /**
+     * @param $files
+     *
+     * @throws \Exception
+     */
+    private function restore($files)
+    {
+        $this->backup->restorePackageFilesFromCache($files);
+        $filesToRemove = $this->backup->getDifferenceBetweenBackupAndActualPackage($files);
+        foreach ($filesToRemove as $fileToRemove) {
+            $this->fileSystem->remove($fileToRemove);
+        }
     }
     
     
@@ -285,7 +301,7 @@ class GambioStoreInstallation
             $newPackageFile = 'cache/GambioStore/' . $this->getTransactionId() . '/' . $file;
             
             // Replace the old package file with new
-            $this->filesystem->move($newPackageFile, $file);
+            $this->fileSystem->move($newPackageFile, $file);
         }
     }
     
@@ -300,13 +316,13 @@ class GambioStoreInstallation
      */
     private function downloadPackageFilesToCacheFolder()
     {
-        $packageTempDirectory = $this->filesystem->getCacheDirectory() . '/' . $this->getTransactionId();
+        $packageTempDirectory = $this->fileSystem->getCacheDirectory() . '/' . $this->getTransactionId();
         
         foreach ($this->packageData['fileList']['includedFiles'] as $file) {
             
             $destinationFilePath      = $packageTempDirectory . '/' . $file['destination'];
             $destinationFileDirectory = dirname($destinationFilePath);
-            $this->filesystem->createDirectory($destinationFileDirectory);
+            $this->fileSystem->createDirectory($destinationFileDirectory);
             
             $fileContent = $this->getFileContent($file['source']);
             file_put_contents($destinationFilePath, $fileContent);
@@ -332,14 +348,14 @@ class GambioStoreInstallation
     private function downloadPackageZipToCacheFolder()
     {
         $destinationFileName = $this->getTransactionId() . '.zip';
-        $destinationFilePath = $this->filesystem->getCacheDirectory() . '/' . $destinationFileName;
-        $this->filesystem->createDirectory(dirname($destinationFilePath));
+        $destinationFilePath = $this->fileSystem->getCacheDirectory() . '/' . $destinationFileName;
+        $this->fileSystem->createDirectory(dirname($destinationFilePath));
         $downloadZipUrl = $this->packageData['fileList']['zip']['source'];
         $fileContent    = $this->getFileContent($downloadZipUrl);
         file_put_contents($destinationFilePath, $fileContent);
-        
+    
         chmod($destinationFilePath, 0777);
-        
+    
         if (md5_file($destinationFilePath) !== $this->packageData['fileList']['zip']['hash']) {
             throw new GambioStoreFileHashMismatchException('Uploaded package zip file has wrong hash.', [
                 'file' => $destinationFilePath
@@ -353,8 +369,8 @@ class GambioStoreInstallation
                 'file' => $destinationFilePath
             ]);
         }
-        
-        $zip->extractTo($this->filesystem->getCacheDirectory() . '/' . $this->getTransactionId());
+    
+        $zip->extractTo($this->fileSystem->getCacheDirectory() . '/' . $this->getTransactionId());
         $zip->close();
         
         return true;
@@ -393,6 +409,72 @@ class GambioStoreInstallation
      */
     private function cleanCache()
     {
-        $this->filesystem->remove('cache/GambioStore/');
+        $this->fileSystem->remove('cache/GambioStore/');
+    }
+    
+    
+    /**
+     * Remove all empty folders inside themes and GXModules related to this package
+     *
+     * @param $files
+     */
+    private function removeEmptyFolders($files)
+    {
+        // We'll only remove folders inside themes and GXModules
+        $foldersOfInterest = array_filter($files, function ($value) {
+            return strpos($value, 'themes/') === 0
+                   || strpos($value, 'GXModules/') === 0;
+        });
+        
+        // Lets make sure we only have folders
+        array_walk($foldersOfInterest, function (&$item) {
+            if (!is_dir($this->fileSystem->getShopDirectory() . '/' . $item)) {
+                $item = dirname($item);
+            }
+        });
+        
+        $foldersOfInterest = array_unique($foldersOfInterest);
+        
+        // Sort based on length to delete deepest folders first
+        usort($foldersOfInterest, function ($a, $b) {
+            return strlen($b) - strlen($a);
+        });
+        
+        foreach ($foldersOfInterest as $foldersToCheck) {
+            $this->removeEmptyFoldersRecursively($foldersToCheck);
+        }
+    }
+    
+    
+    /**
+     * Recursively delete each empty folder until either a folder is not empty or we reached themes or GXModules
+     *
+     * @param $path
+     */
+    private function removeEmptyFoldersRecursively($path)
+    {
+        if ($path === 'themes'
+            || $path === 'GXModules'
+            || !$this->isFolderEmpty($path)) {
+            return;
+        }
+        
+        $this->fileSystem->remove($path);
+        $this->removeEmptyFoldersRecursively(dirname($path));
+    }
+    
+    
+    /**
+     * Check if a folder is empty
+     *
+     * @param $folder
+     *
+     * @return bool
+     */
+    private function isFolderEmpty($folder)
+    {
+        $path = $this->fileSystem->getShopDirectory() . '/' . $folder;
+        
+        return @count(@scandir($path)) === 2;
     }
 }
