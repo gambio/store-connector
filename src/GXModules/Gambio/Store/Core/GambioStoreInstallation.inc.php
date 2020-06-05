@@ -264,11 +264,11 @@ class GambioStoreInstallation
      */
     private function restore($files)
     {
-        $this->backup->restorePackageFilesFromCache($files);
         $filesToRemove = $this->backup->getDifferenceBetweenBackupAndActualPackage($files);
         foreach ($filesToRemove as $fileToRemove) {
             $this->fileSystem->remove($fileToRemove);
         }
+        $this->backup->restorePackageFilesFromCache($files);
         $this->removeEmptyFolders($filesToRemove);
     }
     
