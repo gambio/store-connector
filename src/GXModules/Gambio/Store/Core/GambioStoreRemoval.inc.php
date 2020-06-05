@@ -97,8 +97,7 @@ class GambioStoreRemoval
         } catch (Exception $exception) {
             $message = 'Could not remove package: ' . $name;
             $this->logger->error($message, [
-                'error'   => $exception->getMessage(),
-                'errorTrace' => $exception->getTrace()
+                'error' => $exception->getMessage(),
             ]);
             $this->backup->restorePackageFilesFromCache($files);
             throw new GambioStoreRemovalException($message);

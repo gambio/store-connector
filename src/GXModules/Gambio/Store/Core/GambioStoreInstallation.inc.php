@@ -218,8 +218,7 @@ class GambioStoreInstallation
         } catch (Exception $e) {
             $message = 'Could not install package: ' . $this->packageData['details']['title']['de'];
             $this->logger->error($message, [
-                'error'            => $e->getMessage(),
-                'errorTrace'       => $e->getTrace()
+                'error' => $e->getMessage()
             ]);
             $this->cleanCache();
             throw new GambioStorePackageInstallationException($message);
@@ -232,17 +231,15 @@ class GambioStoreInstallation
         } catch (GambioStoreException $e) {
             $message = 'Could not install package: ' . $this->packageData['details']['title']['de'];
             $this->logger->error($message, [
-                'error'            => $e->getMessage(),
-                'context'          => $e->getContext(),
-                'errorTrace'       => $e->getTrace()
+                'error'   => $e->getMessage(),
+                'context' => $e->getContext()
             ]);
             $this->restore($destinations);
             throw new GambioStorePackageInstallationException($message);
         } catch (Exception $e) {
             $message = 'Could not install package: ' . $this->packageData['details']['title']['de'];
             $this->logger->error($message, [
-                'error'            => $e->getMessage(),
-                'errorTrace'       => $e->getTrace()
+                'error' => $e->getMessage()
             ]);
             $this->restore($destinations);
             throw new GambioStorePackageInstallationException($message);
