@@ -97,7 +97,12 @@ class GambioStoreRemoval
         } catch (Exception $exception) {
             $message = 'Could not remove package: ' . $name;
             $this->logger->error($message, [
-                'error' => $exception->getMessage(),
+                'error' => [
+                    'code'    => $exception->getCode(),
+                    'message' => $exception->getMessage(),
+                    'file'    => $exception->getFile(),
+                    'line'    => $exception->getLine()
+                ]
             ]);
             $this->backup->restorePackageFilesFromCache($files);
             throw new GambioStoreRemovalException($message);
@@ -158,8 +163,12 @@ class GambioStoreRemoval
     public function handleUnexpectedException(Exception $exception)
     {
         $this->logger->critical('Critical error during package removal from package: ' . $this->packageData['name'], [
-            'error'      => $exception->getMessage(),
-            'errorTrace' => $exception->getTrace(),
+            'error' => [
+                'code'    => $exception->getCode(),
+                'message' => $exception->getMessage(),
+                'file'    => $exception->getFile(),
+                'line'    => $exception->getLine()
+            ]
         ]);
         $this->backup->restorePackageFilesFromCache($this->packageData['files_list']);
     }

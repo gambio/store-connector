@@ -215,10 +215,15 @@ class GambioStoreInstallation
         
         try {
             $this->backup->movePackageFilesToCache($destinations);
-        } catch (Exception $e) {
+        } catch (Exception $exception) {
             $message = 'Could not install package: ' . $this->packageData['details']['title']['de'];
             $this->logger->error($message, [
-                'error' => $e->getMessage()
+                'error' => [
+                    'code'    => $exception->getCode(),
+                    'message' => $exception->getMessage(),
+                    'file'    => $exception->getFile(),
+                    'line'    => $exception->getLine()
+                ]
             ]);
             $this->cleanCache();
             throw new GambioStorePackageInstallationException($message);
@@ -231,15 +236,25 @@ class GambioStoreInstallation
         } catch (GambioStoreException $e) {
             $message = 'Could not install package: ' . $this->packageData['details']['title']['de'];
             $this->logger->error($message, [
-                'error'   => $e->getMessage(),
-                'context' => $e->getContext()
+                'context' => $e->getContext(),
+                'error' => [
+                    'code'    => $exception->getCode(),
+                    'message' => $exception->getMessage(),
+                    'file'    => $exception->getFile(),
+                    'line'    => $exception->getLine()
+                ],
             ]);
             $this->restore($destinations);
             throw new GambioStorePackageInstallationException($message);
-        } catch (Exception $e) {
+        } catch (Exception $exception) {
             $message = 'Could not install package: ' . $this->packageData['details']['title']['de'];
             $this->logger->error($message, [
-                'error' => $e->getMessage()
+                'error' => [
+                    'code'    => $exception->getCode(),
+                    'message' => $exception->getMessage(),
+                    'file'    => $exception->getFile(),
+                    'line'    => $exception->getLine()
+                ]
             ]);
             $this->restore($destinations);
             throw new GambioStorePackageInstallationException($message);
