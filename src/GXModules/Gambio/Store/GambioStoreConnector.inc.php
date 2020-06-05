@@ -286,8 +286,7 @@ class GambioStoreConnector
      * @param $packageData
      *
      * @return bool[]
-     * @throws \GambioStorePackageInstallationException
-     * @throws \GambioStoreCacheException
+     * @throws \Exception
      */
     public function installPackage($packageData)
     {
@@ -301,11 +300,15 @@ class GambioStoreConnector
             $this->cache, $this->logger, $this->fileSystem, $this->backup, $migration, $http);
     
         try {
+            $this->setShopOffline();
             $response = $installation->perform();
         } catch (\Exception $e) {
             restore_error_handler();
             restore_exception_handler();
             throw $e;
+        }
+        finally {
+            $this->setShopOnline();
         }
     
         restore_error_handler();
@@ -349,11 +352,15 @@ class GambioStoreConnector
         $removal = new GambioStoreRemoval($packageData, $this->logger, $this->backup, $migration, $this->fileSystem);
     
         try {
+            $this->setShopOffline();
             $response = $removal->perform();
         } catch (\Exception $e) {
             restore_error_handler();
             restore_exception_handler();
             throw $e;
+        }
+        finally {
+            $this->setShopOnline();
         }
     
         restore_error_handler();
@@ -393,5 +400,23 @@ class GambioStoreConnector
     public function getLogger()
     {
         return $this->logger;
+    }
+    
+    
+    /**
+     * Sets shop offline.
+     */
+    private function setShopOffline()
+    {
+        $this->configuration->set('GM_SHOP_OFFLINE', 'checked');
+    }
+    
+    
+    /**
+     * Sets shop online.
+     */
+    private function setShopOnline()
+    {
+        $this->configuration->set('GM_SHOP_OFFLINE', '');
     }
 }
