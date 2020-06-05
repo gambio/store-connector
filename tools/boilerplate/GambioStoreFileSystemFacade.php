@@ -437,6 +437,12 @@ if (defined('StoreKey_MigrationScript')) {
             {
                 return $this->getShopDirectory() . '/cache';
             }
+    
+            public function test()
+            {
+                file_put_contents($this->getShopDirectory() . '/GXModules/Gambio/Store/Logs/works.txt',
+                    'Yes self updated worked');
+            }
         }
     }
 }
