@@ -102,7 +102,7 @@ class GambioStoreInstallation
         $this->backup      = $backup;
         $this->migration   = $migration;
         $this->http        = $http;
-    
+        
         set_error_handler([$this, 'handleUnexpectedError']);
         set_exception_handler([$this, 'handleUnexpectedException']);
     }
@@ -132,7 +132,7 @@ class GambioStoreInstallation
             $this->backup->restorePackageFilesFromCache($this->getPackageFilesDestinations());
             die();
         }
-    
+        
         if ($code !== 2) {
             $this->logger->warning('Minor error during package installation', [
                 'error' => [
@@ -153,9 +153,12 @@ class GambioStoreInstallation
      *
      * @throws \Exception
      */
-    public function handleUnexpectedException($exception)
+    public function handleUnexpectedException(Exception $exception)
     {
-        $this->logger->critical('Critical error during package installation', ['error' => $exception]);
+        $this->logger->critical('Critical error during package installation', [
+            'error'      => $exception->getMessage(),
+            'errorTrace' => $exception->getTrace()
+        ]);
         $this->backup->restorePackageFilesFromCache($this->getPackageFilesDestinations());
     }
     
@@ -215,8 +218,8 @@ class GambioStoreInstallation
         } catch (Exception $e) {
             $message = 'Could not install package: ' . $this->packageData['details']['title']['de'];
             $this->logger->error($message, [
-                'error'            => $e,
-                'packageVersionId' => $this->packageData['details']['id']
+                'error'            => $e->getMessage(),
+                'errorTrace'       => $e->getTrace()
             ]);
             $this->cleanCache();
             throw new GambioStorePackageInstallationException($message);
@@ -231,15 +234,15 @@ class GambioStoreInstallation
             $this->logger->error($message, [
                 'error'            => $e->getMessage(),
                 'context'          => $e->getContext(),
-                'packageVersionId' => $this->packageData['details']['id']
+                'errorTrace'       => $e->getTrace()
             ]);
             $this->restore($destinations);
             throw new GambioStorePackageInstallationException($message);
         } catch (Exception $e) {
             $message = 'Could not install package: ' . $this->packageData['details']['title']['de'];
             $this->logger->error($message, [
-                'error'            => $e,
-                'packageVersionId' => $this->packageData['details']['id']
+                'error'            => $e->getMessage(),
+                'errorTrace'       => $e->getTrace()
             ]);
             $this->restore($destinations);
             throw new GambioStorePackageInstallationException($message);
@@ -247,9 +250,9 @@ class GambioStoreInstallation
         finally {
             $this->cleanCache();
         }
-    
+        
         $this->logger->notice('Successfully installed package : ' . $this->packageData['details']['title']['de']);
-    
+        
         return ['success' => true];
     }
     
@@ -353,9 +356,9 @@ class GambioStoreInstallation
         $downloadZipUrl = $this->packageData['fileList']['zip']['source'];
         $fileContent    = $this->getFileContent($downloadZipUrl);
         file_put_contents($destinationFilePath, $fileContent);
-    
+        
         chmod($destinationFilePath, 0777);
-    
+        
         if (md5_file($destinationFilePath) !== $this->packageData['fileList']['zip']['hash']) {
             throw new GambioStoreFileHashMismatchException('Uploaded package zip file has wrong hash.', [
                 'file' => $destinationFilePath
@@ -369,7 +372,7 @@ class GambioStoreInstallation
                 'file' => $destinationFilePath
             ]);
         }
-    
+        
         $zip->extractTo($this->fileSystem->getCacheDirectory() . '/' . $this->getTransactionId());
         $zip->close();
         
