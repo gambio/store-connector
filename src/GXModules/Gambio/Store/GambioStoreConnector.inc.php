@@ -1,6 +1,6 @@
 <?php
 /* --------------------------------------------------------------
-   GambioStoreConnector.php 2020-05-14
+   GambioStoreConnector.php 2020-06-11
    Gambio GmbH
    http://www.gambio.de
    Copyright (c) 2020 Gambio GmbH
@@ -291,8 +291,8 @@ class GambioStoreConnector
     public function installPackage($packageData)
     {
         $migration = new GambioStoreMigration($this->fileSystem,
-            isset($packageData['migration']['up']) ? $packageData['migration']['up'] : [],
-            isset($packageData['migration']['down']) ? $packageData['migration']['down'] : []);
+            isset($packageData['migrations']['up']) ? $packageData['migrations']['up'] : [],
+            isset($packageData['migrations']['down']) ? $packageData['migrations']['down'] : []);
     
         $http = new GambioStoreHttp;
     
@@ -346,8 +346,8 @@ class GambioStoreConnector
         }
     
         $migration = new GambioStoreMigration($this->fileSystem,
-            isset($postData['migration']['up']) ? $postData['migration']['up'] : [],
-            isset($postData['migration']['down']) ? $postData['migration']['down'] : []);
+            isset($postData['migrations']['up']) ? $postData['migrations']['up'] : [],
+            isset($postData['migrations']['down']) ? $postData['migrations']['down'] : []);
     
         $removal = new GambioStoreRemoval($packageData, $this->logger, $this->backup, $migration, $this->fileSystem);
     

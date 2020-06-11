@@ -1,6 +1,6 @@
 <?php
 /* --------------------------------------------------------------
-   GambioStoreMigration.php 2020-05-04
+   GambioStoreMigration.php 2020-06-11
    Gambio GmbH
    http://www.gambio.de
    Copyright (c) 2020 Gambio GmbH
@@ -79,7 +79,7 @@ class GambioStoreMigration
             try {
                 require_once $this->fileSystem->getShopDirectory() . '/' . $item;
             } catch (\Exception $exception) {
-                throw new GambioStoreUpMigrationException('Up migration failed. File: ', 0, $item);
+                throw new GambioStoreUpMigrationException('Up migrations failed. File: ', 0, $item);
             }
         }
     }
@@ -114,7 +114,7 @@ class GambioStoreMigration
             try {
                 require_once $this->fileSystem->getShopDirectory() . '/' . $item;
             } catch (\Exception $exception) {
-                throw new GambioStoreDownMigrationException('Down migration failed. File: ', 0, $item);
+                throw new GambioStoreDownMigrationException('Down migrations failed. File: ', 0, $item);
             }
         }
     }
