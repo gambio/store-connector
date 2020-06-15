@@ -144,7 +144,7 @@ module.exports = (gulp, $) => {
 		
 		replace(clonePath + '/install.sh', {
 			BRANCH_NAME: shopBranchName,
-			SHOP_URL: 'http://172.17.0.1:' + serverPort + '/gambio_installer/'
+			SHOP_URL: serverPort + '/gambio_installer/'
 		});
 		
 		

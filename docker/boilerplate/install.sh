@@ -35,7 +35,7 @@ install_shop() {
 
 	cd $CURRENT_PATH/shop/shop-installer
 
-	./bin/run {{SHOP_URL}} store-connector-mysql-{{BRANCH_NAME}} gxdev gxdev gxdev
+	./bin/run 'http://'$(ip -4 addr show docker0 | grep -Po 'inet \K[\d.]+'){{SHOP_URL}} store-connector-mysql-{{BRANCH_NAME}} gxdev gxdev gxdev
 }
 
 move_swap_url_script() {
