@@ -5,19 +5,22 @@ services:
         image: shop/php-{{phpVersion}}:v1
         container_name: store-connector-server-{{branch}}-{{phpVersion}}
         ports:
-        - "{{serverPort}}:80"
+            - "{{serverPort}}:80"
         volumes:
-        - ./shop/src:/var/www/html
-        - ./server/php.ini:/usr/local/etc/php/conf.d/99-overrides.ini
+            - ./shop/src:/var/www/html
+            - ./server/php.ini:/usr/local/etc/php/conf.d/99-overrides.ini
+        environment:
+            - DOCKER_HOST_IP=${DOCKER_HOST_IP}
     mysql:
         image: mysql:5.7
         container_name: store-connector-mysql-{{branch}}
         volumes:
-        - ./mysql:/var/lib/mysql
+            - ./mysql:/var/lib/mysql
         environment:
-        - MYSQL_ROOT_PASSWORD=root
-        - MYSQL_DATABASE=gxdev
-        - MYSQL_USER=gxdev
-        - MYSQL_PASSWORD=gxdev
+            - MYSQL_ROOT_PASSWORD=root
+            - MYSQL_DATABASE=gxdev
+            - MYSQL_USER=gxdev
+            - MYSQL_PASSWORD=gxdev
+            - DOCKER_HOST_IP=${DOCKER_HOST_IP}
         ports:
-        - "{{mysqlPort}}:3306"
+            - "{{mysqlPort}}:3306"
