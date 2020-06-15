@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
 
-export DOCKER_HOST_IP="$(ip -4 addr show docker0 | grep -Po 'inet \K[\d.]+')"
-
 inform_user() {
 
 	if [[  -z "$1" ]]; then
@@ -27,22 +25,8 @@ hide_office_network_from_docker() {
 
 }
 
-increase_system_resources_for_elasticsearch() {
-
-	inform_user "Increasing system resources for elasticsearch..."
-
-	VM_LINE='vm.max_map_count=262144'
-	VM_FILE=/etc/sysctl.conf
-	grep -qF "$VM_LINE" "$VM_FILE" || echo "$VM" | sudo tee --append "$VM_FILE"
-
-	sudo sysctl -w vm.max_map_count=262144
-
-}
-
 inform_user "Configuring operating system (root permissions may be necessary) ..."
 
 hide_office_network_from_docker
-
-increase_system_resources_for_elasticsearch
 
 inform_user "Starting containers..."
