@@ -226,6 +226,10 @@ class GambioStoreController extends AdminHttpViewController
         if (!is_writable($this->connector->getFileSystem()->getShopDirectory() . '/GXModules/Gambio/Store')) {
             $this->appendError('STORE_FOLDER_PERMISSION_ERROR');
         }
+    
+        if (!extension_loaded('curl')) {
+            $this->appendError('CURL_EXTENSION_MISSING');
+        }
     }
     
     

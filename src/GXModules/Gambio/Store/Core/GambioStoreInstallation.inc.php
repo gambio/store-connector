@@ -9,7 +9,6 @@
    --------------------------------------------------------------
 */
 require_once 'Exceptions/GambioStoreException.inc.php';
-require_once 'Exceptions/GambioStoreCurlFileDownloadException.inc.php';
 require_once 'Exceptions/GambioStorePackageInstallationException.inc.php';
 require_once 'Exceptions/GambioStoreInstallationMissingPHPExtensionsException.inc.php';
 require_once 'Exceptions/GambioStoreZipException.inc.php';
@@ -197,12 +196,6 @@ class GambioStoreInstallation
     {
         if (!extension_loaded('zip')) {
             $message = 'The Gambio Store could not locate the zip extension for PHP which is required for installations.';
-            $this->logger->critical($message);
-            throw new GambioStoreInstallationMissingPHPExtensionsException($message);
-        }
-        
-        if (!extension_loaded('curl')) {
-            $message = 'The Gambio Store could not locate the curl extension for PHP which is required for installations.';
             $this->logger->critical($message);
             throw new GambioStoreInstallationMissingPHPExtensionsException($message);
         }
