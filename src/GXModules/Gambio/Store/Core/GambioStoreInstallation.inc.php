@@ -10,7 +10,6 @@
 */
 require_once 'Exceptions/GambioStoreException.inc.php';
 require_once 'Exceptions/GambioStorePackageInstallationException.inc.php';
-require_once 'Exceptions/GambioStoreInstallationMissingPHPExtensionsException.inc.php';
 require_once 'Exceptions/GambioStoreZipException.inc.php';
 require_once 'Exceptions/GambioStoreHttpErrorException.inc.php';
 require_once 'Exceptions/GambioStoreFileHashMismatchException.inc.php';
@@ -194,12 +193,6 @@ class GambioStoreInstallation
      */
     public function perform()
     {
-        if (!extension_loaded('zip')) {
-            $message = 'The Gambio Store could not locate the zip extension for PHP which is required for installations.';
-            $this->logger->critical($message);
-            throw new GambioStoreInstallationMissingPHPExtensionsException($message);
-        }
-        
         if ($this->cache->has($this->getTransactionId())) {
             return $this->cache->get($this->getTransactionId());
         }
@@ -231,10 +224,10 @@ class GambioStoreInstallation
             $this->logger->error($message, [
                 'context' => $e->getContext(),
                 'error' => [
-                    'code'    => $exception->getCode(),
-                    'message' => $exception->getMessage(),
-                    'file'    => $exception->getFile(),
-                    'line'    => $exception->getLine()
+                    'code'    => $e->getCode(),
+                    'message' => $e->getMessage(),
+                    'file'    => $e->getFile(),
+                    'line'    => $e->getLine()
                 ],
             ]);
             $this->restore($destinations);
@@ -288,7 +281,10 @@ class GambioStoreInstallation
      */
     private function downloadPackageToCacheFolder()
     {
-        if (!$this->downloadPackageZipToCacheFolder()) {
+        if (!extension_loaded('zip')) {
+            $this->logger->warning('The Gambio Store could not locate the zip extension for PHP which is required for installations.');
+            $this->downloadPackageFilesToCacheFolder();
+        } elseif (!$this->downloadPackageZipToCacheFolder()) {
             $this->logger->warning('Could not download zip file: ' . $this->packageData['fileList']['zip']['source']
                                    . ' from package: ' . $this->packageData['details']['title']['de']);
             $this->downloadPackageFilesToCacheFolder();
