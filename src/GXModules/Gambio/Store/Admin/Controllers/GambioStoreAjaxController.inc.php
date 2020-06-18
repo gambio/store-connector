@@ -192,4 +192,15 @@ class GambioStoreAjaxController extends AdminHttpViewController
         
         return new JsonHttpControllerResponse(['success' => $result]);
     }
+    
+    
+    /**
+     * Returns session status. Success is always true as now other options are possible.
+     *
+     * @return \JsonHttpControllerResponse
+     */
+    public function actionIsSessionActive()
+    {
+        return new JsonHttpControllerResponse(['success' => true]);
+    }
 }
