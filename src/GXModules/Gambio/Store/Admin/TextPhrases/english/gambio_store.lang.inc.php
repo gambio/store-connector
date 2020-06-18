@@ -23,5 +23,7 @@ $t_language_text_section_content_array = [
     'STORE_FOLDER_PERMISSION_ERROR'     => 'The store directory "GXModules/Gambio/Store" is not writable. Please change the permissions.',
     'DATABASE_INTEGRITY_ERROR'          => 'There are important values missing in the database. Please contact the Gambio Support for help.',
     'SHOP_INFORMATION_JSON_PARSE_ERROR' => 'The Gambio Store was provided missing or erroneous shop information.',
-    'SHOP_INFORMATION_NETWORK_ERROR'    => 'The Gambio Store was unable to receive shop information.'
+    'SHOP_INFORMATION_NETWORK_ERROR'    => 'The Gambio Store was unable to receive shop information.',
+    'CURL_EXTENSION_MISSING'            => 'Curl PHP extension is required to use Gambio Store.',
+    'PDO_EXTENSION_MISSING'             => 'PDO PHP extension is required to use Gambio Store.'
 ];

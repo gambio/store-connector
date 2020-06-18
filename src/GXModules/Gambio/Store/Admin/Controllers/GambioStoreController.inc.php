@@ -230,6 +230,10 @@ class GambioStoreController extends AdminHttpViewController
         if (!extension_loaded('curl')) {
             $this->appendError('CURL_EXTENSION_MISSING');
         }
+    
+        if (!extension_loaded('PDO')) {
+            $this->appendError('PDO_EXTENSION_MISSING');
+        }
     }
     
     
