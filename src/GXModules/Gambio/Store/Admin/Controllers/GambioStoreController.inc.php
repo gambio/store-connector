@@ -134,7 +134,9 @@ class GambioStoreController extends AdminHttpViewController
             return $this->actionDefault();
         }
     
-        $this->checkForErrors();
+        if (!$this->acceptableErrorsTestPassed()) {
+            return $this->showCriticalErrorPage();
+        }
     
         $title    = new NonEmptyStringType($this->languageTextManager->get_text('PAGE_TITLE'));
         $template = new ExistingFile(new NonEmptyStringType(__DIR__ . '/../Html/gambio_store.html'));
@@ -214,6 +216,11 @@ class GambioStoreController extends AdminHttpViewController
         
         if (!extension_loaded('curl')) {
             $this->appendError('CURL_EXTENSION_MISSING');
+        }
+    
+        
+        if (!extension_loaded('PDO')) {
+            $this->appendError('PDO_EXTENSION_MISSING');
             $passed = false;
         }
         
