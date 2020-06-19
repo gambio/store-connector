@@ -60,7 +60,7 @@ const installPackage = async (data, progressCallback = () => null) => {
 		progressCallback(response);
 		
 		if (response.done !== true) {
-			await doPackageInstallation;
+			await doPackageInstallation();
 		}
 		
 		return true;
@@ -96,6 +96,19 @@ const isFilePermissionCorrect = async (data) => {
  * @param data
  */
 const uninstallPackage = async (data) => {
+    
+    // Cancel the uninstall if the shop's session is not active.
+    try {
+        await GambioStore.callShop('admin.php?do=GambioStoreAjax/isSessionActive', {
+            method: 'get',
+            redirect: 'error'
+        });
+    } catch (error) {
+        window.location.reload(true);
+        return;
+    }
+    
+    
 	const formData = new FormData();
 	
 	formData.append('gambioStoreData', JSON.stringify(data));
@@ -175,6 +188,18 @@ const updateProgressCallback = ({progress}) => {
  * @return {Promise<void>}
  */
 const install = async (data) => {
+    
+    // Cancel the installation if the shop's session is not active.
+    try {
+        await GambioStore.callShop('admin.php?do=GambioStoreAjax/isSessionActive', {
+            method: 'get',
+            redirect: 'error'
+        });
+    } catch (error) {
+        window.location.reload(true);
+        return;
+    }
+    
 	const $installingPackageModal = $('.installing-package.modal');
 	const progressDescription = document
 		.getElementsByClassName('installing-package modal').item(0)

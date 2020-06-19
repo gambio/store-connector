@@ -23,5 +23,7 @@ $t_language_text_section_content_array = [
     'STORE_FOLDER_PERMISSION_ERROR'     => 'Der Store-Ordner "GXModules/Gambio/Store" ist schreibgeschützt. Ändere bitte die Berechtigungen.',
     'DATABASE_INTEGRITY_ERROR'          => 'Wichtige Einträge fehlen in der Datenbank. Bitte kontaktiere den Gambio Support.',
     'SHOP_INFORMATION_JSON_PARSE_ERROR' => 'Dem Gambio Store wurden fehlende oder fehlerhafte Informationen übermittelt.',
-    'SHOP_INFORMATION_NETWORK_ERROR'    => 'Der Gambio Store konnte keine Informationen des Shops einholen.'
+    'SHOP_INFORMATION_NETWORK_ERROR'    => 'Der Gambio Store konnte keine Informationen des Shops einholen.',
+    'CURL_EXTENSION_MISSING'            => 'Die Curl Erweiterung ist erforderlich, um den Gambio Store nutzen zu können.',
+    'PDO_EXTENSION_MISSING'             => 'Die PDO Erweiterung ist erforderlich, um den Gambio Store nutzen zu können.'
 ];
