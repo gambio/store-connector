@@ -34,13 +34,13 @@ class GambioStoreFileSystem
     {
         if (file_exists($destination) && is_file($destination)) {
             throw new GambioStoreFileExistsException('File already exists: ' . $destination, 1, [
-                'info' => "File with this name already exists on attempt to rename file $source to $destination"
+                'info' => "File with this name already exists on attempt to move file $source to $destination"
             ]);
         }
         
         if (!file_exists($source) || !is_file($source)) {
             throw new GambioStoreFileNotFoundException('File not found: ' . $source, 1, [
-                'info' => "File not found on attempt to rename file $source to $destination"
+                'info' => "File not found on attempt to move file $source to $destination"
             ]);
         }
     
@@ -66,14 +66,21 @@ class GambioStoreFileSystem
     public function rename($oldName, $newName)
     {
         $oldName = $this->getShopDirectory() . '/' . $oldName;
+        $newName = dirname($oldName) . '/' . basename($newName);
         
         if (!file_exists($oldName)) {
             throw new GambioStoreFileNotFoundException('File not found: ' . $oldName, 1, [
                 'info' => "File or folder not found on attempt to rename $oldName"
             ]);
         }
+    
+        if (file_exists($newName) && is_file($newName)) {
+            throw new GambioStoreFileExistsException('File already exists: ' . $newName, 1, [
+                'info' => "File with this name already exists on attempt to rename file $oldName to $newName"
+            ]);
+        }
         
-        if (!rename($newName, dirname($oldName) . '/' . basename($newName))) {
+        if (!rename($oldName, $newName)) {
             throw new GambioStoreRenameException('Could not rename a file or folder ' . $oldName, 2, [
                 'info' => 'Please contact the server administrator'
             ]);
@@ -395,6 +402,12 @@ class GambioStoreFileSystem
      */
     private function fileCopy($source, $destination)
     {
+        if (file_exists($destination) && is_file($destination)) {
+            throw new GambioStoreFileExistsException('File already exists: ' . $destination, 1, [
+                'info' => "File with this name already exists on attempt to copy file $source to $destination"
+            ]);
+        }
+        
         if (!file_exists($source) || !is_file($source)) {
             throw new GambioStoreFileNotFoundException('No such file: ' . $source);
         }
