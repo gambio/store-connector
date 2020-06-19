@@ -53,7 +53,7 @@ class GambioStoreCache
      */
     public function get($key)
     {
-        # Key must be a string in the database.
+        // Key must be a string in the database.
         $key              = (string)$key;
         $sql              = 'SELECT cache_value FROM ' . self::CACHE_TABLE . ' WHERE cache_key = :cache_key LIMIT 1';
         $query            = $this->database->query($sql, [':cache_key' => $key]);
@@ -84,12 +84,12 @@ class GambioStoreCache
      */
     public function set($key, $value)
     {
-        # Boolean values would otherwise be a empty string
+        // Boolean values would otherwise be a empty string
         if (is_bool($value)) {
             $value = $value ? 'true' : 'false';
         }
         
-        # Key must be a string in the database.
+        // Key must be a string in the database.
         $key     = (string)$key;
         $sql     = 'INSERT INTO ' . self::CACHE_TABLE . ' (cache_key,cache_value) VALUES (:cache_key, :cache_value) '
                    . 'ON DUPLICATE KEY UPDATE cache_value=:cache_value ';
@@ -117,7 +117,7 @@ class GambioStoreCache
      */
     public function has($key)
     {
-        # Key must be a string in the database.
+        // Key must be a string in the database.
         $key   = (string)$key;
         $sql   = 'SELECT COUNT(*) FROM ' . self::CACHE_TABLE . ' WHERE cache_key = :cache_key LIMIT 1';
         $query = $this->database->query($sql, [':cache_key' => $key]);
@@ -141,7 +141,7 @@ class GambioStoreCache
      */
     public function delete($key)
     {
-        # Key must be a string in the database.
+        // Key must be a string in the database.
         $key     = (string)$key;
         $sql     = 'DELETE FROM ' . self::CACHE_TABLE . ' WHERE cache_key = :cache_key LIMIT 1';
         $query   = $this->database->query($sql, [':cache_key' => $key]);
