@@ -32,9 +32,15 @@ class GambioStoreFileSystem
      */
     private function fileMove($source, $destination)
     {
+        if (file_exists($destination) && is_file($destination)) {
+            throw new GambioStoreFileExistsException('File already exists: ' . $destination, 1, [
+                'info' => "File with this name already exists on attempt to rename file $source to $destination"
+            ]);
+        }
+        
         if (!file_exists($source) || !is_file($source)) {
             throw new GambioStoreFileNotFoundException('File not found: ' . $source, 1, [
-                'info' => "File not found on attempt to move file $source to $destination"
+                'info' => "File not found on attempt to rename file $source to $destination"
             ]);
         }
     
