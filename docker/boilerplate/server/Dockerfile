@@ -5,7 +5,7 @@ WORKDIR "/var/www/html"
 ARG DEBIAN_FRONTEND=noninteractive
 
 # Install selected extensions and other stuff
-RUN apt-get update
+RUN apt-get update \
     && apt-get install -y --no-install-recommends apt-utils \
 		                                          libfreetype6-dev \
 		                                          libjpeg62-turbo-dev \
