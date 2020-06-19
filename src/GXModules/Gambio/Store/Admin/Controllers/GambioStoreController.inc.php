@@ -70,7 +70,9 @@ class GambioStoreController extends AdminHttpViewController
         $assets            = $this->getIFrameAssets();
         $data              = [];
 
-        $this->checkForErrors();
+        if (! $this->acceptableErrorsTestPassed()) {
+            return $this->showCriticalErrorPage();
+        }
     
         setcookie('auto_updater_admin_check', 'admin_logged_in', time() + 5 * 60, '/');
     
@@ -132,7 +134,9 @@ class GambioStoreController extends AdminHttpViewController
             return $this->actionDefault();
         }
     
-        $this->checkForErrors();
+        if (!$this->acceptableErrorsTestPassed()) {
+            return $this->showCriticalErrorPage();
+        }
     
         $title    = new NonEmptyStringType($this->languageTextManager->get_text('PAGE_TITLE'));
         $template = new ExistingFile(new NonEmptyStringType(__DIR__ . '/../Html/gambio_store.html'));
@@ -196,6 +200,35 @@ class GambioStoreController extends AdminHttpViewController
     
     
     /**
+     * Checks for general errors with the Store and displays them in the frontend
+     */
+    private function acceptableErrorsTestPassed()
+    {
+        $passed = true;
+        
+        if (!$this->connector->getLogger()->isWritable()) {
+            $this->appendError('LOGS_FOLDER_PERMISSION_ERROR');
+        }
+        
+        if (!is_writable($this->connector->getFileSystem()->getShopDirectory() . '/GXModules/Gambio/Store')) {
+            $this->appendError('STORE_FOLDER_PERMISSION_ERROR');
+        }
+        
+        if (!extension_loaded('curl')) {
+            $this->appendError('CURL_EXTENSION_MISSING');
+        }
+    
+        
+        if (!extension_loaded('PDO')) {
+            $this->appendError('PDO_EXTENSION_MISSING');
+            $passed = false;
+        }
+        
+        return $passed;
+    }
+    
+    
+    /**
      * Gets the store URL
      *
      * @return string
@@ -211,29 +244,6 @@ class GambioStoreController extends AdminHttpViewController
         }
     
         return $gambioUrl;
-    }
-    
-    
-    /**
-     * Checks for general errors with the Store and displays them in the frontend
-     */
-    private function checkForErrors()
-    {
-        if (!$this->connector->getLogger()->isWritable()) {
-            $this->appendError('LOGS_FOLDER_PERMISSION_ERROR');
-        }
-        
-        if (!is_writable($this->connector->getFileSystem()->getShopDirectory() . '/GXModules/Gambio/Store')) {
-            $this->appendError('STORE_FOLDER_PERMISSION_ERROR');
-        }
-    
-        if (!extension_loaded('curl')) {
-            $this->appendError('CURL_EXTENSION_MISSING');
-        }
-    
-        if (!extension_loaded('PDO')) {
-            $this->appendError('PDO_EXTENSION_MISSING');
-        }
     }
     
     
