@@ -59,7 +59,7 @@ const installPackage = async (data, progressCallback = () => null) => {
 		});
 		progressCallback(response);
 		
-		if (response.done !== true) {
+		if (response.progress !== 100) {
 			await doPackageInstallation();
 		}
 		

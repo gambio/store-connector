@@ -119,6 +119,7 @@ class GambioStoreInstallation
     public function handleUnexpectedError($code, $message, $file, $line)
     {
         if ($code === E_USER_ERROR) {
+            $this->cache->delete($this->getTransactionId());
             $this->logger->critical('Critical error during package installation', [
                 'error' => [
                     'code'    => $code,
@@ -153,11 +154,13 @@ class GambioStoreInstallation
      */
     public function handleUnexpectedException(Exception $exception)
     {
+        $this->cache->delete($this->getTransactionId());
         $this->logger->critical('Critical error during package installation', [
             'error'      => $exception->getMessage(),
             'errorTrace' => $exception->getTrace()
         ]);
         $this->backup->restorePackageFilesFromCache($this->getPackageFilesDestinations());
+        die();
     }
     
     
@@ -194,13 +197,27 @@ class GambioStoreInstallation
     public function perform()
     {
         if ($this->cache->has($this->getTransactionId())) {
-            return $this->cache->get($this->getTransactionId());
+            $progress = json_decode($this->cache->get($this->getTransactionId()), true);
+            if ($progress['progress'] === 100) {
+                $this->cache->delete($this->getTransactionId());
+            }
+            
+            return $progress;
         }
+    
+        $this->cache->set($this->getTransactionId(), json_encode([
+            'state'    => 'started',
+            'progress' => 0
+        ]));
         
         $destinations = $this->getPackageFilesDestinations();
         
         try {
             $this->backup->movePackageFilesToCache($destinations);
+            $this->cache->set($this->getTransactionId(), json_encode([
+                'state'    => 'backedup',
+                'progress' => 20
+            ]));
         } catch (Exception $exception) {
             $message = 'Could not install package: ' . $this->packageData['details']['title']['de'];
             $this->logger->error($message, [
@@ -217,8 +234,20 @@ class GambioStoreInstallation
         
         try {
             $this->downloadPackageToCacheFolder();
+            $this->cache->set($this->getTransactionId(), json_encode([
+                'state'    => 'downloaded',
+                'progress' => 50
+            ]));
             $this->installPackage();
+            $this->cache->set($this->getTransactionId(), json_encode([
+                'state'    => 'installed',
+                'progress' => 80
+            ]));
             $this->migration->up();
+            $this->cache->set($this->getTransactionId(), json_encode([
+                'state'    => 'migrated',
+                'progress' => 100
+            ]));
         } catch (GambioStoreException $e) {
             $message = 'Could not install package: ' . $this->packageData['details']['title']['de'];
             $this->logger->error($message, [
