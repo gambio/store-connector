@@ -64,6 +64,9 @@ class GambioStoreThemes
         return false;
     }
     
+    public function reimportContentManagerEntries() 
+    {}
+    
     
     /**
      * Activates a Theme
