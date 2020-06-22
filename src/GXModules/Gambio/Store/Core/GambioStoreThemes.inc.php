@@ -64,8 +64,10 @@ class GambioStoreThemes
         return false;
     }
     
-    public function reimportContentManagerEntries() 
-    {}
+    public function reimportContentManagerEntries($themePath, $themeName) 
+    {
+        $themePath .= '/theme.json'; // load theme json
+    }
     
     
     /**
