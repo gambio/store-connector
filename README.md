@@ -16,7 +16,7 @@ You will be needing a GX shop setup in order to use this repository. The gulp wo
 use shops by using the docker task. 
 
 ```sh
-gulp docker --branch 4.1_develop --port 4100 --php 7.2
+gulp docker --branch 4.0_release_v4.0.2 --port 4100 --php 7.2
 ```
 
 The command will need some time to complete as it will clone, setup and bootstrap the docker images for the shop 
