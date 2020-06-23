@@ -21,6 +21,7 @@ if (defined('StoreKey_MigrationScript')) {
         require_once __DIR__ . '/../Exceptions/FileSystemExceptions/GambioStoreDirectoryContentException.inc.php';
         require_once __DIR__ . '/../Exceptions/FileSystemExceptions/GambioStoreCreateDirectoryException.inc.php';
         require_once __DIR__ . '/../Exceptions/FileSystemExceptions/GambioStorePathIsNotDirectoryException.inc.php';
+        require_once __DIR__ . '/../Exceptions/FileSystemExceptions/GambioStoreFileExistsException.inc.php';
         
         class GambioStoreFileSystemFacade
         {
@@ -34,23 +35,28 @@ if (defined('StoreKey_MigrationScript')) {
              * @throws \GambioStoreFileNotFoundException
              * @throws \GambioStoreRenameException
              */
-            public function rename($oldFileName, $newFileName)
+            public function rename($oldName, $newName)
             {
-                $oldFileName = $this->getShopDirectory() . '/' . $oldFileName;
-                
-                if (!file_exists($oldFileName)) {
-                    throw new GambioStoreFileNotFoundException('File not found: ' . $oldFileName, 1, [
-                        'info' => "File or folder not found on attempt to rename $oldFileName"
+                $oldName = $this->getShopDirectory() . '/' . $oldName;
+                $newName = dirname($oldName) . '/' . basename($newName);
+        
+                if (!file_exists($oldName)) {
+                    throw new GambioStoreFileNotFoundException('File not found: ' . $oldName, 1, [
+                        'info' => "File or folder not found on attempt to rename $oldName"
                     ]);
                 }
-                
-                if (!rename($oldFileName, dirname($oldFileName) . '/' . basename($newFileName))) {
-                    throw new GambioStoreRenameException('Could not rename a file ir folder ' . $oldFileName, 2, [
+        
+                if (file_exists($newName) && is_file($newName)) {
+                    throw new GambioStoreFileExistsException('File already exists: ' . $newName, 1, [
+                        'info' => "File with this name already exists on attempt to rename file $oldName to $newName"
+                    ]);
+                }
+        
+                if (!rename($oldName, $newName)) {
+                    throw new GambioStoreRenameException('Could not rename a file or folder ' . $oldName, 2, [
                         'info' => 'Please contact the server administrator'
                     ]);
                 }
-                
-                return true;
             }
             
             
@@ -133,23 +139,26 @@ if (defined('StoreKey_MigrationScript')) {
              * @param string $source
              * @param string $destination
              *
-             * @return bool
              * @throws \GambioStoreCreateDirectoryException
              * @throws \GambioStoreFileNotFoundException|\GambioStoreFileCopyException
              */
             private function fileCopy($source, $destination)
             {
+                if (file_exists($destination) && is_file($destination)) {
+                    throw new GambioStoreFileExistsException('File already exists: ' . $destination, 1, [
+                        'info' => "File with this name already exists on attempt to copy file $source to $destination"
+                    ]);
+                }
+        
                 if (!file_exists($source) || !is_file($source)) {
                     throw new GambioStoreFileNotFoundException('No such file: ' . $source);
                 }
-                
-                $this->createDirectory(dirname($destination));
-                
-                if (!copy($source, $destination)) {
+        
+                $this->createDirectory($destination);
+        
+                if (!copy($source, $destination . '/' . basename($source))) {
                     throw new GambioStoreFileCopyException("Couldn't copy file " . $source);
                 }
-                
-                return true;
             }
             
             

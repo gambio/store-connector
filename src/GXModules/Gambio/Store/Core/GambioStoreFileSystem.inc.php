@@ -16,6 +16,7 @@ require_once 'Exceptions/FileSystemExceptions/GambioStoreFileNotFoundException.i
 require_once 'Exceptions/FileSystemExceptions/GambioStoreDirectoryContentException.inc.php';
 require_once 'Exceptions/FileSystemExceptions/GambioStoreCreateDirectoryException.inc.php';
 require_once 'Exceptions/FileSystemExceptions/GambioStorePathIsNotDirectoryException.inc.php';
+require_once 'Exceptions/FileSystemExceptions/GambioStoreFileExistsException.inc.php';
 
 class GambioStoreFileSystem
 {
