@@ -276,11 +276,15 @@ class GambioStoreInstallation
         }
         finally {
             $this->cleanCache();
+            $this->cache->delete($this->getTransactionId());
         }
         
         $this->logger->notice('Successfully installed package : ' . $this->packageData['details']['title']['de']);
-        
-        return ['success' => true];
+    
+        return [
+            'state'    => 'migrated',
+            'progress' => 100
+        ];
     }
     
     

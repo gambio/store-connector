@@ -412,10 +412,10 @@ class GambioStoreFileSystem
         if (!file_exists($source) || !is_file($source)) {
             throw new GambioStoreFileNotFoundException('No such file: ' . $source);
         }
-        
-        $this->createDirectory($destination);
     
-        if (!copy($source, $destination . '/' . basename($source))) {
+        $this->createDirectory(dirname($destination));
+    
+        if (!copy($source, $destination)) {
             throw new GambioStoreFileCopyException("Couldn't copy file " . $source);
         }
     }

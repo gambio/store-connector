@@ -25,6 +25,7 @@ if (defined('StoreKey_MigrationScript')) {
         
         class GambioStoreFileSystemFacade
         {
+            public $actionsPerformed = [];
             /**
              * Renames a file. Any folders for the new name will be ignored.
              *
@@ -85,15 +86,26 @@ if (defined('StoreKey_MigrationScript')) {
             {
                 $source      = $this->getShopDirectory() . '/' . $source;
                 $destination = $this->getShopDirectory() . '/' . $destination;
-                
+    
+                if (is_file($source)) {
+                    $this->fileCopy($source, $destination);
+                    return;
+                }
+    
                 $directory = new RecursiveDirectoryIterator($source, RecursiveDirectoryIterator::SKIP_DOTS);
                 $iterator  = new RecursiveIteratorIterator($directory, RecursiveIteratorIterator::SELF_FIRST);
-                
+    
                 foreach ($iterator as $item) {
                     if ($item->isDir()) {
+                        /**
+                         * The getSubPathName method might be highlighted in PhpStorm even though it is exists.
+                         * https://www.php.net/manual/en/recursivedirectoryiterator.getsubpathname.php
+                         */
                         $this->createDirectory($destination . DIRECTORY_SEPARATOR . $iterator->getSubPathName());
                     } else {
-                        $this->fileCopy($item, $destination . DIRECTORY_SEPARATOR . $iterator->getSubPathName());
+                        $sourceFolder = dirname($item->getPathname());
+                        $subPath = str_replace($source, '', $sourceFolder);
+                        $this->fileCopy($item->getPathname(), $destination . $subPath);
                     }
                 }
             }
@@ -107,28 +119,30 @@ if (defined('StoreKey_MigrationScript')) {
              * @return bool
              * @throws \GambioStoreCreateDirectoryException
              */
-            private function createDirectory($path)
+            public function createDirectory($path)
             {
-                if (!mkdir($path, 0777, true) && !is_dir($path)) {
-                    
+                if (is_dir($path)) {
+                    return;
+                }
+        
+                if (!@mkdir($path, 0777, true) && !is_dir($path)) {
+            
                     if (is_file($path)) {
                         throw new GambioStoreCreateDirectoryException('Could not create a folder ' . $path, 1, [
                             'info' => 'There is already a file exists for the path: ' . $path
                         ]);
                     }
-                    
+            
                     if (is_link($path)) {
                         throw new GambioStoreCreateDirectoryException('Could not create a folder ' . $path, 2, [
                             'info' => 'There is already a symlink exists for this path! ' . $path
                         ]);
                     }
-                    
+            
                     throw new GambioStoreCreateDirectoryException('Could not create a folder ' . $path, 3, [
                         'info' => 'Please contact the server administrator'
                     ]);
                 }
-                
-                return true;
             }
             
             
@@ -154,9 +168,9 @@ if (defined('StoreKey_MigrationScript')) {
                     throw new GambioStoreFileNotFoundException('No such file: ' . $source);
                 }
         
-                $this->createDirectory($destination);
+                $this->createDirectory(dirname($destination));
         
-                if (!copy($source, $destination . '/' . basename($source))) {
+                if (!copy($source, $destination)) {
                     throw new GambioStoreFileCopyException("Couldn't copy file " . $source);
                 }
             }
@@ -445,6 +459,27 @@ if (defined('StoreKey_MigrationScript')) {
             public function getCacheDirectory()
             {
                 return $this->getShopDirectory() . '/cache';
+            }
+            /**
+             * @param $method
+             * @param $arguments
+             *
+             * @return mixed
+             */
+            public function __call($method, $arguments)
+            {
+                if (in_array($method, ['fileCopy', 'fileMove', 'rename', 'remove'])) {
+                    $this->actionsPerformed[] = [$method, $arguments];
+                }
+    
+                return call_user_func_array([$this, $method], $arguments);
+            }
+    
+            public function rollback()
+            {
+                foreach ($this->actionsPerformed as $action) {
+
+                }
             }
         }
     }
