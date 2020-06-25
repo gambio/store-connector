@@ -201,10 +201,14 @@ class GambioStoreInstallation
             if ($progress['progress'] === 100) {
                 $this->cache->delete($this->getTransactionId());
             }
-            
-            return $progress;
-        }
     
+            return [
+                'success'  => true,
+                'state'    => $progress['state'],
+                'progress' => $progress['progress']
+            ];
+        }
+        
         $this->cache->set($this->getTransactionId(), json_encode([
             'state'    => 'started',
             'progress' => 0
@@ -229,6 +233,7 @@ class GambioStoreInstallation
                 ]
             ]);
             $this->cleanCache();
+            $this->cache->delete($this->getTransactionId());
             throw new GambioStorePackageInstallationException($message);
         }
         
@@ -260,6 +265,7 @@ class GambioStoreInstallation
                 ],
             ]);
             $this->restore($destinations);
+            $this->cache->delete($this->getTransactionId()); 
             throw new GambioStorePackageInstallationException($message);
         } catch (Exception $exception) {
             $message = 'Could not install package: ' . $this->packageData['details']['title']['de'];
@@ -272,15 +278,15 @@ class GambioStoreInstallation
                 ]
             ]);
             $this->restore($destinations);
+            $this->cache->delete($this->getTransactionId());
             throw new GambioStorePackageInstallationException($message);
-        }
-        finally {
+        } finally {
             $this->cleanCache();
         }
         
         $this->logger->notice('Successfully installed package : ' . $this->packageData['details']['title']['de']);
         
-        return ['success' => true];
+        return ['success' => true, 'progress' => 100];
     }
     
     
