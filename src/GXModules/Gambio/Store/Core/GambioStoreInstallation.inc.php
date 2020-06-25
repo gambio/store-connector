@@ -208,7 +208,7 @@ class GambioStoreInstallation
                 'progress' => $progress['progress']
             ];
         }
-        
+    
         $this->cache->set($this->getTransactionId(), json_encode([
             'state'    => 'started',
             'progress' => 0

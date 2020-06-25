@@ -79,6 +79,7 @@ class GambioStoreMigration
             try {
                 require_once $this->fileSystem->getShopDirectory() . '/' . $item;
             } catch (\Exception $exception) {
+                $fileSystem->rollback();
                 throw new GambioStoreUpMigrationException('Up migrations failed. File: ', 0, $item);
             }
         }
@@ -113,7 +114,9 @@ class GambioStoreMigration
         foreach ($this->down as $item) {
             try {
                 require_once $this->fileSystem->getShopDirectory() . '/' . $item;
+                throw new Exception('Down migrations failed');
             } catch (\Exception $exception) {
+                $this->rollback();
                 throw new GambioStoreDownMigrationException('Down migrations failed. File: ', 0, $item);
             }
         }
@@ -132,5 +135,10 @@ class GambioStoreMigration
         require_once 'Facades/GambioStoreCacheFacade.php';
         require_once 'Facades/GambioStoreHttpFacade.php';
         require_once 'Facades/GambioStoreLoggerFacade.php';
+    }
+    
+    private function rollback()
+    {
+    
     }
 }
