@@ -55,9 +55,13 @@ const installPackage = (data, progressCallback = () => null) => {
         let progress = 0;
         try {
             while (progress !== 100) {
-                const response = await GambioStore.callShop('admin.php?do=GambioStoreAjax/InstallPackage', {
-                    method: 'post',
-                    body: formData
+                const response = await new Promise((resolve,reject) => {
+                    setTimeout(() => {
+                        GambioStore.callShop('admin.php?do=GambioStoreAjax/InstallPackage', {
+                            method: 'post',
+                            body: formData
+                        }).then(resolve).catch(reject);
+                    }, 500)
                 });
                 if(!response.success) {
                     throw new Error('Package not installed!');
