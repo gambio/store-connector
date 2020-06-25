@@ -166,6 +166,68 @@ class GambioStoreConnector
     
     
     /**
+     * Returns the GambioStoreDatabase instance.
+     *
+     * @return \GambioStoreDatabase
+     */
+    public function getDatabase()
+    {
+        return $this->database;
+    }
+    
+    
+    /**
+     * Returns a GambioStoreFileSystem instance.
+     *
+     * @return \GambioStoreFileSystem
+     */
+    public function getFileSystem()
+    {
+        return $this->fileSystem;
+    }
+    
+    
+    /**
+     * Returns a GambioStoreCache instance.
+     *
+     * @return \GambioStoreCache
+     */
+    public function getCache()
+    {
+        return $this->cache;
+    }
+    
+    
+    /**
+     * Returns a GambioStoreLogger instance.
+     *
+     * @return \GambioStoreLogger
+     */
+    public function getLogger()
+    {
+        return $this->logger;
+    }
+    
+    
+    /**
+     * Sets shop offline.
+     */
+    private function setShopOffline()
+    {
+        $this->configuration->set('GM_SHOP_OFFLINE', 'checked');
+    }
+    
+    
+    /**
+     * Sets shop online.
+     */
+    private function setShopOnline()
+    {
+        $this->configuration->set('GM_SHOP_OFFLINE', '');
+    }
+    
+    
+    /**
      * Determines whether this shop send the store token for registration
      *
      * @param string $storeToken
@@ -240,17 +302,6 @@ class GambioStoreConnector
         }
         
         return $active;
-    }
-    
-    
-    /**
-     * Returns the GambioStoreDatabase instance.
-     *
-     * @return \GambioStoreDatabase
-     */
-    public function getDatabase()
-    {
-        return $this->database;
     }
     
     
@@ -367,56 +418,5 @@ class GambioStoreConnector
         restore_exception_handler();
     
         return $response;
-    }
-    
-    
-    /**
-     * Returns a GambioStoreFileSystem instance.
-     *
-     * @return \GambioStoreFileSystem
-     */
-    public function getFileSystem()
-    {
-        return $this->fileSystem;
-    }
-    
-    
-    /**
-     * Returns a GambioStoreCache instance.
-     *
-     * @return \GambioStoreCache
-     */
-    public function getCache()
-    {
-        return $this->cache;
-    }
-    
-    
-    /**
-     * Returns a GambioStoreLogger instance.
-     *
-     * @return \GambioStoreLogger
-     */
-    public function getLogger()
-    {
-        return $this->logger;
-    }
-    
-    
-    /**
-     * Sets shop offline.
-     */
-    private function setShopOffline()
-    {
-        $this->configuration->set('GM_SHOP_OFFLINE', 'checked');
-    }
-    
-    
-    /**
-     * Sets shop online.
-     */
-    private function setShopOnline()
-    {
-        $this->configuration->set('GM_SHOP_OFFLINE', '');
     }
 }
