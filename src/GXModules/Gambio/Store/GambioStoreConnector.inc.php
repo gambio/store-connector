@@ -344,27 +344,32 @@ class GambioStoreConnector
         $migration = new GambioStoreMigration($this->fileSystem,
             isset($packageData['migrations']['up']) ? $packageData['migrations']['up'] : [],
             isset($packageData['migrations']['down']) ? $packageData['migrations']['down'] : []);
-    
-        $http = new GambioStoreHttp;
-    
+        
+        $http = new GambioStoreHttp();
+        
         $installation = new GambioStoreInstallation($packageData, $this->configuration->get('GAMBIO_STORE_TOKEN'),
             $this->cache, $this->logger, $this->fileSystem, $this->backup, $migration, $http);
-    
+        
         try {
             $this->setShopOffline();
             $response = $installation->perform();
-        } catch (\Exception $e) {
+        } catch (\Exception $exception) {
             restore_error_handler();
             restore_exception_handler();
-            throw $e;
+            throw $exception;
         }
         finally {
             $this->setShopOnline();
         }
-    
+        
+        if (isset($packageData['folder_name_inside_shop']) || isset($packageData['filename'])) {
+            $themeDirectoryName = $packageData['folder_name_inside_shop'] ? : $packageData['filename'];
+            $this->themes->reimportContentManagerEntries($themeDirectoryName);
+        }
+        
         restore_error_handler();
         restore_exception_handler();
-    
+        
         return $response;
     }
     
@@ -395,28 +400,28 @@ class GambioStoreConnector
         } else {
             $packageData['files_list'] = $postData['file_list'];
         }
-    
+        
         $migration = new GambioStoreMigration($this->fileSystem,
             isset($postData['migrations']['up']) ? $postData['migrations']['up'] : [],
             isset($postData['migrations']['down']) ? $postData['migrations']['down'] : []);
-    
+        
         $removal = new GambioStoreRemoval($packageData, $this->logger, $this->backup, $migration, $this->fileSystem);
-    
+        
         try {
             $this->setShopOffline();
             $response = $removal->perform();
-        } catch (\Exception $e) {
+        } catch (\Exception $exception) {
             restore_error_handler();
             restore_exception_handler();
-            throw $e;
+            throw $exception;
         }
         finally {
             $this->setShopOnline();
         }
-    
+        
         restore_error_handler();
         restore_exception_handler();
-    
+        
         return $response;
     }
 }

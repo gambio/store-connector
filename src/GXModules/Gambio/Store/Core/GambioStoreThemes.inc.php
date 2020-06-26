@@ -64,9 +64,44 @@ class GambioStoreThemes
         return false;
     }
     
-    public function reimportContentManagerEntries($themePath, $themeName) 
+    
+    /**
+     * Reimport content manager entries by theme name.
+     *
+     * @param $themeName
+     *
+     * @return void
+     * @throws \UnfinishedBuildException
+     */
+    public function reimportContentManagerEntries($themeName)
     {
-        $themePath .= '/theme.json'; // load theme json
+        if (!$this->isActive($themeName)) {
+            return;
+        }
+        
+        if (!$this->compatibility->has(GambioStoreCompatibility::FEATURE_THEME_SERVICE)) {
+            return;
+        }
+        
+        $themesDirectory = $this->fileSystem->getThemeDirectory();
+        $themeJsonPath   = implode('/', [
+            $themesDirectory,
+            $themeName,
+            'theme.json'
+        ]);
+        $themeService    = StaticGXCoreLoader::getService('Theme');
+        $themeId         = ThemeId::create($themeName);
+        
+        if (file_exists($themeJsonPath)) {
+            
+            $themeJsonContent = file_get_contents($themeJsonPath);
+            $themeJson        = json_decode($themeJsonContent, false);
+            
+            if ($themeJson !== false && isset($themeJson->contents)) {
+                $themeContents = ThemeContentsParser::parse($themeJson->contents);
+                $themeService->storeThemeContent($themeId, $themeContents);
+            }
+        }
     }
     
     
@@ -82,14 +117,14 @@ class GambioStoreThemes
         if (!$this->compatibility->has(GambioStoreCompatibility::FEATURE_THEME_SERVICE)) {
             return false;
         }
-    
+        
         $themeServiceFactory = new ThemeServiceFactory();
         $shopRootDirectory   = new ExistingDirectory($this->fileSystem->getShopDirectory());
         $themeService        = $themeServiceFactory->createThemeService($shopRootDirectory);
         
         try {
             $themeService->activateTheme($themeName);
-    
+            
             return true;
         } catch (\Exception $e) {
             return false;
