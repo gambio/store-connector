@@ -121,12 +121,12 @@ class GambioStoreConnector
         $database        = GambioStoreDatabase::connect($fileSystem);
         $compatibility   = new GambioStoreCompatibility($database);
         $configuration   = new GambioStoreConfiguration($database, $compatibility);
-        $themes          = new GambioStoreThemes($compatibility, $fileSystem);
         $shopInformation = new GambioStoreShopInformation($database, $fileSystem);
         $cache           = new GambioStoreCache($database);
         $backup          = new GambioStoreBackup($fileSystem);
         $logger          = new GambioStoreLogger($cache);
-        
+        $themes          = new GambioStoreThemes($compatibility, $fileSystem, $logger);
+    
         return new self($database, $configuration, $compatibility, $logger, $themes, $fileSystem, $shopInformation,
             $cache, $backup);
     }
@@ -238,10 +238,10 @@ class GambioStoreConnector
     {
         $result = $this->configuration->get('GAMBIO_STORE_TOKEN') === $storeToken;
         if ($result) {
-            $this->logger->notice('Verification succeed');
+            $this->logger->notice('Registration verification succeed');
             $this->configuration->set('GAMBIO_STORE_IS_REGISTERED', 'true');
         } else {
-            $this->logger->error('Verification failed');
+            $this->logger->error('Registration verification failed');
         }
         
         return $result;

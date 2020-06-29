@@ -184,12 +184,6 @@ class GambioStoreAjaxController extends AdminHttpViewController
         $themeName = $_POST['themeStorageName'];
         $result    = $this->themes->activateTheme($themeName);
         
-        if ($result) {
-            $this->logger->notice('Activation of theme: ' . $themeName . ' succeeded');
-        } else {
-            $this->logger->error('Could not activate theme: ' . $themeName);
-        }
-        
         return new JsonHttpControllerResponse(['success' => $result]);
     }
     

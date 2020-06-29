@@ -26,6 +26,11 @@ class GambioStoreThemes
      */
     private $fileSystem;
     
+    /**
+     * @var \GambioStoreLogger
+     */
+    private $logger;
+    
     
     /**
      * GambioStoreThemes constructor.
@@ -33,10 +38,14 @@ class GambioStoreThemes
      * @param \GambioStoreCompatibility $compatibility
      * @param \GambioStoreFileSystem    $fileSystem
      */
-    public function __construct(GambioStoreCompatibility $compatibility, GambioStoreFileSystem $fileSystem)
-    {
+    public function __construct(
+        GambioStoreCompatibility $compatibility,
+        GambioStoreFileSystem $fileSystem,
+        GambioStoreLogger $logger
+    ) {
         $this->compatibility = $compatibility;
         $this->fileSystem    = $fileSystem;
+        $this->logger        = $logger;
     }
     
     
@@ -72,6 +81,7 @@ class GambioStoreThemes
      *
      * @return void
      * @throws \UnfinishedBuildException
+     * @throws \Exception
      */
     public function reimportContentManagerEntries($themeName)
     {
@@ -80,6 +90,8 @@ class GambioStoreThemes
         }
         
         if (!$this->compatibility->has(GambioStoreCompatibility::FEATURE_THEME_SERVICE)) {
+            $this->logger->info('Reimport of theme content manager entries does not work, because theme service not exits');
+            
             return;
         }
         
@@ -89,8 +101,11 @@ class GambioStoreThemes
             $themeName,
             'theme.json'
         ]);
-        $themeService    = StaticGXCoreLoader::getService('Theme');
-        $themeId         = ThemeId::create($themeName);
+        
+        $themeServiceFactory = new ThemeServiceFactory();
+        $shopRootDirectory   = new ExistingDirectory($this->fileSystem->getShopDirectory());
+        $themeService        = $themeServiceFactory::createThemeService($shopRootDirectory);
+        $themeId             = new ThemeId($themeName);
         
         if (file_exists($themeJsonPath)) {
             
@@ -115,18 +130,29 @@ class GambioStoreThemes
     public function activateTheme($themeName)
     {
         if (!$this->compatibility->has(GambioStoreCompatibility::FEATURE_THEME_SERVICE)) {
+            $this->logger->info('The theme activation does not work, because theme service does not exists.');
+            
             return false;
         }
         
         $themeServiceFactory = new ThemeServiceFactory();
         $shopRootDirectory   = new ExistingDirectory($this->fileSystem->getShopDirectory());
-        $themeService        = $themeServiceFactory->createThemeService($shopRootDirectory);
+        $themeService        = $themeServiceFactory::createThemeService($shopRootDirectory);
         
         try {
             $themeService->activateTheme($themeName);
-            
+            $this->logger->notice('Activation of theme: ' . $themeName . ' succeeded');
             return true;
-        } catch (\Exception $e) {
+        } catch (\Exception $exception) {
+            $this->logger->error('Could not activate theme: ' . $themeName, [
+                'error' => [
+                    'code'    => $exception->getCode(),
+                    'message' => $exception->getMessage(),
+                    'file'    => $exception->getFile(),
+                    'line'    => $exception->getLine()
+                ]
+            ]);
+            
             return false;
         }
     }
