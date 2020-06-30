@@ -370,8 +370,8 @@ class GambioStoreConnector
             $this->setShopOnline();
         }
         
-        if (isset($packageData['folder_name_inside_shop']) || isset($packageData['filename'])) {
-            $themeDirectoryName = $packageData['folder_name_inside_shop'] ? : $packageData['filename'];
+        if (isset($packageData['details']['folder_name_inside_shop']) || isset($packageData['details']['filename'])) {
+            $themeDirectoryName = $packageData['details']['folder_name_inside_shop'] ? : $packageData['details']['filename'];
             $this->themes->reimportContentManagerEntries($themeDirectoryName);
         }
         
