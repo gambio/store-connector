@@ -275,7 +275,15 @@ class GambioStoreConnector
         try {
             return $this->shopInformation->getShopInformation();
         } catch (\GambioStoreException $exception) {
-            $this->logger->critical('Could not collected shop information', ['error' => $exception]);
+            $this->logger->critical('Could not collected shop information', [
+                'context' => $exception->getContext(),
+                'error'   => [
+                    'code'    => $exception->getCode(),
+                    'message' => $exception->getMessage(),
+                    'file'    => $exception->getFile(),
+                    'line'    => $exception->getLine()
+                ]
+            ]);
             
             return [
                 'error' => $exception->getMessage()
