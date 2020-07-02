@@ -51,7 +51,6 @@ class GambioStoreController extends AdminHttpViewController
      * Determines whether to display the data processing terms, the registration or the downloads page of the iframe
      *
      * @return mixed
-     * @throws \GambioStoreLanguageNotResolvableException
      */
     public function actionDefault()
     {
@@ -106,6 +105,7 @@ class GambioStoreController extends AdminHttpViewController
         $contentNavigation = MainFactory::create('ContentNavigationCollection', []);
         $title    = new NonEmptyStringType($this->languageTextManager->get_text('PAGE_TITLE'));
         
+        // Fallback to 'en' in case we are not able to fetch from the session value.
         try {
             $language = $this->connector->getCurrentShopLanguageCode();
         } catch (GambioStoreLanguageNotResolvableException $e) {
@@ -120,6 +120,7 @@ class GambioStoreController extends AdminHttpViewController
 
         return new AdminLayoutHttpControllerResponse($title, $template, $data, $assets, $contentNavigation);
     }
+    
     
     /**
      * Displays the installations page on the iframe
@@ -314,16 +315,21 @@ class GambioStoreController extends AdminHttpViewController
      * @param $urlPostfix
      *
      * @return \KeyValueCollection
-     * @throws \GambioStoreLanguageNotResolvableException
      */
     private function getIFrameTemplateData($urlPostfix)
     {
         $translations = $this->languageTextManager->get_section_array('gambio_store', $_SESSION['languages_id']);
         
+        try {
+            $language = $this->connector->getCurrentShopLanguageCode();
+        } catch (GambioStoreLanguageNotResolvableException $e) {
+            $language = 'en';
+        }
+        
         return new KeyValueCollection([
             'storeUrl'      => $this->getGambioStoreUrl() . $urlPostfix,
             'storeToken'    => $this->getGambioStoreToken(),
-            'storeLanguage' => $this->connector->getCurrentShopLanguageCode(),
+            'storeLanguage' => $language,
             'translations'  => $translations,
             'errors'        => $this->errors
         ]);

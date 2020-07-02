@@ -389,7 +389,6 @@ class GambioStoreConnector
      *
      * @return bool[]
      * @throws \Exception
-     * @throws \GambioStoreRemovalException
      */
     public function uninstallPackage(array $postData)
     {
@@ -399,7 +398,23 @@ class GambioStoreConnector
         if (isset($postData['folder_name_inside_shop']) || isset($postData['filename'])) {
             $themeDirectoryName      = $postData['folder_name_inside_shop'] ? : $postData['filename'];
             $themeDirectoryPath      = $this->fileSystem->getThemeDirectory() . '/' . $themeDirectoryName;
-            $fileList                = $this->fileSystem->getContentsRecursively($themeDirectoryPath);
+            
+            try {
+                $fileList = $this->fileSystem->getContentsRecursively($themeDirectoryPath);
+            } catch (GambioStoreException $exception) {
+                $message = 'Could not install package: ' . $postData['details']['title']['de'];
+                $this->logger->error($message, [
+                    'context' => $exception->getContext(),
+                    'error'   => [
+                        'code'    => $exception->getCode(),
+                        'message' => $exception->getMessage(),
+                        'file'    => $exception->getFile(),
+                        'line'    => $exception->getLine()
+                    ],
+                ]);
+                
+                throw $exception;
+            }
             $shopDirectoryPathLength = strlen($this->fileSystem->getShopDirectory() . '/');
             array_walk($fileList, function (&$item) use ($shopDirectoryPathLength) {
                 $item = substr($item, $shopDirectoryPathLength);
