@@ -64,11 +64,18 @@ class GambioStoreUpdates
     
     /**
      * Retrieves the number of available updates for the current shop version from the store.
-     *
+     * Note that this returns an empty array silently if either:
+     *  - curl is missing
+     *  - not registered to the store
+     *  - data processing not accepted
      * @return array
      */
     public function fetchAvailableUpdates()
     {
+        if (!extension_loaded('curl')) {
+            return [];
+        }
+        
         if (!$this->configuration->has('GAMBIO_STORE_IS_REGISTERED')
             || $this->configuration->get('GAMBIO_STORE_IS_REGISTERED') !== true
             || !$this->configuration->has('GAMBIO_STORE_ACCEPTED_DATA_PROCESSING')
