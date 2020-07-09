@@ -13,6 +13,9 @@ if (defined('StoreKey_MigrationScript')) {
     if (!defined('GambioStoreShopInformationFacade_included')) {
         
         define('GambioStoreShopInformationFacade_included', true);
+        require_once 'GambioStoreDatabaseFacade.php';
+        require_once 'GambioStoreFileSystemFacade.php';
+        
         require_once __DIR__ . '/../Exceptions/GambioStoreHttpServerMissingException.inc.php';
         require_once __DIR__ . '/../Exceptions/GambioStoreRelativeShopPathMissingException.inc.php';
         require_once __DIR__ . '/../Exceptions/GambioStoreShopKeyMissingException.inc.php';

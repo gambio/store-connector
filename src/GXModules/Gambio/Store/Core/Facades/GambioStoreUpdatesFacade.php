@@ -13,7 +13,11 @@ if (defined('StoreKey_MigrationScript')) {
     if (!defined('GambioStoreUpdatesFacade_included')) {
         
         define('GambioStoreUpdatesFacade_included', true);
-        require 'GambioStoreCacheFacade.php';
+        require_once 'GambioStoreCacheFacade.php';
+        require_once 'GambioStoreShopInformationFacade.php';
+        require_once 'GambioStoreHttpFacade.php';
+        require_once 'GambioStoreConfigurationFacade.php';
+        
         require_once __DIR__ . '/../Exceptions/GambioStoreException.inc.php';
         require_once __DIR__ . '/../Exceptions/GambioStoreUpdatesNotRetrievableException.inc.php';
         
