@@ -29,19 +29,19 @@ if (defined('StoreKey_MigrationScript')) {
              */
             const STORE_API_URL = 'https://store.gambio.com';
             /**
-             * @var \GambioStoreCache
+             * @var \GambioStoreCacheFacade
              */
             private $cache;
             /**
-             * @var \GambioStoreHttp
+             * @var \GambioStoreHttpFacade
              */
             private $http;
             /**
-             * @var \GambioStoreShopInformation
+             * @var \GambioStoreShopInformationFacade
              */
             private $shopInformation;
             /**
-             * @var \GambioStoreConfiguration
+             * @var \GambioStoreConfigurationFacade
              */
             private $configuration;
             
@@ -52,10 +52,10 @@ if (defined('StoreKey_MigrationScript')) {
              * @param \GambioStoreCache $cache
              */
             public function __construct(
-                GambioStoreHttp $http,
-                GambioStoreCache $cache,
-                GambioStoreShopInformation $shopInformation,
-                GambioStoreConfiguration $configuration
+                GambioStoreHttpFacade $http,
+                GambioStoreCacheFacade $cache,
+                GambioStoreShopInformationFacade $shopInformation,
+                GambioStoreConfigurationFacade $configuration
             ) {
                 $this->http            = $http;
                 $this->cache           = $cache;
@@ -86,13 +86,15 @@ if (defined('StoreKey_MigrationScript')) {
                 }
                 
                 try {
-                    $response = $this->http->post(self::STORE_API_URL . '/merchant_packages', $shopInformation)->getBody();
+                    $response = $this->http->post(self::STORE_API_URL . '/merchant_packages', $shopInformation)
+                                           ->getBody();
                 } catch (GambioStoreHttpErrorException $e) {
                     throw new GambioStoreUpdatesNotRetrievableException("Network failure while trying to fetch updates.",
                         $e->getCode(), $e->getContext(), $e);
                 }
                 
-                if (!is_array($response) || !array_key_exists('updates', $response) || !is_array($response['updates'])) {
+                if (!is_array($response) || !array_key_exists('updates', $response)
+                    || !is_array($response['updates'])) {
                     throw new GambioStoreUpdatesNotRetrievableException("The API returned invalid updates!", 0,
                         ['response' => $response]);
                 }
@@ -101,17 +103,6 @@ if (defined('StoreKey_MigrationScript')) {
             }
             
             
-            /**
-             * Install an array of updates.
-             *
-             * @param $updates array The updates to install.
-             */
-            public function installUpdates($updates)
-            {
-                // TODO: Implement me!
-            }
-    
-    
             /**
              * Retrieves the number of available updates.
              * Use this method if the number of updates is to be queried frequently,
@@ -124,19 +115,21 @@ if (defined('StoreKey_MigrationScript')) {
             public function getCachedNumberOfUpdates()
             {
                 $now = new DateTime();
-                if(!$this->configuration->has('GAMBIO_STORE_LAST_UPDATE_COUNT_FETCH_DATE')) {
+                if (!$this->configuration->has('GAMBIO_STORE_LAST_UPDATE_COUNT_FETCH_DATE')) {
                     $updateCount = count($this->fetchAvailableUpdates());
                     $this->configuration->set('GAMBIO_STORE_LAST_UPDATE_COUNT', $updateCount);
                     $this->configuration->set('GAMBIO_STORE_LAST_UPDATE_COUNT_FETCH_DATE', $now->format('Y-m-d'));
+                    
                     return $updateCount;
                 }
                 
                 $then = new DateTime($this->configuration->get('GAMBIO_STORE_LAST_UPDATE_COUNT_FETCH_DATE'));
-                if($now->diff($then)->days > 0) {
+                if ($now->diff($then)->days > 0) {
                     $updateCount = count($this->fetchAvailableUpdates());
                     $this->configuration->set('GAMBIO_STORE_LAST_UPDATE_COUNT', $updateCount);
                     $this->configuration->set('GAMBIO_STORE_LAST_UPDATE_COUNT_FETCH_DATE', $now->format('Y-m-d'));
-                    return $updateCount; 
+                    
+                    return $updateCount;
                 }
                 
                 return $this->configuration->get('GAMBIO_STORE_LAST_UPDATE_COUNT');
@@ -151,7 +144,7 @@ if (defined('StoreKey_MigrationScript')) {
              */
             public function clearCachedNumberOfUpdates()
             {
-               $this->configuration->remove('GAMBIO_STORE_LAST_UPDATE_COUNT_FETCH_DATE'); 
+                $this->configuration->remove('GAMBIO_STORE_LAST_UPDATE_COUNT_FETCH_DATE');
             }
         }
     }
