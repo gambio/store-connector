@@ -34,18 +34,22 @@ if (defined('StoreKey_MigrationScript')) {
              * The URL of the store api.
              */
             const STORE_API_URL = 'https://store.gambio.com';
+            
             /**
              * @var \GambioStoreCacheFacade
              */
             private $cache;
+            
             /**
              * @var \GambioStoreHttpFacade
              */
             private $http;
+            
             /**
              * @var \GambioStoreShopInformationFacade
              */
             private $shopInformation;
+            
             /**
              * @var \GambioStoreConfigurationFacade
              */
@@ -57,27 +61,27 @@ if (defined('StoreKey_MigrationScript')) {
              *
              * @param \GambioStoreCache $cache
              */
-            public function __construct() {
+            public function __construct()
+            {
                 $this->http            = new GambioStoreHttpFacade();
                 $this->cache           = new GambioStoreCacheFacade();
-                $fileSystem = new GambioStoreFileSystemFacade();
-                $database = GambioStoreDatabaseFacade::connect($fileSystem);
-                $this->shopInformation = new GambioStoreShopInformationFacade(
-                    $database,
-                    $fileSystem
-                );
-                $this->configuration   = new GambioStoreConfigurationFacade($database, new GambioStoreCompatibilityFacade($database));
+                $fileSystem            = new GambioStoreFileSystemFacade();
+                $database              = GambioStoreDatabaseFacade::connect($fileSystem);
+                $this->shopInformation = new GambioStoreShopInformationFacade($database, $fileSystem);
+                $this->configuration   = new GambioStoreConfigurationFacade($database,
+                    new GambioStoreCompatibilityFacade($database));
             }
             
             
             /**
-             * Retrieves the number of available updates for the current shop version from the store.     
+             * Retrieves the number of available updates for the current shop version from the store.
              * Note that this returns an empty array silently if either:
              *  - curl is missing
              *  - not registered to the store
              *  - data processing not accepted
              *
              * @return array
+             * @throws \GambioStoreUpdatesNotRetrievableException
              */
             public function fetchAvailableUpdates()
             {
@@ -124,21 +128,15 @@ if (defined('StoreKey_MigrationScript')) {
              *
              * @return int
              * @throws \GambioStoreUpdatesNotRetrievableException
+             * @throws \Exception
              * @see \GambioStoreUpdatesFacade::clearCachedNumberOfUpdates()
              */
             public function getCachedNumberOfUpdates()
             {
-                $now = new DateTime();
-                if (!$this->configuration->has('GAMBIO_STORE_LAST_UPDATE_COUNT_FETCH_DATE')) {
-                    $updateCount = count($this->fetchAvailableUpdates());
-                    $this->configuration->set('GAMBIO_STORE_LAST_UPDATE_COUNT', $updateCount);
-                    $this->configuration->set('GAMBIO_STORE_LAST_UPDATE_COUNT_FETCH_DATE', $now->format('Y-m-d'));
-                    
-                    return $updateCount;
-                }
-                
+                $now  = new DateTime();
                 $then = new DateTime($this->configuration->get('GAMBIO_STORE_LAST_UPDATE_COUNT_FETCH_DATE'));
-                if ($now->diff($then)->days > 0) {
+                if (!$this->configuration->has('GAMBIO_STORE_LAST_UPDATE_COUNT_FETCH_DATE')
+                    || $now->diff($then)->days > 0) {
                     $updateCount = count($this->fetchAvailableUpdates());
                     $this->configuration->set('GAMBIO_STORE_LAST_UPDATE_COUNT', $updateCount);
                     $this->configuration->set('GAMBIO_STORE_LAST_UPDATE_COUNT_FETCH_DATE', $now->format('Y-m-d'));
@@ -148,26 +146,29 @@ if (defined('StoreKey_MigrationScript')) {
                 
                 return $this->configuration->get('GAMBIO_STORE_LAST_UPDATE_COUNT');
             }
-    
-    
+            
+            
             /**
              * This method installs updates as queried from the store-api.
-             * 
-             * @see \GambioStoreUpdatesFacade::fetchAvailableUpdates()
-             * 
+             *
              * @param array $updates The updates to install.
-             *                       
+             *
              * @throws \GambioStoreUpdatesNotInstalledException in case of failure.
+             * @see \GambioStoreUpdatesFacade::fetchAvailableUpdates()
+             *
              */
-            public function installUpdates(array $updates) {
+            public function installUpdates(array $updates)
+            {
                 try {
                     foreach ($updates as $update) {
                         GambioStoreConnector::getInstance()->installPackage($update);
                     }
-                } catch(\Exception $e) {
-                    throw new GambioStoreUpdatesNotInstalledException("An update could not be installed!", $e->getCode(), ["updates" => $updates], $e);
+                } catch (\Exception $e) {
+                    throw new GambioStoreUpdatesNotInstalledException("An update could not be installed!",
+                        $e->getCode(), ["updates" => $updates], $e);
                 }
             }
+            
             
             /**
              * Clears the number of cached updates, so that subsequent queries to it will return a fresh value.
