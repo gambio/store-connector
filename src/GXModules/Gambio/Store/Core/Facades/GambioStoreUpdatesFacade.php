@@ -17,9 +17,11 @@ if (defined('StoreKey_MigrationScript')) {
         require_once 'GambioStoreShopInformationFacade.php';
         require_once 'GambioStoreHttpFacade.php';
         require_once 'GambioStoreConfigurationFacade.php';
+        require_once __DIR__ . '/../../GambioStoreConnector.inc.php';
         
         require_once __DIR__ . '/../Exceptions/GambioStoreException.inc.php';
         require_once __DIR__ . '/../Exceptions/GambioStoreUpdatesNotRetrievableException.inc.php';
+        require_once __DIR__ . '/../Exceptions/GambioStoreUpdatesNotInstalledException.inc.php';
         
         /**
          * Class GambioStoreUpdatesFacade
@@ -55,16 +57,16 @@ if (defined('StoreKey_MigrationScript')) {
              *
              * @param \GambioStoreCache $cache
              */
-            public function __construct(
-                GambioStoreHttpFacade $http,
-                GambioStoreCacheFacade $cache,
-                GambioStoreShopInformationFacade $shopInformation,
-                GambioStoreConfigurationFacade $configuration
-            ) {
-                $this->http            = $http;
-                $this->cache           = $cache;
-                $this->shopInformation = $shopInformation;
-                $this->configuration   = $configuration;
+            public function __construct() {
+                $this->http            = new GambioStoreHttpFacade();
+                $this->cache           = new GambioStoreCacheFacade();
+                $fileSystem = new GambioStoreFileSystemFacade();
+                $database = GambioStoreDatabaseFacade::connect($fileSystem);
+                $this->shopInformation = new GambioStoreShopInformationFacade(
+                    $database,
+                    $fileSystem
+                );
+                $this->configuration   = new GambioStoreConfigurationFacade($database, new GambioStoreCompatibilityFacade($database));
             }
             
             
@@ -146,7 +148,26 @@ if (defined('StoreKey_MigrationScript')) {
                 
                 return $this->configuration->get('GAMBIO_STORE_LAST_UPDATE_COUNT');
             }
-            
+    
+    
+            /**
+             * This method installs updates as queried from the store-api.
+             * 
+             * @see \GambioStoreUpdatesFacade::fetchAvailableUpdates()
+             * 
+             * @param array $updates The updates to install.
+             *                       
+             * @throws \GambioStoreUpdatesNotInstalledException in case of failure.
+             */
+            public function installUpdates(array $updates) {
+                try {
+                    foreach ($updates as $update) {
+                        GambioStoreConnector::getInstance()->installPackage($update);
+                    }
+                } catch(\Exception $e) {
+                    throw new GambioStoreUpdatesNotInstalledException("An update could not be installed!", $e->getCode(), ["updates" => $updates], $e);
+                }
+            }
             
             /**
              * Clears the number of cached updates, so that subsequent queries to it will return a fresh value.

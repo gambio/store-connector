@@ -14,6 +14,8 @@ require_once 'GambioStoreHttp.inc.php';
 require_once 'GambioStoreConfiguration.inc.php';
 require_once 'Exceptions/GambioStoreException.inc.php';
 require_once 'Exceptions/GambioStoreUpdatesNotRetrievableException.inc.php';
+require_once 'Exceptions/GambioStoreUpdatesNotInstalledException.inc.php';
+require_once __DIR__ . '/../GambioStoreConnector.inc.php';
 
 /**
  * Class GambioStoreUpdates
@@ -106,6 +108,25 @@ class GambioStoreUpdates
         
         return $response['updates'];
     }
+    
+    /**
+     * This method installs updates as queried from the store-api.
+     *
+     * @see \GambioStoreUpdates::fetchAvailableUpdates()
+     *
+     * @param array $updates The updates to install.
+     *
+     * @throws \GambioStoreUpdatesNotInstalledException in case of failure.
+     */
+    public function installUpdates(array $updates) {
+        try {
+            foreach ($updates as $update) {
+                GambioStoreConnector::getInstance()->installPackage($update);
+            }
+        } catch(\Exception $e) {
+            throw new GambioStoreUpdatesNotInstalledException("An update could not be installed!", $e->getCode(), ["updates" => $updates], $e);
+        }
+    } 
     
     
     /**
