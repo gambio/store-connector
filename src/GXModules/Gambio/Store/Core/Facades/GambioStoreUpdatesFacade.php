@@ -1,6 +1,6 @@
 <?php
 /* --------------------------------------------------------------
-   GambioStoreUpdatesFacade.php 2020-07-08
+   GambioStoreUpdatesFacade.php 2020-07-10
    Gambio GmbH
    http://www.gambio.de
    Copyright (c) 2020 Gambio GmbH
@@ -33,7 +33,7 @@ if (defined('StoreKey_MigrationScript')) {
             /**
              * The URL of the store api.
              */
-            const STORE_API_URL = 'https://store.gambio.com';
+            const STORE_API_URL = 'http://172.17.0.1/store-api-connector/public';
             
             /**
              * @var \GambioStoreCacheFacade
@@ -97,18 +97,18 @@ if (defined('StoreKey_MigrationScript')) {
                 }
                 
                 try {
-                    $shopInformation = $this->shopInformation->getShopInformation();
-                } catch (GambioStoreException $e) {
+                    $shopInformationArray = $this->shopInformation->getShopInformation();
+                } catch (GambioStoreException $exception) {
                     throw new GambioStoreUpdatesNotRetrievableException("Could not fetch shop information during update-fetching!",
-                        $e->getCode(), $e->getContext(), $e);
+                        $exception->getCode(), $exception->getContext(), $exception);
                 }
                 
                 try {
-                    $response = $this->http->post(self::STORE_API_URL . '/merchant_packages', $shopInformation)
+                    $response = $this->http->post(self::STORE_API_URL . '/merchant_packages', $shopInformationArray)
                                            ->getBody();
-                } catch (GambioStoreHttpErrorException $e) {
+                } catch (GambioStoreHttpErrorException $exception) {
                     throw new GambioStoreUpdatesNotRetrievableException("Network failure while trying to fetch updates.",
-                        $e->getCode(), $e->getContext(), $e);
+                        $exception->getCode(), $exception->getContext(), $exception);
                 }
                 
                 if (!is_array($response) || !array_key_exists('updates', $response)
@@ -129,22 +129,21 @@ if (defined('StoreKey_MigrationScript')) {
              * @return int
              * @throws \GambioStoreUpdatesNotRetrievableException
              * @throws \Exception
-             * @see \GambioStoreUpdatesFacade::clearCachedNumberOfUpdates()
              */
             public function getCachedNumberOfUpdates()
             {
                 $now  = new DateTime();
-                $then = new DateTime($this->configuration->get('GAMBIO_STORE_LAST_UPDATE_COUNT_FETCH_DATE'));
-                if (!$this->configuration->has('GAMBIO_STORE_LAST_UPDATE_COUNT_FETCH_DATE')
+                $then = new DateTime($this->cache->get('GAMBIO_STORE_LAST_UPDATE_COUNT_FETCH_DATE'));
+                if (!$this->cache->has('GAMBIO_STORE_LAST_UPDATE_COUNT_FETCH_DATE')
                     || $now->diff($then)->days > 0) {
                     $updateCount = count($this->fetchAvailableUpdates());
-                    $this->configuration->set('GAMBIO_STORE_LAST_UPDATE_COUNT', $updateCount);
-                    $this->configuration->set('GAMBIO_STORE_LAST_UPDATE_COUNT_FETCH_DATE', $now->format('Y-m-d'));
+                    $this->cache->set('GAMBIO_STORE_LAST_UPDATE_COUNT', $updateCount);
+                    $this->cache->set('GAMBIO_STORE_LAST_UPDATE_COUNT_FETCH_DATE', $now->format('Y-m-d'));
                     
                     return $updateCount;
                 }
                 
-                return $this->configuration->get('GAMBIO_STORE_LAST_UPDATE_COUNT');
+                return $this->cache->get('GAMBIO_STORE_LAST_UPDATE_COUNT');
             }
             
             
@@ -163,22 +162,22 @@ if (defined('StoreKey_MigrationScript')) {
                     foreach ($updates as $update) {
                         GambioStoreConnector::getInstance()->installPackage($update);
                     }
-                } catch (\Exception $e) {
+                } catch (\Exception $exception) {
                     throw new GambioStoreUpdatesNotInstalledException("An update could not be installed!",
-                        $e->getCode(), ["updates" => $updates], $e);
+                        $exception->getCode(), ["updates" => $updates], $exception);
                 }
             }
-            
-            
+    
+    
             /**
              * Clears the number of cached updates, so that subsequent queries to it will return a fresh value.
              *
              * @return void
-             * @see \GambioStoreUpdatesFacade::getCachedNumberOfUpdates()
+             * @throws \GambioStoreCacheException
              */
             public function clearCachedNumberOfUpdates()
             {
-                $this->configuration->remove('GAMBIO_STORE_LAST_UPDATE_COUNT_FETCH_DATE');
+                $this->cache->delete('GAMBIO_STORE_LAST_UPDATE_COUNT_FETCH_DATE');
             }
         }
     }
