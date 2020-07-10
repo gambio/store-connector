@@ -179,8 +179,9 @@ if (defined('StoreKey_MigrationScript')) {
             public function post($url, $data = [], $options = [])
             {
                 $options += [
-                    CURLOPT_POST       => true,
-                    CURLOPT_POSTFIELDS => $data
+                    CURLOPT_POST           => true,
+                    CURLOPT_RETURNTRANSFER => true,
+                    CURLOPT_POSTFIELDS     => $data
                 ];
                 
                 return $this->request($url, $options);

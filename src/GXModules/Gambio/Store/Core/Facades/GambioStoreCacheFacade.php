@@ -99,7 +99,7 @@ if (defined('StoreKey_MigrationScript')) {
                 $sql     = 'INSERT INTO ' . self::CACHE_TABLE
                            . ' (`cache_key`,`cache_value`) VALUES (:cache_key, :cache_value) '
                            . 'ON DUPLICATE KEY UPDATE `cache_value`=:cache_value ';
-                $query   = $this->database->query($sql, ['cache_key' => $key, 'cache_value' => $value]);
+                $query   = $this->database->query($sql, [':cache_key' => $key, ':cache_value' => $value]);
                 $success = $query->execute();
                 
                 if ($success) {
@@ -108,8 +108,8 @@ if (defined('StoreKey_MigrationScript')) {
                 
                 $errorInformation = $query->errorInfo();
                 
-                throw new GambioStoreCacheException('Could not set key: ' . $key . 'value: ' . $value
-                                                    . 'into cache table', 0, ['sqlError' => $errorInformation]);
+                throw new GambioStoreCacheException('Could not set key: ' . $key . ' value: ' . $value
+                                                    . ' into cache table', 0, ['sqlError' => $errorInformation]);
             }
             
             

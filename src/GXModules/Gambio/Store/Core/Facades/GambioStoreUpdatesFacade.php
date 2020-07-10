@@ -94,9 +94,14 @@ if (defined('StoreKey_MigrationScript')) {
                     $shopInformationArray = $this->shopInformation->getShopInformation();
                     $storeToken           = $this->configuration->get('GAMBIO_STORE_TOKEN');
                     $response             = $this->http->post(self::STORE_API_URL . '/merchant_packages',
-                        ['shopInformation' => json_encode($shopInformationArray)], [
-                            CURLOPT_HTTPHEADER => ['X-STORE-TOKEN: ' . $storeToken]
-                        ])->getBody();
+                        json_encode(['shopInformation' => $shopInformationArray]), [
+                            CURLOPT_HTTPHEADER => [
+                                'Content-Type:application/json',
+                                'X-STORE-TOKEN: ' . $storeToken
+                            ]
+                        ]);
+                    
+                    $response = json_decode($response->getBody(), true);
                 } catch (GambioStoreHttpErrorException $exception) {
                     throw new GambioStoreUpdatesNotRetrievableException("Network failure while trying to fetch updates.",
                         $exception->getCode(), $exception->getContext(), $exception);
@@ -127,18 +132,26 @@ if (defined('StoreKey_MigrationScript')) {
              */
             public function getCachedNumberOfUpdates()
             {
-                $now  = new DateTime();
-                $then = new DateTime($this->cache->get('GAMBIO_STORE_LAST_UPDATE_COUNT_FETCH_DATE'));
-                if (!$this->cache->has('GAMBIO_STORE_LAST_UPDATE_COUNT_FETCH_DATE')
-                    || $now->diff($then)->days > 0) {
+                $now = new DateTime();
+                
+                if (!$this->cache->has('GAMBIO_STORE_UPDATE_COUNT_FETCH_DATE')) {
                     $updateCount = count($this->fetchAvailableUpdates());
-                    $this->cache->set('GAMBIO_STORE_LAST_UPDATE_COUNT', $updateCount);
-                    $this->cache->set('GAMBIO_STORE_LAST_UPDATE_COUNT_FETCH_DATE', $now->format('Y-m-d'));
+                    $this->cache->set('GAMBIO_STORE_UPDATE_COUNT', $updateCount);
+                    $this->cache->set('GAMBIO_STORE_UPDATE_COUNT_FETCH_DATE', $now->format('Y-m-d'));
                     
                     return $updateCount;
                 }
                 
-                return $this->cache->get('GAMBIO_STORE_LAST_UPDATE_COUNT');
+                $then = DateTime::createFromFormat('Y-m-d' , $this->cache->get('GAMBIO_STORE_LAST_UPDATE_COUNT_FETCH_DATE'));
+                if ($now->diff($then)->days > 0) {
+                    $updateCount = count($this->fetchAvailableUpdates());
+                    $this->cache->set('GAMBIO_STORE_UPDATE_COUNT', $updateCount);
+                    $this->cache->set('GAMBIO_STORE_UPDATE_COUNT_FETCH_DATE', $now->format('Y-m-d'));
+                    
+                    return $updateCount;
+                }
+                
+                return $this->cache->get('GAMBIO_STORE_UPDATE_COUNT');
             }
             
             

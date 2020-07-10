@@ -53,6 +53,10 @@ class GambioStoreMigration
     /**
      * Migrate up.
      *
+     * @throws \GambioStoreCreateDirectoryException
+     * @throws \GambioStoreFileMoveException
+     * @throws \GambioStoreFileNotFoundException
+     * @throws \GambioStoreRenameException
      * @throws \GambioStoreUpMigrationException
      */
     public function up()
