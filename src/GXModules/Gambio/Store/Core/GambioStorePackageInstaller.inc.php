@@ -136,15 +136,17 @@ class GambioStorePackageInstaller
                 $this->setShopOnline();
             }
         }
-        
+    
         if (isset($packageData['details']['folder_name_inside_shop']) || isset($packageData['details']['filename'])) {
             $themeDirectoryName = $packageData['details']['folder_name_inside_shop'] ? : $packageData['details']['filename'];
             $this->themes->reimportContentManagerEntries($themeDirectoryName);
         }
-        
+    
         restore_error_handler();
         restore_exception_handler();
-        
+    
+        $this->cache->delete('GAMBIO_STORE_LAST_UPDATE_COUNT_FETCH_DATE');
+    
         return $response;
     }
     
@@ -210,14 +212,16 @@ class GambioStorePackageInstaller
             throw $exception;
         }
         finally {
-            if($wasShopOnline) {
+            if ($wasShopOnline) {
                 $this->setShopOnline();
             }
         }
-        
+    
         restore_error_handler();
         restore_exception_handler();
-        
+    
+        $this->cache->delete('GAMBIO_STORE_LAST_UPDATE_COUNT_FETCH_DATE');
+    
         return $response;
     }
 }
