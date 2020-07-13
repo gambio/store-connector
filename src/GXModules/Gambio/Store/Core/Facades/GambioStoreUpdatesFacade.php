@@ -134,24 +134,25 @@ if (defined('StoreKey_MigrationScript')) {
             {
                 $now = new DateTime();
                 
-                if (!$this->cache->has('GAMBIO_STORE_UPDATE_COUNT_FETCH_DATE')) {
+                if (!$this->cache->has('UPDATE_COUNT_DATE')) {
                     $updateCount = count($this->fetchAvailableUpdates());
-                    $this->cache->set('GAMBIO_STORE_UPDATE_COUNT', $updateCount);
-                    $this->cache->set('GAMBIO_STORE_UPDATE_COUNT_FETCH_DATE', $now->format('Y-m-d'));
+                    $this->cache->set('UPDATE_COUNT', $updateCount);
+                    $this->cache->set('UPDATE_COUNT_DATE', $now->format('Y-m-d'));
                     
                     return $updateCount;
                 }
                 
-                $then = DateTime::createFromFormat('Y-m-d' , $this->cache->get('GAMBIO_STORE_LAST_UPDATE_COUNT_FETCH_DATE'));
+                $then = DateTime::createFromFormat('Y-m-d' , $this->cache->get('UPDATE_COUNT_DATE'));
+                
                 if ($now->diff($then)->days > 0) {
                     $updateCount = count($this->fetchAvailableUpdates());
-                    $this->cache->set('GAMBIO_STORE_UPDATE_COUNT', $updateCount);
-                    $this->cache->set('GAMBIO_STORE_UPDATE_COUNT_FETCH_DATE', $now->format('Y-m-d'));
+                    $this->cache->set('UPDATE_COUNT', $updateCount);
+                    $this->cache->set('UPDATE_COUNT_DATE', $now->format('Y-m-d'));
                     
                     return $updateCount;
                 }
                 
-                return $this->cache->get('GAMBIO_STORE_UPDATE_COUNT');
+                return $this->cache->get('UPDATE_COUNT');
             }
             
             
