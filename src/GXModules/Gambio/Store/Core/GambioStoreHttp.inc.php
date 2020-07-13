@@ -175,6 +175,7 @@ class GambioStoreHttp
     {
         $options += [
             CURLOPT_POST       => true,
+            CURLOPT_RETURNTRANSFER => true,
             CURLOPT_POSTFIELDS => $data
         ];
         
