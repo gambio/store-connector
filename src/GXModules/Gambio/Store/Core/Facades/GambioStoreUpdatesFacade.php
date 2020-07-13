@@ -95,7 +95,7 @@ if (defined('StoreKey_MigrationScript')) {
                     $shopInformationArray = $this->shopInformation->getShopInformation();
                     $storeToken           = $this->configuration->get('GAMBIO_STORE_TOKEN');
                     $apiUrl               = $this->getGambioStoreApiUrl();
-                    $response             = $this->http->post($apiUrl . '/merchant_packages',
+                    $response             = $this->http->post($apiUrl . '/connector/updates',
                         json_encode(['shopInformation' => $shopInformationArray]), [
                             CURLOPT_HTTPHEADER => [
                                 'Content-Type:application/json',
