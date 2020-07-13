@@ -34,11 +34,6 @@ if (defined('StoreKey_MigrationScript')) {
         class GambioStoreUpdatesFacade
         {
             /**
-             * The URL of the store api.
-             */
-            const STORE_API_URL = 'https://store.gambio.com';
-            
-            /**
              * @var \GambioStoreCacheFacade
              */
             private $cache;
@@ -99,7 +94,8 @@ if (defined('StoreKey_MigrationScript')) {
                 try {
                     $shopInformationArray = $this->shopInformation->getShopInformation();
                     $storeToken           = $this->configuration->get('GAMBIO_STORE_TOKEN');
-                    $response             = $this->http->post(self::STORE_API_URL . '/merchant_packages',
+                    $apiUrl               = $this->getGambioStoreApiUrl();
+                    $response             = $this->http->post($apiUrl . '/merchant_packages',
                         json_encode(['shopInformation' => $shopInformationArray]), [
                             CURLOPT_HTTPHEADER => [
                                 'Content-Type:application/json',
@@ -251,6 +247,25 @@ if (defined('StoreKey_MigrationScript')) {
                 }
                 
                 return true;
+            }
+            
+            
+            /**
+             * Gets the store api URL
+             *
+             * @return string
+             */
+            private function getGambioStoreApiUrl()
+            {
+                $gambioUrl = $this->configuration->get('GAMBIO_STORE_API_URL');
+                
+                // Fall back to the production Gambio Store api URL if none is set.
+                if (empty($gambioUrl)) {
+                    $gambioUrl = 'https://store.gambio.com';
+                    $this->configuration->create('GAMBIO_STORE_API_URL', $gambioUrl);
+                }
+                
+                return $gambioUrl;
             }
         }
     }

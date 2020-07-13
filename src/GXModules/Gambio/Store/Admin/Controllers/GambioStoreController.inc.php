@@ -68,13 +68,13 @@ class GambioStoreController extends AdminHttpViewController
         $contentNavigation = MainFactory::create('ContentNavigationCollection', []);
         $assets            = $this->getIFrameAssets();
         $data              = [];
-
-        if (! $this->acceptableErrorsTestPassed()) {
+        
+        if (!$this->acceptableErrorsTestPassed()) {
             return $this->showCriticalErrorPage();
         }
-    
+        
         setcookie('auto_updater_admin_check', 'admin_logged_in', time() + 5 * 60, '/');
-    
+        
         if ($this->configuration->get('GAMBIO_STORE_ACCEPTED_DATA_PROCESSING') === false) {
             $data = $this->getIFrameTemplateData('/dataprocessing');
         } elseif ($this->configuration->get('GAMBIO_STORE_IS_REGISTERED') === false) {
@@ -86,6 +86,7 @@ class GambioStoreController extends AdminHttpViewController
         
         if (empty($data)) {
             $this->appendError('DATABASE_INTEGRITY_ERROR');
+            
             return $this->showCriticalErrorPage();
         }
         
@@ -96,14 +97,16 @@ class GambioStoreController extends AdminHttpViewController
     /**
      * To be returned upon encountering a critical error.
      * Make sure to append to the errors array first.
-     * 
+     *
      * @return \AdminLayoutHttpControllerResponse
      */
-    private function showCriticalErrorPage() {
-        $template = new ExistingFile(new NonEmptyStringType(__DIR__ . '/../Html/gambio_store_critical_errors.html'));
+    private function showCriticalErrorPage()
+    {
+        $template          = new ExistingFile(new NonEmptyStringType(__DIR__
+                                                                     . '/../Html/gambio_store_critical_errors.html'));
         $assets            = $this->getIFrameAssets();
         $contentNavigation = MainFactory::create('ContentNavigationCollection', []);
-        $title    = new NonEmptyStringType($this->languageTextManager->get_text('PAGE_TITLE'));
+        $title             = new NonEmptyStringType($this->languageTextManager->get_text('PAGE_TITLE'));
         
         // Fallback to 'en' in case we are not able to fetch from the session value.
         try {
@@ -111,13 +114,13 @@ class GambioStoreController extends AdminHttpViewController
         } catch (GambioStoreLanguageNotResolvableException $e) {
             $language = 'en';
         }
-
+        
         $data = new KeyValueCollection([
             'storeLanguage' => $language,
-            'translations' => $this->languageTextManager->get_section_array('gambio_store', $_SESSION['languages_id']),
-            'errors' => $this->errors
+            'translations'  => $this->languageTextManager->get_section_array('gambio_store', $_SESSION['languages_id']),
+            'errors'        => $this->errors
         ]);
-
+        
         return new AdminLayoutHttpControllerResponse($title, $template, $data, $assets, $contentNavigation);
     }
     
@@ -130,20 +133,20 @@ class GambioStoreController extends AdminHttpViewController
     public function actionInstallations()
     {
         $this->setup();
-    
+        
         if ($this->configuration->get('GAMBIO_STORE_ACCEPTED_DATA_PROCESSING') !== true) {
             return $this->actionDefault();
         }
-    
+        
         if (!$this->acceptableErrorsTestPassed()) {
             return $this->showCriticalErrorPage();
         }
-    
+        
         $title    = new NonEmptyStringType($this->languageTextManager->get_text('PAGE_TITLE'));
         $template = new ExistingFile(new NonEmptyStringType(__DIR__ . '/../Html/gambio_store.html'));
-    
+        
         setcookie('auto_updater_admin_check', 'admin_logged_in', time() + 5 * 60, '/');
-    
+        
         $data              = $this->getIFrameTemplateData('/installations');
         $assets            = $this->getIFrameAssets();
         $contentNavigation = $this->getStoreNavigation(false, true);
@@ -161,7 +164,8 @@ class GambioStoreController extends AdminHttpViewController
     {
         $this->setup();
         
-        $gambioStoreUrl = $this->configuration->get('GAMBIO_STORE_URL');
+        $gambioStoreUrl    = $this->getGambioStoreUrl();
+        $gambioStoreApiUrl = $this->getGambioStoreApiUrl();
         
         if (isset($_POST['url'])
             && $_POST['url'] !== $gambioStoreUrl
@@ -170,10 +174,20 @@ class GambioStoreController extends AdminHttpViewController
             $this->configuration->set('GAMBIO_STORE_URL', $gambioStoreUrl);
         }
         
+        if (isset($_POST['apiUrl'])
+            && $_POST['apiUrl'] !== $gambioStoreApiUrl
+            && (filter_var($_POST['apiUrl'], FILTER_VALIDATE_URL) === $_POST['apiUrl'])) {
+            $gambioStoreApiUrl = $_POST['apiUrl'];
+            $this->configuration->set('GAMBIO_STORE_API_URL', $gambioStoreApiUrl);
+        }
+        
         $title    = new NonEmptyStringType($this->languageTextManager->get_text('PAGE_TITLE'));
         $template = new ExistingFile(new NonEmptyStringType(__DIR__ . '/../Html/gambio_store_configuration.html'));
-        
-        $data = new KeyValueCollection(['url' => $gambioStoreUrl]);
+    
+        $data = new KeyValueCollection([
+            'url'    => $gambioStoreUrl,
+            'apiUrl' => $gambioStoreApiUrl
+        ]);
         
         $assets = new AssetCollection([
             new Asset('gambio_store.lang.inc.php')
@@ -218,7 +232,6 @@ class GambioStoreController extends AdminHttpViewController
         if (!extension_loaded('curl')) {
             $this->appendError('CURL_EXTENSION_MISSING');
         }
-    
         
         if (!extension_loaded('PDO')) {
             $this->appendError('PDO_EXTENSION_MISSING');
@@ -237,13 +250,32 @@ class GambioStoreController extends AdminHttpViewController
     private function getGambioStoreUrl()
     {
         $gambioUrl = $this->configuration->get('GAMBIO_STORE_URL');
-    
+        
         // Fall back to the production Gambio Store URL if none is set.
         if (empty($gambioUrl)) {
             $gambioUrl = 'https://store.gambio.com/a';
-            $this->configuration->set('GAMBIO_STORE_URL', $gambioUrl);
+            $this->configuration->create('GAMBIO_STORE_URL', $gambioUrl);
         }
+        
+        return $gambioUrl;
+    }
     
+    
+    /**
+     * Gets the store api URL
+     *
+     * @return string
+     */
+    private function getGambioStoreApiUrl()
+    {
+        $gambioUrl = $this->configuration->get('GAMBIO_STORE_API_URL');
+        
+        // Fall back to the production Gambio Store api URL if none is set.
+        if (empty($gambioUrl)) {
+            $gambioUrl = 'https://store.gambio.com';
+            $this->configuration->create('GAMBIO_STORE_API_URL', $gambioUrl);
+        }
+        
         return $gambioUrl;
     }
     
@@ -258,7 +290,7 @@ class GambioStoreController extends AdminHttpViewController
         $gambioToken = $this->configuration->get('GAMBIO_STORE_TOKEN');
         if (empty($gambioToken)) {
             $gambioToken = $this->connector->generateToken();
-            $this->configuration->set('GAMBIO_STORE_TOKEN', $gambioToken);
+            $this->configuration->create('GAMBIO_STORE_TOKEN', $gambioToken);
         }
         
         return $gambioToken;
@@ -338,10 +370,11 @@ class GambioStoreController extends AdminHttpViewController
     
     /**
      * Appends an error to the errors array.
-     * 
+     *
      * @param $errorIdentifier string the error's translational identifier.
      */
-    private function appendError($errorIdentifier) {
+    private function appendError($errorIdentifier)
+    {
         $this->errors[] = $errorIdentifier;
     }
 }
