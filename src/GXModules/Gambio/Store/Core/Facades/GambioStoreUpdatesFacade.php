@@ -85,60 +85,9 @@ if (defined('StoreKey_MigrationScript')) {
              * @return array
              * @throws \GambioStoreUpdatesNotRetrievableException
              */
-            public function fetchAvailableUpdates()
+            public static function fetchAvailableUpdates()
             {
-                if (!extension_loaded('curl') || !$this->isAllowedToGetUpdates()) {
-                    return [];
-                }
-                
-                try {
-                    $shopInformationArray = $this->shopInformation->getShopInformation();
-                    $storeToken           = $this->configuration->get('GAMBIO_STORE_TOKEN');
-                    $apiUrl               = $this->getGambioStoreApiUrl();
-                    $response             = $this->http->post($apiUrl . '/connector/updates',
-                        json_encode(['shopInformation' => $shopInformationArray]), [
-                            CURLOPT_HTTPHEADER => [
-                                'Content-Type:application/json',
-                                'X-STORE-TOKEN: ' . $storeToken
-                            ]
-                        ]);
-                    
-                    $response = json_decode($response->getBody(), true);
-                } catch (GambioStoreHttpErrorException $exception) {
-                    $message = 'Network failure while trying to fetch updates.';
-                    $this->logger->error($message, [
-                        'context' => $exception->getContext(),
-                        'error'   => [
-                            'code'    => $exception->getCode(),
-                            'message' => $exception->getMessage(),
-                            'file'    => $exception->getFile(),
-                            'line'    => $exception->getLine()
-                        ],
-                    ]);
-                    throw new GambioStoreUpdatesNotRetrievableException($message, $exception->getCode(),
-                        $exception->getContext(), $exception);
-                } catch (GambioStoreException $exception) {
-                    $message = 'Could not fetch shop information during update-fetching!';
-                    $this->logger->error($message, [
-                        'context' => $exception->getContext(),
-                        'error'   => [
-                            'code'    => $exception->getCode(),
-                            'message' => $exception->getMessage(),
-                            'file'    => $exception->getFile(),
-                            'line'    => $exception->getLine()
-                        ],
-                    ]);
-                    throw new GambioStoreUpdatesNotRetrievableException($message, $exception->getCode(),
-                        $exception->getContext(), $exception);
-                }
-                
-                if (!is_array($response) || !array_key_exists('updates', $response)
-                    || !is_array($response['updates'])) {
-                    throw new GambioStoreUpdatesNotRetrievableException("The API returned invalid updates!", 0,
-                        ['response' => $response]);
-                }
-                
-                return $response['updates'];
+                return GambioStoreConnector::getInstance()->fetchAvailableUpdates();
             }
             
             
@@ -157,7 +106,7 @@ if (defined('StoreKey_MigrationScript')) {
                 $now = new DateTime();
                 
                 if (!$this->cache->has('GAMBIO_STORE_UPDATE_COUNT_DATE')) {
-                    $updateCount = count($this->fetchAvailableUpdates());
+                    $updateCount = count(self::fetchAvailableUpdates());
                     $this->cache->set('GAMBIO_STORE_UPDATE_COUNT', $updateCount);
                     $this->cache->set('GAMBIO_STORE_UPDATE_COUNT_DATE', $now->format('Y-m-d'));
                     
@@ -167,7 +116,7 @@ if (defined('StoreKey_MigrationScript')) {
                 $then = DateTime::createFromFormat('Y-m-d', $this->cache->get('GAMBIO_STORE_UPDATE_COUNT_DATE'));
                 
                 if ($now->diff($then)->days > 0) {
-                    $updateCount = count($this->fetchAvailableUpdates());
+                    $updateCount = count(self::fetchAvailableUpdates());
                     $this->cache->set('GAMBIO_STORE_UPDATE_COUNT', $updateCount);
                     $this->cache->set('GAMBIO_STORE_UPDATE_COUNT_DATE', $now->format('Y-m-d'));
                     
@@ -220,52 +169,6 @@ if (defined('StoreKey_MigrationScript')) {
                 if ($this->cache->has('GAMBIO_STORE_UPDATE_COUNT_DATE')) {
                     $this->cache->delete('GAMBIO_STORE_UPDATE_COUNT_DATE');
                 }
-            }
-            
-            
-            /***
-             * Checks if shop is allowed to get updates.
-             * Note this returns false if :
-             *  - Gambio Store is not registered
-             *  - Gambio Store data processing is not accepted
-             *  - Gambio token is not existing
-             *
-             * @return bool
-             */
-            private function isAllowedToGetUpdates()
-            {
-                if (!$this->configuration->get('GAMBIO_STORE_IS_REGISTERED') === true) {
-                    return false;
-                }
-                
-                if (!$this->configuration->get('GAMBIO_STORE_ACCEPTED_DATA_PROCESSING') === true) {
-                    return false;
-                }
-                
-                if (!$this->configuration->get('GAMBIO_STORE_TOKEN') === true) {
-                    return false;
-                }
-                
-                return true;
-            }
-            
-            
-            /**
-             * Gets the store api URL
-             *
-             * @return string
-             */
-            private function getGambioStoreApiUrl()
-            {
-                $gambioUrl = $this->configuration->get('GAMBIO_STORE_API_URL');
-                
-                // Fall back to the production Gambio Store api URL if none is set.
-                if (empty($gambioUrl)) {
-                    $gambioUrl = 'https://store.gambio.com';
-                    $this->configuration->create('GAMBIO_STORE_API_URL', $gambioUrl);
-                }
-                
-                return $gambioUrl;
             }
         }
     }
