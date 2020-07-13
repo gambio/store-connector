@@ -58,6 +58,11 @@ if (defined('StoreKey_MigrationScript')) {
              */
             private $configuration;
             
+            /**
+             * @var \GambioStoreLoggerFacade
+             */
+            private $logger;
+            
             
             /**
              * GambioStoreUpdatesFacade constructor.
@@ -69,6 +74,7 @@ if (defined('StoreKey_MigrationScript')) {
                 $this->http            = new GambioStoreHttpFacade();
                 $this->cache           = new GambioStoreCacheFacade($database);
                 $this->shopInformation = new GambioStoreShopInformationFacade($database, $fileSystem);
+                $this->logger          = new GambioStoreLoggerFacade($this->cache);
                 $this->configuration   = new GambioStoreConfigurationFacade($database,
                     new GambioStoreCompatibilityFacade($database));
             }
@@ -103,11 +109,31 @@ if (defined('StoreKey_MigrationScript')) {
                     
                     $response = json_decode($response->getBody(), true);
                 } catch (GambioStoreHttpErrorException $exception) {
-                    throw new GambioStoreUpdatesNotRetrievableException("Network failure while trying to fetch updates.",
-                        $exception->getCode(), $exception->getContext(), $exception);
+                    $message = 'Network failure while trying to fetch updates.';
+                    $this->logger->error($message, [
+                        'context' => $exception->getContext(),
+                        'error'   => [
+                            'code'    => $exception->getCode(),
+                            'message' => $exception->getMessage(),
+                            'file'    => $exception->getFile(),
+                            'line'    => $exception->getLine()
+                        ],
+                    ]);
+                    throw new GambioStoreUpdatesNotRetrievableException($message, $exception->getCode(),
+                        $exception->getContext(), $exception);
                 } catch (GambioStoreException $exception) {
-                    throw new GambioStoreUpdatesNotRetrievableException("Could not fetch shop information during update-fetching!",
-                        $exception->getCode(), $exception->getContext(), $exception);
+                    $message = 'Could not fetch shop information during update-fetching!';
+                    $this->logger->error($message, [
+                        'context' => $exception->getContext(),
+                        'error'   => [
+                            'code'    => $exception->getCode(),
+                            'message' => $exception->getMessage(),
+                            'file'    => $exception->getFile(),
+                            'line'    => $exception->getLine()
+                        ],
+                    ]);
+                    throw new GambioStoreUpdatesNotRetrievableException($message, $exception->getCode(),
+                        $exception->getContext(), $exception);
                 }
                 
                 if (!is_array($response) || !array_key_exists('updates', $response)
@@ -142,7 +168,7 @@ if (defined('StoreKey_MigrationScript')) {
                     return $updateCount;
                 }
                 
-                $then = DateTime::createFromFormat('Y-m-d' , $this->cache->get('GAMBIO_STORE_UPDATE_COUNT_DATE'));
+                $then = DateTime::createFromFormat('Y-m-d', $this->cache->get('GAMBIO_STORE_UPDATE_COUNT_DATE'));
                 
                 if ($now->diff($then)->days > 0) {
                     $updateCount = count($this->fetchAvailableUpdates());
@@ -172,8 +198,17 @@ if (defined('StoreKey_MigrationScript')) {
                         GambioStoreConnector::getInstance()->installPackage($update);
                     }
                 } catch (\Exception $exception) {
-                    throw new GambioStoreUpdatesNotInstalledException("An update could not be installed!",
-                        $exception->getCode(), ["updates" => $updates], $exception);
+                    $message = 'An update could not be installed!';
+                    $this->logger->error($message, [
+                        'error' => [
+                            'code'    => $exception->getCode(),
+                            'message' => $exception->getMessage(),
+                            'file'    => $exception->getFile(),
+                            'line'    => $exception->getLine()
+                        ],
+                    ]);
+                    throw new GambioStoreUpdatesNotInstalledException($message, $exception->getCode(),
+                        ["updates" => $updates], $exception);
                 }
             }
             
@@ -186,7 +221,9 @@ if (defined('StoreKey_MigrationScript')) {
              */
             public function clearCachedNumberOfUpdates()
             {
-                $this->cache->delete('GAMBIO_STORE_UPDATE_COUNT_DATE');
+                if ($this->cache->has('GAMBIO_STORE_UPDATE_COUNT_DATE')) {
+                    $this->cache->delete('GAMBIO_STORE_UPDATE_COUNT_DATE');
+                }
             }
             
             
