@@ -186,7 +186,7 @@ if (defined('StoreKey_MigrationScript')) {
              */
             public function clearCachedNumberOfUpdates()
             {
-                $this->cache->delete('GAMBIO_STORE_LAST_UPDATE_COUNT_FETCH_DATE');
+                $this->cache->delete('UPDATE_COUNT_DATE');
             }
             
             
