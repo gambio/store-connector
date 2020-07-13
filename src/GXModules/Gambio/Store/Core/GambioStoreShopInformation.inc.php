@@ -51,6 +51,7 @@ class GambioStoreShopInformation
      * @throws \GambioStoreRelativeShopPathMissingException
      * @throws \GambioStoreShopKeyMissingException
      * @throws \GambioStoreShopVersionMissingException
+     * @throws \GambioStoreShopClassMissingException
      */
     public function getShopInformation()
     {
@@ -74,7 +75,7 @@ class GambioStoreShopInformation
     
     /**
      * @return mixed
-     * @throws \GambioStoreHttpServerMissingException
+     * @throws \GambioStoreShopClassMissingException
      */
     private function getCurrentTheme()
     {
