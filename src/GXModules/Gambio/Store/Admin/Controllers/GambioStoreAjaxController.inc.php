@@ -67,7 +67,7 @@ class GambioStoreAjaxController extends AdminHttpViewController
     {
         if (!$this->compatibility->has(GambioStoreCompatibility::FEATURE_CACHE_CONTROL)) {
             $this->logger->error('The CacheControl or PhraseCacheBuilder classes do not exist. Cache cant be cleared after an installation/update.');
-            return;
+            return new JsonHttpControllerResponse(['success' => false]);;
         }
         
         $cacheControl       = MainFactory::create_object('CacheControl');
@@ -80,6 +80,8 @@ class GambioStoreAjaxController extends AdminHttpViewController
         $cacheControl->clear_css_cache();
         $phraseCacheBuilder->build();
         $cacheControl->clear_data_cache();
+    
+        return new JsonHttpControllerResponse(['success' => true]);
     }
     
     /**
