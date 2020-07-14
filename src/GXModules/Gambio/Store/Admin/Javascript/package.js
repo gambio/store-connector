@@ -69,12 +69,11 @@ const installPackage = (data, progressCallback = () => null) => {
 				progress = response.progress ? response.progress : progress;
 				progressCallback(progress);
 			}
+   
+			await GambioStore.clearShopCache();
 		} catch (e) {
 			reject(e);
 		}
-		await GambioStore.callShop('admin.php?do=GambioStoreAjax/ClearShopCache', {
-			method: 'get'
-		});
 		resolve();
 	});
 }
@@ -128,9 +127,8 @@ const uninstallPackage = async (data) => {
 			method: 'post',
 			body: formData
 		});
-		await GambioStore.callShop('admin.php?do=GambioStoreAjax/ClearShopCache', {
-			method: 'get'
-		});
+        await GambioStore.clearShopCache();
+		
 		GambioStore.messenger.sendMessage('uninstall_succeeded');
 	} catch (error) {
 		GambioStore.messenger.sendMessage('uninstall_failed', error.context || error);

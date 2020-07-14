@@ -91,3 +91,27 @@ window.addEventListener('DOMContentLoaded', () => {
 		});
 	});
 });
+
+window.GambioStore = Object.assign({}, {
+    clearShopCache: async () => {
+        try {
+            await Promise.all([
+                GambioStore.visitShop('clear_cache.php?manual_output=submit', {
+                    method: 'get'
+                }),
+                GambioStore.visitShop('clear_cache.php?manual_text_cache=submit', {
+                    method: 'get'
+                }),
+                GambioStore.visitShop('clear_cache.php?manual_data_cache=submit', {
+                    method: 'get'
+                })
+            ]);
+        
+            const shopUrl = window.location.pathname.replace('admin/admin.php', '');
+        
+            await fetch(shopUrl).catch(networkError => {
+                throw({type: networkErrors.NO_SUCCESS, contex: networkError});
+            });
+        } catch (e) {}
+    }
+}, window.GambioStore);
