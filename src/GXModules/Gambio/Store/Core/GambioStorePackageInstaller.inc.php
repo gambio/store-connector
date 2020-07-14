@@ -178,7 +178,6 @@ class GambioStorePackageInstaller
         restore_error_handler();
         restore_exception_handler();
         
-        $this->cache->delete('GAMBIO_STORE_LAST_UPDATE_COUNT_FETCH_DATE');
         $this->clearShopCache();
         
         return $response;
@@ -254,7 +253,6 @@ class GambioStorePackageInstaller
         restore_error_handler();
         restore_exception_handler();
         
-        $this->cache->delete('GAMBIO_STORE_LAST_UPDATE_COUNT_FETCH_DATE');
         $this->clearShopCache();
         
         return $response;

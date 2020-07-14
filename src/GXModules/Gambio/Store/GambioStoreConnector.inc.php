@@ -21,6 +21,8 @@ require_once 'Core/GambioStoreCache.inc.php';
 require_once 'Core/GambioStoreBackup.inc.php';
 require_once 'Core/GambioStorePackageInstaller.inc.php';
 require_once 'Core/Exceptions/GambioStoreLanguageNotResolvableException.inc.php';
+require_once 'Core/Exceptions/GambioStoreHttpErrorException.inc.php';
+require_once 'Core/Exceptions/GambioStoreUpdatesNotRetrievableException.inc.php';
 
 /**
  * Class GambioStoreConnector
@@ -79,6 +81,11 @@ class GambioStoreConnector
      */
     private $installer;
     
+    /**
+     * @var \GambioStoreHttp
+     */
+    private $http;
+    
     
     /**
      * GambioStoreConnector constructor.
@@ -91,6 +98,7 @@ class GambioStoreConnector
      * @param \GambioStoreFileSystem       $fileSystem
      * @param \GambioStoreShopInformation  $shopInformation
      * @param \GambioStoreCache            $cache
+     * @param \GambioStoreHttp             $http
      * @param \GambioStoreBackup           $backup
      * @param \GambioStorePackageInstaller $installer
      */
@@ -103,6 +111,7 @@ class GambioStoreConnector
         GambioStoreFileSystem $fileSystem,
         GambioStoreShopInformation $shopInformation,
         GambioStoreCache $cache,
+        GambioStoreHttp $http,
         GambioStoreBackup $backup,
         GambioStorePackageInstaller $installer
     ) {
@@ -114,6 +123,7 @@ class GambioStoreConnector
         $this->fileSystem      = $fileSystem;
         $this->shopInformation = $shopInformation;
         $this->cache           = $cache;
+        $this->http           = $http;
         $this->backup          = $backup;
         $this->installer       = $installer;
     }
@@ -132,13 +142,14 @@ class GambioStoreConnector
         $configuration   = new GambioStoreConfiguration($database, $compatibility);
         $shopInformation = new GambioStoreShopInformation($database, $fileSystem);
         $cache           = new GambioStoreCache($database);
+        $http            = new GambioStoreHttp();
         $backup          = new GambioStoreBackup($fileSystem);
         $logger          = new GambioStoreLogger($cache);
         $themes          = new GambioStoreThemes($compatibility, $fileSystem, $logger);
         $installer       = new GambioStorePackageInstaller($fileSystem, $configuration, $cache, $logger, $backup, $themes, $compatibility);
         
         return new self($database, $configuration, $compatibility, $logger, $themes, $fileSystem, $shopInformation,
-            $cache, $backup, $installer);
+            $cache, $http, $backup, $installer);
     }
     
     
@@ -356,5 +367,115 @@ class GambioStoreConnector
     public function uninstallPackage(array $postData)
     {
         return $this->installer->uninstallPackage($postData);
+    }
+    
+    /**
+     * Retrieves the number of available updates for the current shop version from the store.
+     * Note that this returns an empty array silently if either:
+     *  - curl is missing
+     *  - not registered to the store
+     *  - data processing not accepted
+     *
+     * @return array
+     * @throws \GambioStoreUpdatesNotRetrievableException
+     */
+    public function fetchAvailableUpdates()
+    {
+        if (!extension_loaded('curl') || !$this->isAllowedToGetUpdates()) {
+            return [];
+        }
+        
+        try {
+            $shopInformationArray = $this->shopInformation->getShopInformation();
+            $storeToken           = $this->configuration->get('GAMBIO_STORE_TOKEN');
+            $apiUrl               = $this->getGambioStoreApiUrl();
+            $response             = $this->http->post($apiUrl . '/connector/updates',
+                json_encode(['shopInformation' => $shopInformationArray]), [
+                    CURLOPT_HTTPHEADER => [
+                        'Content-Type:application/json',
+                        'X-STORE-TOKEN: ' . $storeToken
+                    ]
+                ]);
+            
+            $response = json_decode($response->getBody(), true);
+        } catch (GambioStoreHttpErrorException $exception) {
+            $message = 'Network failure while trying to fetch updates.';
+            $this->logger->error($message, [
+                'context' => $exception->getContext(),
+                'error'   => [
+                    'code'    => $exception->getCode(),
+                    'message' => $exception->getMessage(),
+                    'file'    => $exception->getFile(),
+                    'line'    => $exception->getLine()
+                ],
+            ]);
+            throw new GambioStoreUpdatesNotRetrievableException($message, $exception->getCode(),
+                $exception->getContext(), $exception);
+        } catch (GambioStoreException $exception) {
+            $message = 'Could not fetch shop information during update-fetching!';
+            $this->logger->error($message, [
+                'context' => $exception->getContext(),
+                'error'   => [
+                    'code'    => $exception->getCode(),
+                    'message' => $exception->getMessage(),
+                    'file'    => $exception->getFile(),
+                    'line'    => $exception->getLine()
+                ],
+            ]);
+            throw new GambioStoreUpdatesNotRetrievableException($message, $exception->getCode(),
+                $exception->getContext(), $exception);
+        }
+        
+        if (!is_array($response) || !array_key_exists('updates', $response)
+            || !is_array($response['updates'])) {
+            throw new GambioStoreUpdatesNotRetrievableException("The API returned invalid updates!", 0,
+                ['response' => $response]);
+        }
+        
+        return $response['updates'];
+    }
+    
+    /***
+     * Checks if shop is allowed to get updates.
+     * Note this returns false if :
+     *  - Gambio Store is not registered
+     *  - Gambio Store data processing is not accepted
+     *  - Gambio token is not existing
+     *
+     * @return bool
+     */
+    private function isAllowedToGetUpdates()
+    {
+        if (!$this->configuration->get('GAMBIO_STORE_IS_REGISTERED') === true) {
+            return false;
+        }
+        
+        if (!$this->configuration->get('GAMBIO_STORE_ACCEPTED_DATA_PROCESSING') === true) {
+            return false;
+        }
+        
+        if (!$this->configuration->get('GAMBIO_STORE_TOKEN') === true) {
+            return false;
+        }
+        
+        return true;
+    }
+    
+    /**
+     * Gets the store api URL
+     *
+     * @return string
+     */
+    private function getGambioStoreApiUrl()
+    {
+        $gambioUrl = $this->configuration->get('GAMBIO_STORE_API_URL');
+        
+        // Fall back to the production Gambio Store api URL if none is set.
+        if (empty($gambioUrl)) {
+            $gambioUrl = 'https://store.gambio.com';
+            $this->configuration->create('GAMBIO_STORE_API_URL', $gambioUrl);
+        }
+        
+        return $gambioUrl;
     }
 }

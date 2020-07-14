@@ -20,6 +20,7 @@ if (defined('StoreKey_MigrationScript')) {
         require_once __DIR__ . '/../Exceptions/GambioStoreRelativeShopPathMissingException.inc.php';
         require_once __DIR__ . '/../Exceptions/GambioStoreShopKeyMissingException.inc.php';
         require_once __DIR__ . '/../Exceptions/GambioStoreShopVersionMissingException.inc.php';
+        require_once __DIR__ . '/../Exceptions/GambioStoreShopClassMissingException.inc.php';
         
         
         class GambioStoreShopInformationFacade
@@ -47,8 +48,8 @@ if (defined('StoreKey_MigrationScript')) {
                 $this->fileSystem = $fileSystem;
                 require_once $this->fileSystem->getShopDirectory() . '/admin/includes/configure.php';
             }
-            
-            
+    
+    
             /**
              * Returns the shop information of the Shop
              *
@@ -57,6 +58,7 @@ if (defined('StoreKey_MigrationScript')) {
              * @throws \GambioStoreRelativeShopPathMissingException
              * @throws \GambioStoreShopKeyMissingException
              * @throws \GambioStoreShopVersionMissingException
+             * @throws \GambioStoreShopClassMissingException
              */
             public function getShopInformation()
             {
@@ -72,8 +74,30 @@ if (defined('StoreKey_MigrationScript')) {
                         'mySQLVersion' => $this->getMySQLVersion()
                     ],
                     'modules' => $this->getModuleVersionFiles(),
-                    'themes'  => $this->getThemes()
+                    'themes'  => $this->getThemes(),
+                    'activeTheme' => $this->getCurrentTheme()
                 ];
+            }
+    
+    
+            /**
+             * @return mixed
+             * @throws \GambioStoreShopClassMissingException
+             */
+            private function getCurrentTheme()
+            {
+                if (!class_exists('Gambio\AdminFeed\Services\ShopInformation\Settings')) {
+                    throw new GambioStoreShopClassMissingException('The HTTP Server constant is missing from the configure.php file in admin.');
+                }
+        
+                if (!class_exists('Gambio\AdminFeed\Services\ShopInformation\Reader\TemplateDetailsReader')) {
+                    throw new GambioStoreShopClassMissingException('The HTTP Server constant is missing from the configure.php file in admin.');
+                }
+        
+                $settings = new Gambio\AdminFeed\Services\ShopInformation\Settings();
+                $reader   = new Gambio\AdminFeed\Services\ShopInformation\Reader\TemplateDetailsReader($settings);
+        
+                return $reader->getActiveTemplate();
             }
             
             
