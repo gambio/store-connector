@@ -65,6 +65,8 @@ class GambioStoreAjaxController extends AdminHttpViewController
      */
     public function actionClearShopCache()
     {
+        $this->setup();
+        
         if (!$this->compatibility->has(GambioStoreCompatibility::FEATURE_CACHE_CONTROL)) {
             $this->logger->error('The CacheControl or PhraseCacheBuilder classes do not exist. Cache cant be cleared after an installation/update.');
             return new JsonHttpControllerResponse(['success' => false]);
