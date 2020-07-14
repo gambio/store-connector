@@ -48,6 +48,12 @@ class GambioStorePackageInstaller
     
     
     /**
+     * @var \GambioStoreCompatibility
+     */
+    private $compatibility;
+    
+    
+    /**
      * GambioStorePackageInstaller constructor.
      *
      * @param \GambioStoreFileSystem    $fileSystem
@@ -56,6 +62,7 @@ class GambioStorePackageInstaller
      * @param \GambioStoreLogger        $logger
      * @param \GambioStoreBackup        $backup
      * @param \GambioStoreThemes        $themes
+     * @param \GambioStoreCompatibility $compatibility
      */
     public function __construct(
         GambioStoreFileSystem $fileSystem,
@@ -63,7 +70,8 @@ class GambioStorePackageInstaller
         GambioStoreCache $cache,
         GambioStoreLogger $logger,
         GambioStoreBackup $backup,
-        GambioStoreThemes $themes
+        GambioStoreThemes $themes,
+        GambioStoreCompatibility $compatibility
     ) {
         $this->fileSystem    = $fileSystem;
         $this->configuration = $configuration;
@@ -71,6 +79,7 @@ class GambioStorePackageInstaller
         $this->logger        = $logger;
         $this->backup        = $backup;
         $this->themes        = $themes;
+        $this->compatibility = $compatibility;
     }
     
     
@@ -95,8 +104,32 @@ class GambioStorePackageInstaller
     /**
      * @return bool indicating wether the shop is online.
      */
-    private function isShopOnline(){
+    private function isShopOnline()
+    {
         return $this->configuration->get('GM_SHOP_OFFLINE') !== 'checked';
+    }
+    
+    
+    /**
+     * Clears the shop cache after a successful installation or update
+     */
+    private function clearShopCache()
+    {
+        if (!$this->compatibility->has(GambioStoreCompatibility::FEATURE_CACHE_CONTROL)) {
+            $this->logger->error('The CacheControl or PhraseCacheBuilder classes do not exist. Cache cant be cleared after an installation/update.');
+            return;
+        }
+        
+        $cacheControl       = MainFactory::create_object('CacheControl');
+        $phraseCacheBuilder = MainFactory::create_object('PhraseCacheBuilder', []);
+        
+        $cacheControl->clear_cache();
+        $cacheControl->clear_content_view_cache();
+        $cacheControl->clear_templates_c();
+        $cacheControl->clear_template_cache();
+        $cacheControl->clear_css_cache();
+        $phraseCacheBuilder->build();
+        $cacheControl->clear_data_cache();
     }
     
     
@@ -109,7 +142,7 @@ class GambioStorePackageInstaller
      * @throws \Exception
      */
     public function installPackage($packageData)
-    { 
+    {
         $wasShopOnline = $this->isShopOnline();
         
         $migration = new GambioStoreMigration($this->fileSystem,
@@ -122,7 +155,7 @@ class GambioStorePackageInstaller
             $this->cache, $this->logger, $this->fileSystem, $this->backup, $migration, $http);
         
         try {
-            if($wasShopOnline) {
+            if ($wasShopOnline) {
                 $this->setShopOffline();
             }
             $response = $installation->perform();
@@ -132,21 +165,22 @@ class GambioStorePackageInstaller
             throw $exception;
         }
         finally {
-            if($wasShopOnline) {
+            if ($wasShopOnline) {
                 $this->setShopOnline();
             }
         }
-    
+        
         if (isset($packageData['details']['folder_name_inside_shop']) || isset($packageData['details']['filename'])) {
             $themeDirectoryName = $packageData['details']['folder_name_inside_shop'] ? : $packageData['details']['filename'];
             $this->themes->reimportContentManagerEntries($themeDirectoryName);
         }
-    
+        
         restore_error_handler();
         restore_exception_handler();
-    
+        
         $this->cache->delete('GAMBIO_STORE_LAST_UPDATE_COUNT_FETCH_DATE');
-    
+        $this->clearShopCache();
+        
         return $response;
     }
     
@@ -198,11 +232,11 @@ class GambioStorePackageInstaller
             isset($postData['migrations']['down']) ? $postData['migrations']['down'] : []);
         
         $removal = new GambioStoreRemoval($packageData, $this->logger, $this->backup, $migration, $this->fileSystem);
-       
+        
         $wasShopOnline = $this->isShopOnline();
         
         try {
-            if($wasShopOnline) {
+            if ($wasShopOnline) {
                 $this->setShopOffline();
             }
             $response = $removal->perform();
@@ -216,12 +250,13 @@ class GambioStorePackageInstaller
                 $this->setShopOnline();
             }
         }
-    
+        
         restore_error_handler();
         restore_exception_handler();
-    
+        
         $this->cache->delete('GAMBIO_STORE_LAST_UPDATE_COUNT_FETCH_DATE');
-    
+        $this->clearShopCache();
+        
         return $response;
     }
 }
