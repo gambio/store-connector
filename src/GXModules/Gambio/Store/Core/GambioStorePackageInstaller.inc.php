@@ -48,12 +48,6 @@ class GambioStorePackageInstaller
     
     
     /**
-     * @var \GambioStoreCompatibility
-     */
-    private $compatibility;
-    
-    
-    /**
      * GambioStorePackageInstaller constructor.
      *
      * @param \GambioStoreFileSystem    $fileSystem
@@ -62,7 +56,6 @@ class GambioStorePackageInstaller
      * @param \GambioStoreLogger        $logger
      * @param \GambioStoreBackup        $backup
      * @param \GambioStoreThemes        $themes
-     * @param \GambioStoreCompatibility $compatibility
      */
     public function __construct(
         GambioStoreFileSystem $fileSystem,
@@ -70,8 +63,7 @@ class GambioStorePackageInstaller
         GambioStoreCache $cache,
         GambioStoreLogger $logger,
         GambioStoreBackup $backup,
-        GambioStoreThemes $themes,
-        GambioStoreCompatibility $compatibility
+        GambioStoreThemes $themes
     ) {
         $this->fileSystem    = $fileSystem;
         $this->configuration = $configuration;
@@ -79,7 +71,6 @@ class GambioStorePackageInstaller
         $this->logger        = $logger;
         $this->backup        = $backup;
         $this->themes        = $themes;
-        $this->compatibility = $compatibility;
     }
     
     
@@ -107,29 +98,6 @@ class GambioStorePackageInstaller
     private function isShopOnline()
     {
         return $this->configuration->get('GM_SHOP_OFFLINE') !== 'checked';
-    }
-    
-    
-    /**
-     * Clears the shop cache after a successful installation or update
-     */
-    private function clearShopCache()
-    {
-        if (!$this->compatibility->has(GambioStoreCompatibility::FEATURE_CACHE_CONTROL)) {
-            $this->logger->error('The CacheControl or PhraseCacheBuilder classes do not exist. Cache cant be cleared after an installation/update.');
-            return;
-        }
-        
-        $cacheControl       = MainFactory::create_object('CacheControl');
-        $phraseCacheBuilder = MainFactory::create_object('PhraseCacheBuilder', []);
-        
-        $cacheControl->clear_cache();
-        $cacheControl->clear_content_view_cache();
-        $cacheControl->clear_templates_c();
-        $cacheControl->clear_template_cache();
-        $cacheControl->clear_css_cache();
-        $phraseCacheBuilder->build();
-        $cacheControl->clear_data_cache();
     }
     
     
@@ -177,8 +145,6 @@ class GambioStorePackageInstaller
         
         restore_error_handler();
         restore_exception_handler();
-        
-        $this->clearShopCache();
         
         return $response;
     }
@@ -252,8 +218,6 @@ class GambioStorePackageInstaller
         
         restore_error_handler();
         restore_exception_handler();
-        
-        $this->clearShopCache();
         
         return $response;
     }

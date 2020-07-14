@@ -41,6 +41,11 @@ class GambioStoreAjaxController extends AdminHttpViewController
      */
     private $logger;
     
+    /**
+     * @var \GambioStoreCompatibility
+     */
+    private $compatibility;
+    
     
     /**
      * Sets up this class avoiding the constructor.
@@ -52,8 +57,30 @@ class GambioStoreAjaxController extends AdminHttpViewController
         $this->configuration = $this->connector->getConfiguration();
         $this->themes        = $this->connector->getThemes();
         $this->logger        = $this->connector->getLogger();
+        $this->compatibility = $this->connector->getCompatibility();
     }
     
+    /**
+     * Clears the shop cache after a successful installation or update
+     */
+    public function actionClearShopCache()
+    {
+        if (!$this->compatibility->has(GambioStoreCompatibility::FEATURE_CACHE_CONTROL)) {
+            $this->logger->error('The CacheControl or PhraseCacheBuilder classes do not exist. Cache cant be cleared after an installation/update.');
+            return;
+        }
+        
+        $cacheControl       = MainFactory::create_object('CacheControl');
+        $phraseCacheBuilder = MainFactory::create_object('PhraseCacheBuilder', []);
+        
+        $cacheControl->clear_cache();
+        $cacheControl->clear_content_view_cache();
+        $cacheControl->clear_templates_c();
+        $cacheControl->clear_template_cache();
+        $cacheControl->clear_css_cache();
+        $phraseCacheBuilder->build();
+        $cacheControl->clear_data_cache();
+    }
     
     /**
      * Collects shop information and sends them back.

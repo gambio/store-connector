@@ -72,6 +72,9 @@ const installPackage = (data, progressCallback = () => null) => {
 		} catch (e) {
 			reject(e);
 		}
+		await GambioStore.callShop('admin.php?do=GambioStoreAjax/ClearShopCache', {
+			method: 'get'
+		});
 		resolve();
 	});
 }
@@ -106,7 +109,7 @@ const uninstallPackage = async (data) => {
 	
 	// Cancel the uninstall if the shop's session is not active.
 	try {
-		await GambioStore.callShop('admin.php?do=GambioStoreAjax/isSessionActive', {
+		await GambioStore.callShop('admin.php?do=GambioStoreAjax/IsSessionActive', {
 			method: 'get',
 			redirect: 'error'
 		});
@@ -121,9 +124,12 @@ const uninstallPackage = async (data) => {
 	formData.append('gambioStoreData', JSON.stringify(data));
 	
 	try {
-		await GambioStore.callShop('admin.php?do=GambioStoreAjax/uninstallPackage', {
+		await GambioStore.callShop('admin.php?do=GambioStoreAjax/UninstallPackage', {
 			method: 'post',
 			body: formData
+		});
+		await GambioStore.callShop('admin.php?do=GambioStoreAjax/ClearShopCache', {
+			method: 'get'
 		});
 		GambioStore.messenger.sendMessage('uninstall_succeeded');
 	} catch (error) {
@@ -199,7 +205,7 @@ const install = async (data) => {
 	
 	// Cancel the installation if the shop's session is not active.
 	try {
-		await GambioStore.callShop('admin.php?do=GambioStoreAjax/isSessionActive', {
+		await GambioStore.callShop('admin.php?do=GambioStoreAjax/IsSessionActive', {
 			method: 'get',
 			redirect: 'error'
 		});
