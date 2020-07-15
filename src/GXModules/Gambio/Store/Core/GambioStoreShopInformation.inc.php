@@ -56,18 +56,18 @@ class GambioStoreShopInformation
     public function getShopInformation()
     {
         return [
-            'version' => 3,
-            'shop'    => [
+            'version'     => 3,
+            'shop'        => [
                 'url'     => $this->getShopUrl(),
                 'key'     => $this->getShopKey(),
                 'version' => $this->getShopVersion()
             ],
-            'server'  => [
+            'server'      => [
                 'phpVersion'   => $this->getPhpVersion(),
                 'mySQLVersion' => $this->getMySQLVersion()
             ],
-            'modules' => $this->getModuleVersionFiles(),
-            'themes'  => $this->getThemes(),
+            'modules'     => $this->getModuleVersionFiles(),
+            'themes'      => $this->getThemes(),
             'activeTheme' => $this->getCurrentTheme()
         ];
     }
@@ -79,18 +79,21 @@ class GambioStoreShopInformation
      */
     private function getCurrentTheme()
     {
-        if (!class_exists('Gambio\AdminFeed\Services\ShopInformation\Settings')) {
-            throw new GambioStoreShopClassMissingException('The HTTP Server constant is missing from the configure.php file in admin.');
+        if (!class_exists('StaticGXCoreLoader')) {
+            throw new GambioStoreShopClassMissingException('The shop class StaticGXCoreLoader is not accessable');
         }
-        
-        if (!class_exists('Gambio\AdminFeed\Services\ShopInformation\Reader\TemplateDetailsReader')) {
-            throw new GambioStoreShopClassMissingException('The HTTP Server constant is missing from the configure.php file in admin.');
+    
+        if ($this->areThemesAvailable()) {
+            /* @var \ThemeControl $themeControl */
+            $themeControl   = StaticGXCoreLoader::getThemeControl();
+            $activeTemplate = $themeControl->isThemeSystemActive() ? 'themes/' : 'templates/';
+            $activeTemplate .= $themeControl->getCurrentTheme();
+        } else {
+            $activeTemplate = defined('CURRENT_TEMPLATE') ? CURRENT_TEMPLATE : '';
+            $activeTemplate = 'templates/' . $activeTemplate;
         }
-        
-        $settings = new Gambio\AdminFeed\Services\ShopInformation\Settings();
-        $reader   = new Gambio\AdminFeed\Services\ShopInformation\Reader\TemplateDetailsReader($settings);
-        
-        return $reader->getActiveTemplate();
+
+        return $activeTemplate;
     }
     
     
@@ -211,5 +214,17 @@ class GambioStoreShopInformation
         }
         
         return $themes;
+    }
+    
+    /**
+     * Returns the status of theme support for this shop.
+     *
+     * @return bool
+     */
+    public function areThemesAvailable()
+    {
+        return defined('DIR_FS_CATALOG') && defined('CURRENT_THEME') && !empty(CURRENT_THEME)
+            ? is_dir(DIR_FS_CATALOG . 'themes/' . CURRENT_THEME)
+            : false;
     }
 }
