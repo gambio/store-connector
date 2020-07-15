@@ -56,19 +56,19 @@ class GambioStoreShopInformation
     public function getShopInformation()
     {
         return [
-            'version'     => 3,
-            'shop'        => [
+            'version'      => 3,
+            'shop'         => [
                 'url'     => $this->getShopUrl(),
                 'key'     => $this->getShopKey(),
                 'version' => $this->getShopVersion()
             ],
-            'server'      => [
+            'server'       => [
                 'phpVersion'   => $this->getPhpVersion(),
                 'mySQLVersion' => $this->getMySQLVersion()
             ],
-            'modules'     => $this->getModuleVersionFiles(),
-            'themes'      => $this->getThemes(),
-            'activeTheme' => $this->getCurrentTheme()
+            'modules'      => $this->getModuleVersionFiles(),
+            'themes'       => $this->getThemes(),
+            'currentTheme' => $this->getCurrentTheme()
         ];
     }
     
@@ -82,18 +82,16 @@ class GambioStoreShopInformation
         if (!class_exists('StaticGXCoreLoader')) {
             throw new GambioStoreShopClassMissingException('The shop class StaticGXCoreLoader is not accessable');
         }
-    
+        
+        $currentTheme = '';
+        
         if ($this->areThemesAvailable()) {
             /* @var \ThemeControl $themeControl */
-            $themeControl   = StaticGXCoreLoader::getThemeControl();
-            $activeTemplate = $themeControl->isThemeSystemActive() ? 'themes/' : 'templates/';
-            $activeTemplate .= $themeControl->getCurrentTheme();
-        } else {
-            $activeTemplate = defined('CURRENT_TEMPLATE') ? CURRENT_TEMPLATE : '';
-            $activeTemplate = 'templates/' . $activeTemplate;
+            $themeControl = StaticGXCoreLoader::getThemeControl();
+            $currentTheme = $themeControl->isThemeSystemActive() ? $themeControl->getCurrentTheme() : '';
         }
-
-        return $activeTemplate;
+        
+        return $currentTheme;
     }
     
     
