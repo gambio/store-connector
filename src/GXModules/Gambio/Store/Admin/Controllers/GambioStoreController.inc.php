@@ -254,7 +254,7 @@ class GambioStoreController extends AdminHttpViewController
         // Fall back to the production Gambio Store URL if none is set.
         if (empty($gambioUrl)) {
             $gambioUrl = 'https://store.gambio.com/a';
-            $this->configuration->create('GAMBIO_STORE_URL', $gambioUrl);
+            $this->configuration->set('GAMBIO_STORE_URL', $gambioUrl);
         }
         
         return $gambioUrl;
@@ -273,7 +273,7 @@ class GambioStoreController extends AdminHttpViewController
         // Fall back to the production Gambio Store api URL if none is set.
         if (empty($gambioUrl)) {
             $gambioUrl = 'https://store.gambio.com';
-            $this->configuration->create('GAMBIO_STORE_API_URL', $gambioUrl);
+            $this->configuration->set('GAMBIO_STORE_API_URL', $gambioUrl);
         }
         
         return $gambioUrl;
@@ -290,7 +290,7 @@ class GambioStoreController extends AdminHttpViewController
         $gambioToken = $this->configuration->get('GAMBIO_STORE_TOKEN');
         if (empty($gambioToken)) {
             $gambioToken = $this->connector->generateToken();
-            $this->configuration->create('GAMBIO_STORE_TOKEN', $gambioToken);
+            $this->configuration->set('GAMBIO_STORE_TOKEN', $gambioToken);
         }
         
         return $gambioToken;
