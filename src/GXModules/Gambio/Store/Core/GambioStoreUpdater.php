@@ -78,17 +78,17 @@ if (defined('StoreKey_MigrationScript')) {
             private function updateBoilerplateScss()
             {
                 $boilerplatePath = $this->fileSystem->getShopDirectory() . '/admin/styles/admin/_boilerplate.scss';
-        
+    
                 $boilerplateContent = file_get_contents($boilerplatePath);
-        
+    
                 $importAppStoreRegex = '/@import "app_store\/app_store";/i';
-        
+    
                 $boilerplateContent = preg_replace($importAppStoreRegex, '', $boilerplateContent);
-        
+    
                 $importGambioStoreRegex = '/@import "gambio_store\/gambio_store";/i';
-        
+    
                 $boilerplateContent = preg_replace($importGambioStoreRegex, '', $boilerplateContent);
-        
+    
                 file_put_contents($boilerplatePath, $boilerplateContent);
             }
     
@@ -128,12 +128,12 @@ if (defined('StoreKey_MigrationScript')) {
              */
             private function createDatabaseKeysIfNotExists()
             {
-                if ($this->configuration->has('APP_STORE_URL')) {
+                if ($this->configuration->has('APP_STORE_URL') && !$this->configuration->has('GAMBIO_STORE_URL')) {
                     $this->configuration->create('GAMBIO_STORE_URL', $this->configuration->get('APP_STORE_URL'));
                     $this->configuration->remove('APP_STORE_URL');
                 }
     
-                if ($this->configuration->has('APP_STORE_TOKEN')) {
+                if ($this->configuration->has('APP_STORE_TOKEN') && !$this->configuration->has('GAMBIO_STORE_TOKEN')) {
                     $token = $this->configuration->get('APP_STORE_TOKEN');
                     if (!empty($token)) {
                         $this->configuration->create('GAMBIO_STORE_TOKEN', $token);
@@ -141,7 +141,8 @@ if (defined('StoreKey_MigrationScript')) {
                     $this->configuration->remove('APP_STORE_TOKEN');
                 }
     
-                if ($this->configuration->has('APP_STORE_IS_REGISTERED')) {
+                if ($this->configuration->has('APP_STORE_IS_REGISTERED')
+                    && !$this->configuration->has('GAMBIO_STORE_IS_REGISTERED')) {
                     $this->configuration->create('GAMBIO_STORE_IS_REGISTERED',
                         $this->configuration->get('APP_STORE_IS_REGISTERED'));
                     $this->configuration->remove('APP_STORE_IS_REGISTERED');
@@ -157,7 +158,7 @@ if (defined('StoreKey_MigrationScript')) {
                     $hash      = md5(time());
                     $suffix    = 'XX';
                     $delimiter = '-';
-                    
+        
                     $gambioToken = implode($delimiter, [$prefix, $date, $hash, $suffix]);
                     $this->configuration->create('GAMBIO_STORE_TOKEN', $gambioToken);
                 }
