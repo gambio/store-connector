@@ -489,16 +489,18 @@ if (defined('StoreKey_MigrationScript')) {
                     case 'fileCopy':
                     case 'fileMove':
                     case 'rename':
-                    $this->actionsPerformed[] = [$method, $arguments];
                     if ($ignoreFileNotFoundException) {
+                        $this->actionsPerformed[] = ['remove', $arguments];
                         try {
                             $returnValue = call_user_func_array([$this, '_' . $method], $arguments);
                         } catch (GambioStoreFileNotFoundException $exception) {
                             // do nothing
                         }
-        
+    
                         return $returnValue;
                     }
+    
+                    $this->actionsPerformed[] = [$method, $arguments];
     
                     return call_user_func_array([$this, '_' . $method], $arguments);
                 }
@@ -535,6 +537,13 @@ if (defined('StoreKey_MigrationScript')) {
                             break;
                         case 'rename':
                             $this->_rename($action[1][1], $action[1][0]);
+                            break;
+                        case 'remove':
+                            try {
+                                $this->_fileMove($action[1][1], $action[1][0]);
+                            } catch (GambioStoreFileNotFoundException $exception) {
+                                // do nothing
+                            }
                             break;
                     }
                 }
