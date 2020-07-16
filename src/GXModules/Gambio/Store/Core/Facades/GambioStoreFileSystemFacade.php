@@ -478,17 +478,29 @@ if (defined('StoreKey_MigrationScript')) {
              */
             public function __call($method, $arguments)
             {
+                $ignoreFileNotFoundException = false;
                 switch ($method) {
                     case 'remove':
                         $method = 'fileMove';
                         // Add full path to the shop since we mimic the remove action.
-                        $arguments[1] = $this->getShopDirectory() . '/cache/backup/migrations/' . $arguments[0];
-                        $arguments[0] = $this->getShopDirectory() . '/' . $arguments[0];
+                        $arguments[1]                = $this->getShopDirectory() . '/cache/backup/migrations/' . $arguments[0];
+                        $arguments[0]                = $this->getShopDirectory() . '/' . $arguments[0];
+                        $ignoreFileNotFoundException = true;
                     case 'fileCopy':
                     case 'fileMove':
                     case 'rename':
-                        $this->actionsPerformed[] = [$method, $arguments];
-                        return call_user_func_array([$this, '_' . $method], $arguments);
+                    $this->actionsPerformed[] = [$method, $arguments];
+                    if ($ignoreFileNotFoundException) {
+                        try {
+                            $returnValue = call_user_func_array([$this, '_' . $method], $arguments);
+                        } catch (GambioStoreFileNotFoundException $exception) {
+                            // do nothing
+                        }
+        
+                        return $returnValue;
+                    }
+    
+                    return call_user_func_array([$this, '_' . $method], $arguments);
                 }
             }
     
