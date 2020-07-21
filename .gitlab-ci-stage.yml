@@ -12,7 +12,7 @@ metrics_stage:
     stage: run
     when: on_success
     artifacts:
-        name: "$CI_COMMIT_SHA-lint"
+        name: "$CI_COMMIT_SHA-metrics"
         paths:
             - docs/metrics
         expire_in: 1 week
