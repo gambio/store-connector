@@ -1,0 +1,15 @@
+metrics_stage:
+    stage: run
+    when: on_success
+    artifacts:
+        name: "$CI_COMMIT_SHA-lint"
+        paths:
+            - docs/metrics
+        expire_in: 1 week
+    script:
+        - '# Metrics store-api.'
+        - chmod +x .gitlab-ci/metrics.sh
+        - .gitlab-ci/metrics.sh
+    only:
+        variables:
+            - $CI_COMMIT_MESSAGE =~ /\/ninja\/stage.*\/metrics/

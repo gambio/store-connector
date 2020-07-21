@@ -9,3 +9,4 @@
 !/docker/boilerplate
 /*.zip
 /**/.phpunit.result.cache
+/docs/metrics

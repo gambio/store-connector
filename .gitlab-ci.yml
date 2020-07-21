@@ -1,0 +1,19 @@
+stages:
+    - run
+
+default:
+    cache:
+        key: "$CI_COMMIT_SHA-cache"
+        paths:
+            - vendor/
+    before_script:
+        - echo '[LOGTIME]' `date` && echo `date` '[start]'
+        - pwd
+        - whoami
+        - ls -la
+        - export
+    after_script:
+        - echo '[LOGTIME]' `date`
+
+include:
+    -   local: '.gitlab-ci-stage.yml'
