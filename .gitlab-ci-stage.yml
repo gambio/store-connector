@@ -1,7 +1,7 @@
 build_stage:
     stage: build
     script:
-        - '# Build the store-api'
+        - '# Build the store-connector'
         - chmod +x .gitlab-ci/build.sh
         - .gitlab-ci/build.sh --dev
     only:
@@ -17,7 +17,7 @@ metrics_stage:
             - docs/metrics
         expire_in: 1 week
     script:
-        - '# Metrics store-api.'
+        - '# Metrics store-connector.'
         - chmod +x .gitlab-ci/metrics.sh
         - .gitlab-ci/metrics.sh
     only:
