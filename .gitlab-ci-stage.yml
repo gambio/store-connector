@@ -1,3 +1,13 @@
+build_stage:
+    stage: build
+    script:
+        - '# Build the store-api'
+        - chmod +x .gitlab-ci/build.sh
+        - .gitlab-ci/build.sh --dev
+    only:
+        variables:
+            - $CI_COMMIT_MESSAGE =~ /\/ninja\/stage/
+
 metrics_stage:
     stage: run
     when: on_success
