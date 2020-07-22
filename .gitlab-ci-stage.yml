@@ -39,3 +39,19 @@ coverage_stage:
     only:
         variables:
             - $CI_COMMIT_MESSAGE =~ /\/ninja\/stage.*\/coverage/
+
+lint_stage:
+    stage: run
+    when: on_success
+    artifacts:
+        name: "$CI_COMMIT_SHA-lint"
+        paths:
+            - docs/lint/lint.txt
+        expire_in: 1 week
+    script:
+        - '# Lint store-connector.'
+        - chmod +x .gitlab-ci/lint.sh
+        - .gitlab-ci/lint.sh
+    only:
+        variables:
+            - $CI_COMMIT_MESSAGE =~ /\/ninja\/stage.*\/lint/
