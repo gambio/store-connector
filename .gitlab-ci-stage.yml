@@ -23,3 +23,19 @@ metrics_stage:
     only:
         variables:
             - $CI_COMMIT_MESSAGE =~ /\/ninja\/stage.*\/metrics/
+
+coverage_stage:
+    stage: run
+    when: on_success
+    artifacts:
+        name: "$CI_COMMIT_SHA-coverage"
+        paths:
+            - docs/coverage
+        expire_in: 1 week
+    script:
+        - '# Coverage store-api.'
+        - chmod +x .gitlab-ci/coverage.sh
+        - .gitlab-ci/coverage.sh
+    only:
+        variables:
+            - $CI_COMMIT_MESSAGE =~ /\/ninja\/stage.*\/coverage/

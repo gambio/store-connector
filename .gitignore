@@ -10,3 +10,4 @@
 /*.zip
 /**/.phpunit.result.cache
 /docs/metrics
+/docs/coverage

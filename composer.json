@@ -4,6 +4,7 @@
 	"type": "project",
 	"license": "GPL-2.0",
 	"scripts": {
+		"coverage": "php vendor/bin/phpunit --coverage-html docs/coverage",
 		"metrics": "php vendor/phpmetrics/phpmetrics/bin/phpmetrics --report-html=./docs/metrics ./src"
 	},
 	"authors": [
