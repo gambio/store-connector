@@ -2,19 +2,18 @@
 <phpdox xmlns="http://xml.phpdox.net/config" silent="false">
 	<bootstrap />
 
-	<project name="HubConfig" source="${basedir}/src" workdir="${basedir}/build/phpdox/xml">
+	<project name="Store Connector" source="${basedir}/src" workdir="${basedir}/build/reference/xml">
 
 		<!--  Additional configuration for the collecting process (parsing of php code, generation of xml data) -->
 		<collector publiconly="false" backend="parser" encoding="auto">
 			<include mask="*.php" />
-			<exclude mask="*/Migrations/*.php" />
 
 			<inheritance resolve="true">
 			</inheritance>
 
 		</collector>
 
-		<generator output="${basedir}/docs">
+		<generator output="${basedir}/docs/reference">
 
 			<enrich base="${basedir}/build">
 
