@@ -55,7 +55,7 @@ lint_stage:
   only:
     variables:
       - $CI_COMMIT_MESSAGE =~ /\/ninja\/stage.*\/lint/
-docs:
+docs_stage:
   stage: run
   when: on_success
   script:
