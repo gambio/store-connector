@@ -1,57 +1,72 @@
 build_stage:
-    stage: build
-    script:
-        - '# Build the store-connector'
-        - chmod +x .gitlab-ci/build.sh
-        - .gitlab-ci/build.sh --dev
-    only:
-        variables:
-            - $CI_COMMIT_MESSAGE =~ /\/ninja\/stage/
+  stage: build
+  script:
+    - '# Build the store-connector'
+    - chmod +x .gitlab-ci/build.sh
+    - .gitlab-ci/build.sh --dev
+  only:
+    variables:
+      - $CI_COMMIT_MESSAGE =~ /\/ninja\/stage/
 
 metrics_stage:
-    stage: run
-    when: on_success
-    artifacts:
-        name: "$CI_COMMIT_SHA-metrics"
-        paths:
-            - docs/metrics
-        expire_in: 1 week
-    script:
-        - '# Metrics store-connector.'
-        - chmod +x .gitlab-ci/metrics.sh
-        - .gitlab-ci/metrics.sh
-    only:
-        variables:
-            - $CI_COMMIT_MESSAGE =~ /\/ninja\/stage.*\/metrics/
+  stage: run
+  when: on_success
+  artifacts:
+    name: "$CI_COMMIT_SHA-metrics"
+    paths:
+      - docs/metrics
+    expire_in: 1 week
+  script:
+    - '# Metrics store-connector.'
+    - chmod +x .gitlab-ci/metrics.sh
+    - .gitlab-ci/metrics.sh
+  only:
+    variables:
+      - $CI_COMMIT_MESSAGE =~ /\/ninja\/stage.*\/metrics/
 
 coverage_stage:
-    stage: run
-    when: on_success
-    artifacts:
-        name: "$CI_COMMIT_SHA-coverage"
-        paths:
-            - docs/coverage
-        expire_in: 1 week
-    script:
-        - '# Coverage store-connector.'
-        - chmod +x .gitlab-ci/coverage.sh
-        - .gitlab-ci/coverage.sh
-    only:
-        variables:
-            - $CI_COMMIT_MESSAGE =~ /\/ninja\/stage.*\/coverage/
+  stage: run
+  when: on_success
+  artifacts:
+    name: "$CI_COMMIT_SHA-coverage"
+    paths:
+      - docs/coverage
+    expire_in: 1 week
+  script:
+    - '# Coverage store-connector.'
+    - chmod +x .gitlab-ci/coverage.sh
+    - .gitlab-ci/coverage.sh
+  only:
+    variables:
+      - $CI_COMMIT_MESSAGE =~ /\/ninja\/stage.*\/coverage/
 
 lint_stage:
-    stage: run
-    when: on_success
-    artifacts:
-        name: "$CI_COMMIT_SHA-lint"
-        paths:
-            - docs/lint/lint.txt
-        expire_in: 1 week
-    script:
-        - '# Lint store-connector.'
-        - chmod +x .gitlab-ci/lint.sh
-        - .gitlab-ci/lint.sh
-    only:
-        variables:
-            - $CI_COMMIT_MESSAGE =~ /\/ninja\/stage.*\/lint/
+  stage: run
+  when: on_success
+  artifacts:
+    name: "$CI_COMMIT_SHA-lint"
+    paths:
+      - docs/lint/lint.txt
+    expire_in: 1 week
+  script:
+    - '# Lint store-connector.'
+    - chmod +x .gitlab-ci/lint.sh
+    - .gitlab-ci/lint.sh
+  only:
+    variables:
+      - $CI_COMMIT_MESSAGE =~ /\/ninja\/stage.*\/lint/
+docs:
+  stage: run
+  when: on_success
+  script:
+    - '# Generate docs for hub core.'
+    - chmod +x .gitlab-ci/docs.sh
+    - .gitlab-ci/docs.sh
+  artifacts:
+    name: "$CI_COMMIT_SHA-docs"
+    paths:
+      - docs/reference
+    expire_in: 1 week
+  only:
+    variables:
+      - $CI_COMMIT_MESSAGE =~ /\/ninja\/stage.*\/docs/
