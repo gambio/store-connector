@@ -33,7 +33,7 @@ coverage_stage:
             - docs/coverage
         expire_in: 1 week
     script:
-        - '# Coverage store-api.'
+        - '# Coverage store-connector.'
         - chmod +x .gitlab-ci/coverage.sh
         - .gitlab-ci/coverage.sh
     only:
