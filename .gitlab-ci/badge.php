@@ -164,45 +164,6 @@ function getViolationCount()
 }
 
 /**
- * INTEGRATION TEST SECTION
- */
-
-//$integrationsPassing = areIntegrationTestsWorking();
-//
-//$integrationsBadge = null;
-//
-//if ($integrationsPassing !== null) {
-//    $integrationsBadge = $integrationsPassing ? generatePositiveBadge('integrations', 'PASSING') : generateDangerBadge('integrations', 'FAILING');
-//} else {
-//    $integrationsBadge = generateDangerBadge('integrations', 'ERROR');
-//}
-//
-//file_put_contents(__DIR__ . '/../badges/integrations.svg', $integrationsBadge);
-//
-//register_shutdown_function('fatal_handler');
-//
-//function fatal_handler() {
-//    $error = error_get_last();
-//    $errno = $error['type'];
-//    echo "Shutdown handler called";
-//    if($errno == E_ERROR){
-//        $integrationsBadge = generateDangerBadge('integrations', 'ERROR');
-//        file_put_contents(__DIR__ . '/../badges/integrations.svg', $integrationsBadge);
-//    }
-//}
-//
-//
-//function areIntegrationTestsWorking() {
-//    try {
-//        $result = include __DIR__ . '/../tests/integration.php';
-//        return $result['failures'] === 0;
-//    } catch (\Exception $e) {
-//        return null;
-//    }
-//}
-
-
-/**
  * BADGE GENERATION SECTION
  */
 
