@@ -119,7 +119,7 @@ function areUnitTestsWorking()
  * METRICS SECTION
  */
 
-$violationCount = getViolationCount();
+$violationCount = getMaintainabilityPercentile();
 
 $violationsBadge = null;
 
