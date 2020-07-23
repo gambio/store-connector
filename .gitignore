@@ -1,6 +1,4 @@
 /.idea
-/docs/reference
-/docs/build
 /vendor
 /node_modules
 /build
@@ -8,7 +6,10 @@
 /docker/*
 !/docker/boilerplate
 /*.zip
+/.phpdoc
 /**/.phpunit.result.cache
+/docs/build
 /docs/metrics
 /docs/coverage
 /docs/lint
+/docs/reference
