@@ -14,7 +14,7 @@ inform_user() {
 
 generate_docs() {
     inform_user "Generating metrics"
-    composer run docs
+    composer docs
 }
 
 generate_docs
