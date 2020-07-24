@@ -17,7 +17,7 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
-use PUGX\Poser\Render\SvgRender;
+use PUGX\Poser\Render\SvgFlatSquareRender;
 use PUGX\Poser\Poser;
 
 // Make the folder for the badges if it does not exist yet
@@ -169,24 +169,24 @@ function getViolationCount()
 
 function generateDangerBadge($title, $value)
 {
-    $render = new SvgRender();
+    $render = new SvgFlatSquareRender();
     $poser  = new Poser([$render]);
     
-    return $poser->generate($title, $value, 'f22613', 'plastic');
+    return $poser->generate($title, $value, 'f22613', 'flat-square');
 }
 
 function generateWarningBadge($title, $value)
 {
-    $render = new SvgRender();
+    $render = new SvgFlatSquareRender();
     $poser  = new Poser([$render]);
     
-    return $poser->generate($title, $value, 'f5ab35', 'plastic');
+    return $poser->generate($title, $value, 'f5ab35', 'flat-square');
 }
 
 function generatePositiveBadge($title, $value)
 {
-    $render = new SvgRender();
+    $render = new SvgFlatSquareRender();
     $poser  = new Poser([$render]);
     
-    return $poser->generate($title, $value, '2ecc71', 'plastic');
+    return $poser->generate($title, $value, '2ecc71', 'flat-square');
 }
