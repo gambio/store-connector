@@ -155,8 +155,13 @@ class GambioStoreInstallation
     public function handleUnexpectedException(Exception $exception)
     {
         $this->cache->delete($this->getTransactionId());
-        $this->logger->critical('Critical error during package installation', [
-            'error'      => $exception->getMessage(),
+        $this->logger->critical('Critical exception during package installation', [
+            'error' => [
+                'code'    => $exception->getCode(),
+                'message' => $exception->getMessage(),
+                'file'    => $exception->getFile(),
+                'line'    => $exception->getLine()
+            ],
             'errorTrace' => $exception->getTrace()
         ]);
         $this->backup->restorePackageFilesFromCache($this->getPackageFilesDestinations());
