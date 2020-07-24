@@ -13,6 +13,12 @@
 		"badge:metrics": "php vendor/phpmetrics/phpmetrics/bin/phpmetrics --report-violations=badges/violations.xml ./src",
 		"badge:coverage": "php vendor/bin/phpunit --coverage-xml badges/coverage"
 	},
+	"repositories": [
+		{
+			"type": "vcs",
+			"url": "https://sources.gambio-server.net/gambio/readme-badger.git"
+		}
+	],
 	"authors": [
 		{
 			"name": "Gambio GmbH",
