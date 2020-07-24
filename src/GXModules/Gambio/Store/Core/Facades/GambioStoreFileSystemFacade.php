@@ -25,10 +25,14 @@ if (defined('StoreKey_MigrationScript')) {
     
     
         /**
-         * This class is used to perform actions upon filesystem within the shop folder.
-         * This class is a facade for using the functionality of the GambioStore module by third-party packages.
+         * This class is used to perform actions on the filesystem within the shop folder.
+         * This class is a facade for using the functionality of the GambioStore module by third-party packages
+         * during the migration step of the installation/uninstallation process.
+         *
          * It mostly reflects the original GambioStoreFileSystem class with some adjustments.
-         * However, this class has a magic __call method that allows tracking performed actions to rollback them in case of an error.
+         * However, this class has a magic __call method that is tracking performed actions.
+         * This feature allows rolling back filesystem changes made by migrations.
+         *
          * Another method presented in the facade class is the __destruct method that removes the migration backup folder.
          *
          * Class GambioStoreFileSystemFacade
