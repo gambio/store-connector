@@ -23,28 +23,21 @@ require_once 'GambioStoreMigration.inc.php';
 /**
  * Class StoreInstallation
  *
- * This class is responsible to perform package installation.
- * That's includes saving and returning the right progress state for the progressbar,
- * handling unexpected errors and exceptions.
+ * This class performs the package installation. On consecutive calls, it will return the progress of the installation.
  *
- * Before a package gets installed the class is checking if currently package files of this package exists,
- * if this is the case it is a package update but the class dont difference them and handel's both as a installation.
- * To secure the package files before the installation maybe overwrites some files the class moves all package files to
- * the shop cache directory. This creates a backup. If the installation process now goes at some point wrong, all files
- * that are new in the package place, gets removed and the backup is moved back at his package place.
+ * Before a package gets installed the class checks for the existing package and creates a backup of it by moving
+ * all package files to the shop cache directory. If the installation fails at any point, the backup can be restored.
  *
  * The next step is it to get the new package data from the store api by downloading the files into the shop cache
- * directory. At first the class is trying to download all files at ones as a Zip archive, if this is not passable or
- * goes wrong the fallback of the class try to download each file by file.
+ * directory. To begin with, an attempt is made to download the package zip archive, if this is not possible or
+ * goes wrong the fallback of the class is to download each file of the package individually.
  *
- * Now after the download is succeeded,
- * the class is moving the downloaded package files into the destination path of the package.
+ * After the download is successful the class moves the downloaded package files to the desired destination.
  *
- * After moving the files the class runs the migration up scripts,
- * to get sure all needed changes for this specific package version to be able to use.
+ * After moving the files the class runs the migration up scripts to run all the necessary changes for this package
+ * version to work. (database changes, file changes, etc).
  *
- * The last step of the class,
- * is it to remove the backup files and the cache for the progress if the installation is done.
+ * Finally the class removes the backup of the package and changes the progress of the installation to done.
  *
  */
 class GambioStoreInstallation
