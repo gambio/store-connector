@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "24ace2d7506420871349be325452d3c0",
+    "content-hash": "e6f113f6bb016f235955e8aa99fcd19e",
     "packages": [],
     "packages-dev": [
         {
@@ -352,6 +352,60 @@
                 "fixtures"
             ],
             "time": "2019-12-12T13:22:17+00:00"
+        },
+        {
+            "name": "gambio/readme-badger",
+            "version": "dev-master",
+            "source": {
+                "type": "git",
+                "url": "https://sources.gambio-server.net/gambio/readme-badger.git",
+                "reference": "a48357fa87ecdf963b748b96df343a333da3012f"
+            },
+            "require": {
+                "ext-gd": "*",
+                "php": ">=5.3",
+                "symfony/console": "^5.0"
+            },
+            "bin": [
+                "bin/poser"
+            ],
+            "type": "lib",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "1.4.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "PUGX\\Poser\\": "src/"
+                }
+            },
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Giulio De Donato",
+                    "email": "liuggio@gmail.com"
+                },
+                {
+                    "name": "PUGX Community",
+                    "homepage": "https://github.com/PUGX/badge-poser/contributors"
+                },
+                {
+                    "name": "Shields Community",
+                    "homepage": "https://github.com/badges/poser/contributors"
+                }
+            ],
+            "description": "Poser, add badges on your readme..",
+            "homepage": "https://github.com/PUGX",
+            "keywords": [
+                "badge",
+                "composer",
+                "packagist",
+                "pin"
+            ],
+            "time": "2020-07-22T13:56:10+00:00"
         },
         {
             "name": "jawira/plantuml",
@@ -5363,7 +5417,8 @@
     "minimum-stability": "dev",
     "stability-flags": {
         "roave/security-advisories": 20,
-        "phpdocumentor/phpdocumentor": 5
+        "phpdocumentor/phpdocumentor": 5,
+        "gambio/readme-badger": 20
     },
     "prefer-stable": true,
     "prefer-lowest": false,
