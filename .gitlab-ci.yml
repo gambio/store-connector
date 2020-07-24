@@ -16,5 +16,13 @@ default:
     after_script:
         - echo '[LOGTIME]' `date`
 
+badges:
+    stage: run
+    when: on_success
+    script:
+        - '# Badges for store-connector'
+        - chmod +x .gitlab-ci/badges.sh
+        - .gitlab-ci/badges.sh
+
 include:
     -   local: '.gitlab-ci-stage.yml'
