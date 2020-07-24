@@ -22,7 +22,17 @@ if (defined('StoreKey_MigrationScript')) {
         require_once __DIR__ . '/../Exceptions/FileSystemExceptions/GambioStoreCreateDirectoryException.inc.php';
         require_once __DIR__ . '/../Exceptions/FileSystemExceptions/GambioStorePathIsNotDirectoryException.inc.php';
         require_once __DIR__ . '/../Exceptions/FileSystemExceptions/GambioStoreFileExistsException.inc.php';
-        
+    
+    
+        /**
+         * This class is used to perform actions upon filesystem within the shop folder.
+         * This class is a facade for using the functionality of the GambioStore module by third-party packages.
+         * It mostly reflects the original GambioStoreFileSystem class with some adjustments.
+         * However, this class has a magic __call method that allows tracking performed actions to rollback them in case of an error.
+         * Another method presented in the facade class is the __destruct method that removes the migration backup folder.
+         *
+         * Class GambioStoreFileSystemFacade
+         */
         class GambioStoreFileSystemFacade
         {
             /**
