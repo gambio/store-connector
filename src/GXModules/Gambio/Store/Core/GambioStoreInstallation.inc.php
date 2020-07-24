@@ -23,9 +23,29 @@ require_once 'GambioStoreMigration.inc.php';
 /**
  * Class StoreInstallation
  *
- * Performs a Store package installation and take care of all the required actions.
+ * This class is responsible to perform package installation.
+ * That's includes saving and returning the right progress state for the progressbar,
+ * handling unexpected errors and exceptions.
  *
- * Execute the upgrade script if needed.
+ * Before a package gets installed the class is checking if currently package files of this package exists,
+ * if this is the case it is a package update but the class dont difference them and handel's both as a installation.
+ * To secure the package files before the installation maybe overwrites some files the class moves all package files to
+ * the shop cache directory. This creates a backup. If the installation process now goes at some point wrong, all files
+ * that are new in the package place, gets removed and the backup is moved back at his package place.
+ *
+ * The next step is it to get the new package data from the store api by downloading the files into the shop cache
+ * directory. At first the class is trying to download all files at ones as a Zip archive, if this is not passable or
+ * goes wrong the fallback of the class try to download each file by file.
+ *
+ * Now after the download is succeeded,
+ * the class is moving the downloaded package files into the destination path of the package.
+ *
+ * After moving the files the class runs the migration up scripts,
+ * to get sure all needed changes for this specific package version to be able to use.
+ *
+ * The last step of the class,
+ * is it to remove the backup files and the cache for the progress if the installation is done.
+ *
  */
 class GambioStoreInstallation
 {
@@ -156,7 +176,7 @@ class GambioStoreInstallation
     {
         $this->cache->delete($this->getTransactionId());
         $this->logger->critical('Critical exception during package installation', [
-            'error' => [
+            'error'      => [
                 'code'    => $exception->getCode(),
                 'message' => $exception->getMessage(),
                 'file'    => $exception->getFile(),
@@ -166,28 +186,6 @@ class GambioStoreInstallation
         ]);
         $this->backup->restorePackageFilesFromCache($this->getPackageFilesDestinations());
         die();
-    }
-    
-    
-    /**
-     * Returns unique installation id.
-     *
-     * @return mixed
-     */
-    private function getTransactionId()
-    {
-        return $this->packageData['details']['id'];
-    }
-    
-    
-    /**
-     * Returns array of installing files.
-     *
-     * @return array
-     */
-    private function getPackageFilesDestinations()
-    {
-        return array_column($this->packageData['fileList']['includedFiles'], 'destination');
     }
     
     
@@ -206,14 +204,14 @@ class GambioStoreInstallation
             if ($progress['progress'] === 100) {
                 $this->cache->delete($this->getTransactionId());
             }
-    
+            
             return [
                 'success'  => true,
                 'state'    => $progress['state'],
                 'progress' => $progress['progress']
             ];
         }
-    
+        
         $this->cache->set($this->getTransactionId(), json_encode([
             'state'    => 'started',
             'progress' => 0
@@ -262,7 +260,7 @@ class GambioStoreInstallation
             $message = 'Could not install package: ' . $this->packageData['details']['title']['de'];
             $this->logger->error($message, [
                 'context' => $e->getContext(),
-                'error' => [
+                'error'   => [
                     'code'    => $e->getCode(),
                     'message' => $e->getMessage(),
                     'file'    => $e->getFile(),
@@ -270,7 +268,7 @@ class GambioStoreInstallation
                 ],
             ]);
             $this->restore($destinations);
-            $this->cache->delete($this->getTransactionId()); 
+            $this->cache->delete($this->getTransactionId());
             throw new GambioStorePackageInstallationException($message);
         } catch (Exception $exception) {
             $message = 'Could not install package: ' . $this->packageData['details']['title']['de'];
@@ -285,14 +283,65 @@ class GambioStoreInstallation
             $this->restore($destinations);
             $this->cache->delete($this->getTransactionId());
             throw new GambioStorePackageInstallationException($message);
-        } finally {
+        }
+        finally {
             $this->cleanCache();
         }
         
         $this->logger->notice('Successfully installed package : ' . $this->packageData['details']['title']['de']);
-    
+        
         $this->cache->delete($this->getTransactionId());
+        
         return ['success' => true, 'progress' => 100];
+    }
+    
+    
+    /**
+     * Performs Curl requests to download file from the provided url.
+     *
+     * @param       $url
+     *
+     * @return string
+     * @throws \GambioStoreHttpErrorException
+     */
+    private function getFileContent($url)
+    {
+        $response = $this->http->get($url, [
+            CURLOPT_HTTPHEADER => ["X-STORE-TOKEN: $this->token"]
+        ]);
+        
+        $code = $response->getInformation('http_code');
+        
+        if ($code !== 200) {
+            throw new GambioStoreHttpErrorException('Error on download a file', [
+                'info'  => "Couldn't download a file via $url.",
+                'token' => $this->token
+            ]);
+        }
+        
+        return $response->getBody();
+    }
+    
+    
+    /**
+     * Returns array of installing files.
+     *
+     * @return array
+     */
+    private function getPackageFilesDestinations()
+    {
+        return array_column($this->packageData['fileList']['includedFiles'], 'destination');
+    }
+    
+    
+    /**
+     * Returns unique installation id.
+     *
+     * @return mixed
+     */
+    private function getTransactionId()
+    {
+        return $this->packageData['details']['id'];
     }
     
     
@@ -419,33 +468,6 @@ class GambioStoreInstallation
         $zip->close();
         
         return true;
-    }
-    
-    
-    /**
-     * Performs Curl requests.
-     *
-     * @param       $url
-     *
-     * @return string
-     * @throws \GambioStoreHttpErrorException
-     */
-    public function getFileContent($url)
-    {
-        $response = $this->http->get($url, [
-            CURLOPT_HTTPHEADER => ["X-STORE-TOKEN: $this->token"]
-        ]);
-        
-        $code = $response->getInformation('http_code');
-        
-        if ($code !== 200) {
-            throw new GambioStoreHttpErrorException('Error on download a file', [
-                'info'  => "Couldn't download a file via $url.",
-                'token' => $this->token
-            ]);
-        }
-        
-        return $response->getBody();
     }
     
     
