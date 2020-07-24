@@ -14,11 +14,16 @@ if (defined('StoreKey_MigrationScript')) {
     if (!defined('GambioStoreUpdater_included')) {
         
         define('GambioStoreUpdater_included', true);
-        
+    
         /**
          * Class GambioStoreUpdater
          *
-         * Updates the Gambio Store Connector
+         * The class is used to perform a self-update for the GambioConnector package.
+         * There is an older version of the GambioConnector package that had been updating via gambio_updater project.
+         * Since the gambio_updater project is out of the responsibility of the GambioConnector package,
+         * the main goal of introducing the new version is to lessen the dependency between them.
+         * The class contains methods to perform various updates, such as updating the menu or upgrading database entries.
+         *
          */
         class GambioStoreUpdater
         {
