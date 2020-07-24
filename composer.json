@@ -9,7 +9,9 @@
 		"coverage": "php vendor/bin/phpunit --coverage-html docs/coverage",
 		"metrics": "php vendor/phpmetrics/phpmetrics/bin/phpmetrics --report-html=./docs/metrics ./src",
 		"lint": "mkdir -p docs/lint && php vendor/bin/phpcs src > docs/lint/lint.txt",
-        "docs": "php vendor/bin/phpdoc -d src -t docs/reference"
+        "docs": "php vendor/bin/phpdoc -d src -t docs/reference",
+		"badge:metrics": "php vendor/phpmetrics/phpmetrics/bin/phpmetrics --report-violations=badges/violations.xml ./src",
+		"badge:coverage": "php vendor/bin/phpunit --coverage-xml badges/coverage"
 	},
 	"authors": [
 		{
