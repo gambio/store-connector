@@ -55,18 +55,3 @@ lint_stage:
   only:
     variables:
       - $CI_COMMIT_MESSAGE =~ /\/ninja\/stage.*\/lint/
-docs_stage:
-  stage: run
-  when: on_success
-  script:
-    - '# Generate docs for hub core.'
-    - chmod +x .gitlab-ci/docs.sh
-    - .gitlab-ci/docs.sh
-  artifacts:
-    name: "$CI_COMMIT_SHA-docs"
-    paths:
-      - docs/reference
-    expire_in: 1 week
-  only:
-    variables:
-      - $CI_COMMIT_MESSAGE =~ /\/ninja\/stage.*\/docs/
