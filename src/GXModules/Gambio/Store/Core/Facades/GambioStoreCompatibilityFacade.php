@@ -20,6 +20,16 @@ if (defined('StoreKey_MigrationScript')) {
          *
          * This class allows to code to check for certain shop resources or features.
          *
+         * This class is the facade for the GambioStoreCompatibility class.
+         * It is used for module self-updating (by GambioStoreUpdater class) though can also be used by a third-party
+         * module or the shop itself. The vital point is that during the self-update processing the facade class may be
+         * used after it has already been updated.
+         *
+         * Functionality is implemented by duplicating methods of the original class.
+         *
+         * The initial check for the StoreKey_MigrationScript constant avoids automatic class auto-loading
+         * by the shop's "MainFactory" since we need a unique new version during the update.
+         *
          * Example:
          *
          * $storeCompatibility->has(StoreCompatibility::RESOURCE_GM_CONFIGURATION_TABLE); // returns true or false
