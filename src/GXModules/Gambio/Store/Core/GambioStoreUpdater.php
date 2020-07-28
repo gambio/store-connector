@@ -23,7 +23,11 @@ if (defined('StoreKey_MigrationScript')) {
          * Since the gambio_updater project is out of the responsibility of the GambioConnector package,
          * the main goal of introducing the new version is to lessen the dependency between them.
          * The class contains methods to perform various updates, such as updating the menu or upgrading database entries.
+         *
          * It should be noted that it is possible to repeatedly execute the class.
+         *
+         * The class itself is not a part of the Connector functionality rather then it has a dedicated logic to perform
+         * self-update only.
          *
          */
         class GambioStoreUpdater
