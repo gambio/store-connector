@@ -3,13 +3,11 @@
 	"description": "The Store Connector module enables the integration of Gambio Store into Gambio GX shops.",
 	"type": "project",
 	"license": "GPL-2.0",
-    "minimum-stability": "dev",
-    "prefer-stable": true,
+    "minimum-stability": "stable",
 	"scripts": {
 		"coverage": "php vendor/bin/phpunit --coverage-html docs/coverage",
 		"metrics": "php vendor/phpmetrics/phpmetrics/bin/phpmetrics --report-html=./docs/metrics ./src",
 		"lint": "mkdir -p docs/lint && php vendor/bin/phpcs --standard=PSR2 src > docs/lint/lint.txt",
-        "docs": "php vendor/bin/phpdoc -d src -t docs/reference",
 		"badge:metrics": "php vendor/phpmetrics/phpmetrics/bin/phpmetrics --report-violations=badges/violations.xml ./src",
 		"badge:coverage": "php vendor/bin/phpunit --coverage-xml badges/coverage"
 	},
@@ -38,7 +36,6 @@
 	    "mikey179/vfsStream": "^1.6",
 	    "fzaninotto/faker": "^1.6",
 	    "phpmetrics/phpmetrics": "^2.7",
-		"squizlabs/php_codesniffer": "^3.5",
-        "phpdocumentor/phpdocumentor": "3.*@RC"
+		"squizlabs/php_codesniffer": "^3.5"
     }
 }

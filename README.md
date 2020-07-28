@@ -1,6 +1,3 @@
-### **For developers: update the *phpdocumentor* package to a stable version (>=3.0) once it released and set `minimum-stability` to `stable` in the package.json file** ###
----
-
 # Gambio Store Connector
 > Store integration module for GX shops. 
 
