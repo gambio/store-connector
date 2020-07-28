@@ -18,11 +18,15 @@ if (defined('StoreKey_MigrationScript')) {
         /**
          * Class GambioStoreUpdater
          *
-         * The class is used to perform a self-update for the GambioConnector package.
-         * There is an older version of the GambioConnector package that had been updating via gambio_updater project.
-         * Since the gambio_updater project is out of the responsibility of the GambioConnector package,
-         * the main goal of introducing the new version is to lessen the dependency between them.
-         * The class contains methods to perform various updates, such as updating the menu or upgrading database entries.
+         * The class performs a self update for the GambioConnector package.
+         * The very first version of the GambioConnector package is installed through the gambio_updater.
+         * Since the gambio_updater is part of the Shop project and we have no direct control over it,
+         * we introduced our own update logic to lessen the dependency on the shop team.
+         *
+         * The class is not included with the Connector Core classes and uses a specific define constant to be included
+         * only when a self-update of the Connector is desired. This also prevents the MainFactory from loading this file.
+         * This guarantees that during the execution of this file after an update, the updated class is executed instead
+         * of the outdated class which would be in memory for the PHP instance.
          *
          * It should be noted that it is possible to repeatedly execute the class.
          *
