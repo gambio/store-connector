@@ -5,11 +5,12 @@
 	"license": "GPL-2.0",
     "minimum-stability": "stable",
 	"scripts": {
-		"coverage": "php vendor/bin/phpunit --coverage-html docs/coverage",
-		"metrics": "php vendor/phpmetrics/phpmetrics/bin/phpmetrics --report-html=./docs/metrics ./src",
+		"coverage": "php vendor/bin/phpunit --log-junit docs/coverage/coverage.xml --coverage-html docs/coverage",
+		"metrics": "php vendor/phpmetrics/phpmetrics/bin/phpmetrics --config=./metrics.json --junit=./docs/coverage/coverage.xml",
 		"lint": "mkdir -p docs/lint && php vendor/bin/phpcs --standard=PSR2 src > docs/lint/lint.txt",
 		"badge:metrics": "php vendor/phpmetrics/phpmetrics/bin/phpmetrics --report-violations=badges/violations.xml ./src",
-		"badge:coverage": "php vendor/bin/phpunit --coverage-xml badges/coverage"
+		"badge:coverage": "php vendor/bin/phpunit --coverage-xml badges/coverage",
+		"serve:metrics" : "google-chrome  ./docs/metrics/index.html || firefox ./docs/metrics/index.html"
 	},
 	"repositories": [
 		{
