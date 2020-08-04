@@ -1,6 +1,6 @@
 <?php
 
-$dsn = 'mysql:host=hub-connector-mysql-{{branch}};dbname=gxdev;charset=utf8';
+$dsn = 'mysql:host=store-connector-mysql-{{branch}};dbname=gxdev;charset=utf8';
 
 $user = 'gxdev';
 $pass = 'gxdev';
