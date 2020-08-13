@@ -7,14 +7,13 @@
 */
 
 .gambio-store {
-    /*width:  100%;*/
+    width:  100%;
     border: none;
 }
 
 .gambio-store iframe {
     width:        100%;
     border:       none;
-    min-width:    1250px;
     margin-left:  -24px;
     margin-right: -24px;
     min-height:   1000px !important;
