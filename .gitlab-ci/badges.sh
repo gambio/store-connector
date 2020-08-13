@@ -22,6 +22,11 @@ generate_metrics() {
   composer badge:metrics
 }
 
+generate_tests() {
+  inform_user "Generating tests"
+  composer badge:tests
+}
+
 generate_coverage() {
   inform_user "Generating coverage"
   composer badge:coverage
@@ -48,6 +53,7 @@ move_badges() {
 
 install_dependencies
 generate_metrics
+generate_tests
 generate_coverage
 generate_badges
 move_badges

@@ -93,7 +93,7 @@ file_put_contents(__DIR__ . '/../badges/tests.svg', $testsBadge);
 
 function areUnitTestsWorking()
 {
-    $coverageReportPath = __DIR__ . '/../badges/coverage/index.xml';
+    $coverageReportPath = __DIR__ . '/../badges/tests.xml';
     
     if (file_exists($coverageReportPath)) {
         $parser = xml_parser_create('UTF-8');
@@ -103,8 +103,8 @@ function areUnitTestsWorking()
         xml_parse_into_struct($parser, $coverageReportContents, $coverageReport);
         
         foreach ($coverageReport as $coverageEntity) {
-            if ($coverageEntity['tag'] === 'TEST' && isset($coverageEntity['attributes']['STATUS'])
-                && $coverageEntity['attributes']['STATUS'] !== 'PASSED') {
+            if ($coverageEntity['tag'] === 'TESTSUITE' && isset($coverageEntity['attributes']['ERRORS'])
+                && $coverageEntity['attributes']['ERRORS'] !== '0') {
                 return false;
             }
         }
