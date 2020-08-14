@@ -542,11 +542,11 @@ if (defined('StoreKey_MigrationScript')) {
                 foreach ($actions as $action) {
                     $method = $action[0];
                     switch ($method) {
-                        case 'copy':
+                        case 'fileCopy':
                             $toRemove = substr($action[1][1], strlen($this->getShopDirectory()) + 1);
                             $this->_remove($toRemove);
                             break;
-                        case 'move':
+                        case 'fileMove':
                             $this->_fileMove($action[1][1], $action[1][0]);
                             break;
                         case 'rename':
