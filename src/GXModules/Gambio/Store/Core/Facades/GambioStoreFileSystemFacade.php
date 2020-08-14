@@ -500,8 +500,8 @@ if (defined('StoreKey_MigrationScript')) {
                         $arguments[1]                = $this->getShopDirectory() . '/cache/backup/migrations/' . $arguments[0];
                         $arguments[0]                = $this->getShopDirectory() . '/' . $arguments[0];
                         $ignoreFileNotFoundException = true;
-                    case 'fileCopy':
-                    case 'fileMove':
+                    case 'copy':
+                    case 'move':
                     case 'rename':
                     if ($ignoreFileNotFoundException) {
                         $this->actionsPerformed[] = ['remove', $arguments];
