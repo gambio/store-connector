@@ -146,7 +146,7 @@ class GambioStoreConnector
         $backup          = new GambioStoreBackup($fileSystem);
         $logger          = new GambioStoreLogger($cache);
         $themes          = new GambioStoreThemes($compatibility, $fileSystem, $logger);
-        $installer       = new GambioStorePackageInstaller($fileSystem, $configuration, $cache, $logger, $backup, $themes, $compatibility);
+        $installer       = new GambioStorePackageInstaller($fileSystem, $configuration, $cache, $logger, $backup, $themes);
         
         return new self($database, $configuration, $compatibility, $logger, $themes, $fileSystem, $shopInformation,
             $cache, $http, $backup, $installer);
