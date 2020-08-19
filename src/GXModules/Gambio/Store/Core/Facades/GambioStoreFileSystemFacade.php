@@ -102,7 +102,7 @@ if (defined('StoreKey_MigrationScript')) {
              * @throws \GambioStoreFileCopyException
              * @throws \GambioStoreFileNotFoundException
              */
-            public function copy($source, $destination)
+            public function _copy($source, $destination)
             {
                 $source      = $this->getShopDirectory() . '/' . $source;
                 $destination = $this->getShopDirectory() . '/' . $destination;
@@ -176,7 +176,7 @@ if (defined('StoreKey_MigrationScript')) {
              * @throws \GambioStoreCreateDirectoryException
              * @throws \GambioStoreFileNotFoundException|\GambioStoreFileCopyException
              */
-            private function _fileCopy($source, $destination)
+            private function fileCopy($source, $destination)
             {
                 if (file_exists($destination) && is_file($destination)) {
                     throw new GambioStoreFileExistsException('File already exists: ' . $destination, 1, [
@@ -205,7 +205,7 @@ if (defined('StoreKey_MigrationScript')) {
              * @throws \GambioStoreFileMoveException
              * @throws \GambioStoreFileNotFoundException
              */
-            public function move($source, $destination)
+            public function _move($source, $destination)
             {
                 $source      = $this->getShopDirectory() . '/' . $source;
                 $destination = $this->getShopDirectory() . '/' . $destination;
@@ -245,7 +245,7 @@ if (defined('StoreKey_MigrationScript')) {
              * @throws \GambioStoreFileMoveException
              * @throws \GambioStoreCreateDirectoryException
              */
-            private function _fileMove($source, $destination)
+            private function fileMove($source, $destination)
             {
                 if (!file_exists($source) || !is_file($source)) {
                     throw new GambioStoreFileNotFoundException('File not found: ' . $source, 1, [
@@ -495,13 +495,13 @@ if (defined('StoreKey_MigrationScript')) {
                 $ignoreFileNotFoundException = false;
                 switch ($method) {
                     case 'remove':
-                        $method = 'fileMove';
-                        // Add full path to the shop since we mimic the remove action.
-                        $arguments[1]                = $this->getShopDirectory() . '/cache/backup/migrations/' . $arguments[0];
-                        $arguments[0]                = $this->getShopDirectory() . '/' . $arguments[0];
+                        $method = 'move';
+                        // Add full path to the shop since 8e mimic the remove action.
+                        $arguments[1]                = 'cache/backup/migrations/' . $arguments[0];
+                        $arguments[0]                = $arguments[0];
                         $ignoreFileNotFoundException = true;
-                    case 'fileCopy':
-                    case 'fileMove':
+                    case 'copy':
+                    case 'move':
                     case 'rename':
                     if ($ignoreFileNotFoundException) {
                         $this->actionsPerformed[] = ['remove', $arguments];
@@ -542,19 +542,19 @@ if (defined('StoreKey_MigrationScript')) {
                 foreach ($actions as $action) {
                     $method = $action[0];
                     switch ($method) {
-                        case 'fileCopy':
+                        case 'copy':
                             $toRemove = substr($action[1][1], strlen($this->getShopDirectory()) + 1);
                             $this->_remove($toRemove);
                             break;
-                        case 'fileMove':
-                            $this->_fileMove($action[1][1], $action[1][0]);
+                        case 'move':
+                            $this->_move($action[1][1], $action[1][0]);
                             break;
                         case 'rename':
                             $this->_rename($action[1][1], $action[1][0]);
                             break;
                         case 'remove':
                             try {
-                                $this->_fileMove($action[1][1], $action[1][0]);
+                                $this->_move($action[1][1], $action[1][0]);
                             } catch (GambioStoreFileNotFoundException $exception) {
                                 // do nothing
                             }
