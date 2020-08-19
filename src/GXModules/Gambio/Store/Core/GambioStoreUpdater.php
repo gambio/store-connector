@@ -221,6 +221,7 @@ if (defined('StoreKey_MigrationScript')) {
                 $this->fileSystem->remove('GXMainComponents/Controllers/HttpView/Shop/GambioStoreCallbackController.inc.php');
                 $this->fileSystem->remove('GXMainComponents/Extensions/GambioStore');
                 $this->fileSystem->remove('admin/html/content/gambio_store');
+                $this->fileSystem->remove('admin/html/assets/javascript/engine/controllers/gambio_store');
                 $this->fileSystem->remove('admin/javascript/engine/controllers/gambio_store');
                 $this->fileSystem->remove('lang/german/original_sections/admin/gambio_store');
                 $this->fileSystem->remove('lang/english/original_sections/admin/gambio_store');
@@ -231,6 +232,7 @@ if (defined('StoreKey_MigrationScript')) {
                 $this->fileSystem->remove('GXMainComponents/Controllers/HttpView/Shop/AppStoreCallbackController.inc.php');
                 $this->fileSystem->remove('GXMainComponents/Extensions/AppStore');
                 $this->fileSystem->remove('admin/html/content/app_store');
+                $this->fileSystem->remove('admin/html/assets/javascript/engine/controllers/app_store');
                 $this->fileSystem->remove('admin/javascript/engine/controllers/app_store');
                 $this->fileSystem->remove('lang/german/original_sections/admin/app_store');
                 $this->fileSystem->remove('lang/english/original_sections/admin/app_store');
