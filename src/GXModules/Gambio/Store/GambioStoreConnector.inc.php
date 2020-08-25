@@ -126,7 +126,7 @@ class GambioStoreConnector
         $backup          = new GambioStoreBackup($fileSystem);
         $logger          = new GambioStoreLogger($cache);
         $themes          = new GambioStoreThemes($compatibility, $fileSystem, $logger);
-    
+        
         return new self($database, $configuration, $compatibility, $logger, $themes, $fileSystem, $shopInformation,
             $cache, $backup);
     }
@@ -364,19 +364,22 @@ class GambioStoreConnector
         } catch (\Exception $exception) {
             restore_error_handler();
             restore_exception_handler();
+            $this->setShopOnline();
             throw $exception;
         }
-        finally {
+        
+        if ($response['progress'] === 100) {
             $this->setShopOnline();
+            
+            if (isset($packageData['details']['folder_name_inside_shop'])
+                || isset($packageData['details']['filename'])) {
+                $themeDirectoryName = $packageData['details']['folder_name_inside_shop'] ? : $packageData['details']['filename'];
+                $this->themes->reimportContentManagerEntries($themeDirectoryName);
+            }
+            
+            restore_error_handler();
+            restore_exception_handler();
         }
-        
-        if (isset($packageData['details']['folder_name_inside_shop']) || isset($packageData['details']['filename'])) {
-            $themeDirectoryName = $packageData['details']['folder_name_inside_shop'] ? : $packageData['details']['filename'];
-            $this->themes->reimportContentManagerEntries($themeDirectoryName);
-        }
-        
-        restore_error_handler();
-        restore_exception_handler();
         
         return $response;
     }
@@ -396,8 +399,8 @@ class GambioStoreConnector
         $packageData['name'] = $postData['title']['de'];
         
         if (isset($postData['folder_name_inside_shop']) || isset($postData['filename'])) {
-            $themeDirectoryName      = $postData['folder_name_inside_shop'] ? : $postData['filename'];
-            $themeDirectoryPath      = $this->fileSystem->getThemeDirectory() . '/' . $themeDirectoryName;
+            $themeDirectoryName = $postData['folder_name_inside_shop'] ? : $postData['filename'];
+            $themeDirectoryPath = $this->fileSystem->getThemeDirectory() . '/' . $themeDirectoryName;
             
             try {
                 $fileList = $this->fileSystem->getContentsRecursively($themeDirectoryPath);
