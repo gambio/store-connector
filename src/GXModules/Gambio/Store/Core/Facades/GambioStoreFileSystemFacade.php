@@ -23,6 +23,20 @@ if (defined('StoreKey_MigrationScript')) {
         require_once __DIR__ . '/../Exceptions/FileSystemExceptions/GambioStorePathIsNotDirectoryException.inc.php';
         require_once __DIR__ . '/../Exceptions/FileSystemExceptions/GambioStoreFileExistsException.inc.php';
         
+        
+        /**
+         * This class is used to perform actions on the filesystem within the shop folder.
+         * This class is a facade for using the functionality of the GambioStore module by third-party packages
+         * during the migration step of the installation/uninstallation process.
+         *
+         * It mostly reflects the original GambioStoreFileSystem class with some adjustments.
+         * However, this class has a magic __call method that is tracking performed actions.
+         * This feature allows rolling back filesystem changes made by migrations.
+         *
+         * Another method presented in the facade class is the __destruct method that removes the migration backup folder.
+         *
+         * Class GambioStoreFileSystemFacade
+         */
         class GambioStoreFileSystemFacade
         {
             /**
@@ -46,19 +60,19 @@ if (defined('StoreKey_MigrationScript')) {
             {
                 $oldName = $this->getShopDirectory() . '/' . $oldName;
                 $newName = dirname($oldName) . '/' . basename($newName);
-        
+                
                 if (!file_exists($oldName)) {
                     throw new GambioStoreFileNotFoundException('File not found: ' . $oldName, 1, [
                         'info' => "File or folder not found on attempt to rename $oldName"
                     ]);
                 }
-        
+                
                 if (file_exists($newName) && is_file($newName)) {
                     throw new GambioStoreFileExistsException('File already exists: ' . $newName, 1, [
                         'info' => "File with this name already exists on attempt to rename file $oldName to $newName"
                     ]);
                 }
-        
+                
                 if (!rename($oldName, $newName)) {
                     throw new GambioStoreRenameException('Could not rename a file or folder ' . $oldName, 2, [
                         'info' => 'Please contact the server administrator'
@@ -88,19 +102,19 @@ if (defined('StoreKey_MigrationScript')) {
              * @throws \GambioStoreFileCopyException
              * @throws \GambioStoreFileNotFoundException
              */
-            public function copy($source, $destination)
+            public function _copy($source, $destination)
             {
                 $source      = $this->getShopDirectory() . '/' . $source;
                 $destination = $this->getShopDirectory() . '/' . $destination;
-    
+                
                 if (is_file($source)) {
                     $this->fileCopy($source, $destination);
                     return;
                 }
-    
+                
                 $directory = new RecursiveDirectoryIterator($source, RecursiveDirectoryIterator::SKIP_DOTS);
                 $iterator  = new RecursiveIteratorIterator($directory, RecursiveIteratorIterator::SELF_FIRST);
-    
+                
                 foreach ($iterator as $item) {
                     if ($item->isDir()) {
                         /**
@@ -130,21 +144,21 @@ if (defined('StoreKey_MigrationScript')) {
                 if (is_dir($path)) {
                     return;
                 }
-        
+                
                 if (!@mkdir($path, 0777, true) && !is_dir($path)) {
-            
+                    
                     if (is_file($path)) {
                         throw new GambioStoreCreateDirectoryException('Could not create a folder ' . $path, 1, [
                             'info' => 'There is already a file exists for the path: ' . $path
                         ]);
                     }
-            
+                    
                     if (is_link($path)) {
                         throw new GambioStoreCreateDirectoryException('Could not create a folder ' . $path, 2, [
                             'info' => 'There is already a symlink exists for this path! ' . $path
                         ]);
                     }
-            
+                    
                     throw new GambioStoreCreateDirectoryException('Could not create a folder ' . $path, 3, [
                         'info' => 'Please contact the server administrator'
                     ]);
@@ -162,20 +176,20 @@ if (defined('StoreKey_MigrationScript')) {
              * @throws \GambioStoreCreateDirectoryException
              * @throws \GambioStoreFileNotFoundException|\GambioStoreFileCopyException
              */
-            private function _fileCopy($source, $destination)
+            private function fileCopy($source, $destination)
             {
                 if (file_exists($destination) && is_file($destination)) {
                     throw new GambioStoreFileExistsException('File already exists: ' . $destination, 1, [
                         'info' => "File with this name already exists on attempt to copy file $source to $destination"
                     ]);
                 }
-        
+                
                 if (!file_exists($source) || !is_file($source)) {
                     throw new GambioStoreFileNotFoundException('No such file: ' . $source);
                 }
-        
+                
                 $this->createDirectory(dirname($destination));
-        
+                
                 if (!copy($source, $destination)) {
                     throw new GambioStoreFileCopyException("Couldn't copy file " . $source);
                 }
@@ -191,7 +205,7 @@ if (defined('StoreKey_MigrationScript')) {
              * @throws \GambioStoreFileMoveException
              * @throws \GambioStoreFileNotFoundException
              */
-            public function move($source, $destination)
+            public function _move($source, $destination)
             {
                 $source      = $this->getShopDirectory() . '/' . $source;
                 $destination = $this->getShopDirectory() . '/' . $destination;
@@ -231,7 +245,7 @@ if (defined('StoreKey_MigrationScript')) {
              * @throws \GambioStoreFileMoveException
              * @throws \GambioStoreCreateDirectoryException
              */
-            private function _fileMove($source, $destination)
+            private function fileMove($source, $destination)
             {
                 if (!file_exists($source) || !is_file($source)) {
                     throw new GambioStoreFileNotFoundException('File not found: ' . $source, 1, [
@@ -466,8 +480,8 @@ if (defined('StoreKey_MigrationScript')) {
             {
                 return $this->getShopDirectory() . '/cache';
             }
-    
-    
+            
+            
             /**
              * Magic __call method.
              *
@@ -478,21 +492,35 @@ if (defined('StoreKey_MigrationScript')) {
              */
             public function __call($method, $arguments)
             {
+                $ignoreFileNotFoundException = false;
                 switch ($method) {
                     case 'remove':
-                        $method = 'fileMove';
-                        // Add full path to the shop since we mimic the remove action.
-                        $arguments[1] = $this->getShopDirectory() . '/cache/backup/migrations/' . $arguments[0];
-                        $arguments[0] = $this->getShopDirectory() . '/' . $arguments[0];
-                    case 'fileCopy':
-                    case 'fileMove':
+                        $method = 'move';
+                        // Add full path to the shop since 8e mimic the remove action.
+                        $arguments[1]                = 'cache/backup/migrations/' . $arguments[0];
+                        $arguments[0]                = $arguments[0];
+                        $ignoreFileNotFoundException = true;
+                    case 'copy':
+                    case 'move':
                     case 'rename':
+                        if ($ignoreFileNotFoundException) {
+                            $this->actionsPerformed[] = ['remove', $arguments];
+                            try {
+                                $returnValue = call_user_func_array([$this, '_' . $method], $arguments);
+                            } catch (GambioStoreFileNotFoundException $exception) {
+                                // do nothing
+                            }
+                            
+                            return $returnValue;
+                        }
+                        
                         $this->actionsPerformed[] = [$method, $arguments];
+                        
                         return call_user_func_array([$this, '_' . $method], $arguments);
                 }
             }
-    
-    
+            
+            
             /**
              * Destructor removes the migrations backup folder.
              */
@@ -500,8 +528,8 @@ if (defined('StoreKey_MigrationScript')) {
             {
                 $this->_remove('/cache/backup/migrations/');
             }
-    
-    
+            
+            
             /**
              * @throws \GambioStoreCreateDirectoryException
              * @throws \GambioStoreFileMoveException
@@ -514,15 +542,22 @@ if (defined('StoreKey_MigrationScript')) {
                 foreach ($actions as $action) {
                     $method = $action[0];
                     switch ($method) {
-                        case 'fileCopy':
+                        case 'copy':
                             $toRemove = substr($action[1][1], strlen($this->getShopDirectory()) + 1);
                             $this->_remove($toRemove);
                             break;
-                        case 'fileMove':
-                            $this->_fileMove($action[1][1], $action[1][0]);
+                        case 'move':
+                            $this->_move($action[1][1], $action[1][0]);
                             break;
                         case 'rename':
                             $this->_rename($action[1][1], $action[1][0]);
+                            break;
+                        case 'remove':
+                            try {
+                                $this->_move($action[1][1], $action[1][0]);
+                            } catch (GambioStoreFileNotFoundException $exception) {
+                                // do nothing
+                            }
                             break;
                     }
                 }
