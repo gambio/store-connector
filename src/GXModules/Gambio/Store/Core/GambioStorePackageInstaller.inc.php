@@ -130,21 +130,25 @@ class GambioStorePackageInstaller
         } catch (Exception $exception) {
             restore_error_handler();
             restore_exception_handler();
-            throw $exception;
-        }
-        finally {
+            
             if ($wasShopOnline) {
                 $this->setShopOnline();
             }
+            
+            throw $exception;
         }
         
-        if (isset($packageData['details']['folder_name_inside_shop']) || isset($packageData['details']['filename'])) {
-            $themeDirectoryName = $packageData['details']['folder_name_inside_shop'] ? : $packageData['details']['filename'];
-            $this->themes->reimportContentManagerEntries($themeDirectoryName);
+        if ($response['progress'] === 100) {
+            
+            if (isset($packageData['details']['folder_name_inside_shop'])
+                || isset($packageData['details']['filename'])) {
+                $themeDirectoryName = $packageData['details']['folder_name_inside_shop'] ? : $packageData['details']['filename'];
+                $this->themes->reimportContentManagerEntries($themeDirectoryName);
+            }
+            
+            restore_error_handler();
+            restore_exception_handler();
         }
-        
-        restore_error_handler();
-        restore_exception_handler();
         
         return $response;
     }

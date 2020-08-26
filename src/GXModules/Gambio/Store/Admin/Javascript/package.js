@@ -48,7 +48,7 @@ const isThemeActive = (themeName) => {
  * @param progressCallback {function} invoked between each installation request. Progress-Bars may hook into this.
  * @returns {Promise<>} Resolves when installed. Rejects upon error.
  */
-const installPackage = (data, progressCallback = () => null) => {
+const installPackage = (data, progressCallback) => {
 	return new Promise(async (resolve, reject) => {
 		const formData = new FormData();
 		formData.append('gambioStoreData', JSON.stringify(data));
@@ -164,9 +164,9 @@ const startPackageInstallation = async (data) => {
 	} catch {
 		GambioStore.messenger.sendMessage('installation_failed');
 	} finally {
-		updateProgressCallback({progress: 1});
 		setTimeout(() => {
 			$installingPackageModal.modal('hide');
+			updateProgressCallback(0);
 		}, 2000);
 	}
 }
@@ -175,22 +175,14 @@ const startPackageInstallation = async (data) => {
  * Callback function to update the progressbar in the gui.
  * @param progress
  */
-const updateProgressCallback = ({progress}) => {
+const updateProgressCallback = (progress) => {
 	const progressBar = document
 		.getElementsByClassName('installing-package modal').item(0)
 		.getElementsByClassName('progress-bar').item(0);
 	
-	let progressPercentage = Math.ceil(progress * 100);
-	
-	if (progressPercentage < 0) {
-		progressPercentage = 0;
-	} else if (progressPercentage > 100) {
-		progressPercentage = 100;
-	}
-	
-	progressBar['aria-valuenow'] = progressPercentage;
-	progressBar.style.width = progressPercentage + '%';
-	progressBar.textContent = progressPercentage + '%';
+	progressBar['aria-valuenow'] = progress;
+	progressBar.style.width = progress + '%';
+	progressBar.textContent = progress + '%';
 };
 
 /**
