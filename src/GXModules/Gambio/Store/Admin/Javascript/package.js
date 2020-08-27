@@ -69,7 +69,8 @@ const installPackage = (data, progressCallback) => {
 				progress = response.progress ? response.progress : progress;
 				progressCallback(progress);
 			}
-   
+			debugger;
+			await showClearCache();
 			await GambioStore.clearShopCache();
 		} catch (e) {
 			reject(e);
@@ -183,6 +184,18 @@ const updateProgressCallback = (progress) => {
 	progressBar['aria-valuenow'] = progress;
 	progressBar.style.width = progress + '%';
 	progressBar.textContent = progress + '%';
+};
+
+const showClearCache = ()  => {
+	const modalBody = document
+		.getElementsByClassName('installing-package modal').item(0)
+		.getElementsByClassName('modal-body').item(0);
+	
+	const cacheClearingText = GambioStore.translation.translate('CLEARING_CACHE');
+	const description = `<p class="progress-description">${cacheClearingText}</p>`
+	const loadingSpinner = '<br><div class="text-center"><i class="fas fa-spinner text-primary fa-spin fa-3x loading-spinner"></i></div>'
+	modalBody.innerHTML = '';
+	modalBody.innerHTML = description + loadingSpinner
 };
 
 /**
