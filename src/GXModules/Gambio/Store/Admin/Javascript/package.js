@@ -113,7 +113,7 @@ const uninstallPackage = async (data) => {
 			redirect: 'error'
 		});
 	} catch (error) {
-		window.location.reload(true);
+		location.reload();
 		return;
 	}
 	
@@ -200,7 +200,7 @@ const install = async (data) => {
 			redirect: 'error'
 		});
 	} catch (error) {
-		window.location.reload(true);
+		location.reload();
 		return;
 	}
 	
