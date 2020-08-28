@@ -69,7 +69,6 @@ const installPackage = (data, progressCallback) => {
 				progress = response.progress ? response.progress : progress;
 				progressCallback(progress);
 			}
-			debugger;
 			await showClearCache();
 			await GambioStore.clearShopCache();
 		} catch (e) {
