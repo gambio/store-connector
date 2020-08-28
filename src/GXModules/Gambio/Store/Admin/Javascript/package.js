@@ -69,8 +69,11 @@ const installPackage = (data, progressCallback) => {
 				progress = response.progress ? response.progress : progress;
 				progressCallback(progress);
 			}
-			await showClearCache();
-			await GambioStore.clearShopCache();
+			setTimeout(async () => {
+				await showClearCache();
+				await GambioStore.clearShopCache();
+			}, 500)
+			
 		} catch (e) {
 			reject(e);
 		}
@@ -127,7 +130,7 @@ const uninstallPackage = async (data) => {
 			method: 'post',
 			body: formData
 		});
-        await GambioStore.clearShopCache();
+		await GambioStore.clearShopCache();
 		
 		GambioStore.messenger.sendMessage('uninstall_succeeded');
 	} catch (error) {
@@ -164,10 +167,7 @@ const startPackageInstallation = async (data) => {
 	} catch {
 		GambioStore.messenger.sendMessage('installation_failed');
 	} finally {
-		setTimeout(() => {
-			$installingPackageModal.modal('hide');
-			updateProgressCallback(0);
-		}, 2000);
+		$installingPackageModal.modal('hide');
 	}
 }
 
@@ -185,7 +185,7 @@ const updateProgressCallback = (progress) => {
 	progressBar.textContent = progress + '%';
 };
 
-const showClearCache = ()  => {
+const showClearCache = () => {
 	const modalBody = document
 		.getElementsByClassName('installing-package modal').item(0)
 		.getElementsByClassName('modal-body').item(0);
