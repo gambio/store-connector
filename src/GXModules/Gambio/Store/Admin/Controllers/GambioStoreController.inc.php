@@ -183,7 +183,7 @@ class GambioStoreController extends AdminHttpViewController
         
         $title    = new NonEmptyStringType($this->languageTextManager->get_text('PAGE_TITLE'));
         $template = new ExistingFile(new NonEmptyStringType(__DIR__ . '/../Html/gambio_store_configuration.html'));
-    
+        
         $data = new KeyValueCollection([
             'url'    => $gambioStoreUrl,
             'apiUrl' => $gambioStoreApiUrl
@@ -258,6 +258,19 @@ class GambioStoreController extends AdminHttpViewController
         }
         
         return $gambioUrl;
+    }
+    
+    
+    /**
+     * Gets the auth headers
+     *
+     * @return array
+     */
+    private function getGambioStoreAuthHeaders()
+    {
+        return [
+            'X-ACCESS-TOKEN' => [$this->configuration->get('GAMBIO_STORE_ACCESS_TOKEN')]
+        ];
     }
     
     
@@ -360,7 +373,8 @@ class GambioStoreController extends AdminHttpViewController
         
         return new KeyValueCollection([
             'storeUrl'      => $this->getGambioStoreUrl() . $urlPostfix,
-            'storeToken'    => $this->getGambioStoreToken(),
+            'clientId'      => $this->getGambioStoreToken(),
+            'authHeaders'   => $this->getGambioStoreAuthHeaders(),
             'storeLanguage' => $language,
             'translations'  => $translations,
             'errors'        => $this->errors
