@@ -33,22 +33,30 @@ class GambioStoreAuth
      */
     private $logger;
     
+    /**
+     * @var \GambioStoreShopInformation
+     */
+    private $shopInformation;
+    
     
     /**
      * GambioStoreAuth constructor.
      *
-     * @param \GambioStoreConfiguration $configuration
-     * @param \GambioStoreHttp          $http
-     * @param \GambioStoreLogger        $logger
+     * @param \GambioStoreConfiguration   $configuration
+     * @param \GambioStoreHttp            $http
+     * @param \GambioStoreShopInformation $shopInformation
+     * @param \GambioStoreLogger          $logger
      */
     public function __construct(
         GambioStoreConfiguration $configuration,
         GambioStoreHttp $http,
+        GambioStoreShopInformation $shopInformation,
         GambioStoreLogger $logger
     ) {
-        $this->configuration = $configuration;
-        $this->http          = $http;
-        $this->logger        = $logger;
+        $this->configuration   = $configuration;
+        $this->http            = $http;
+        $this->shopInformation = $shopInformation;
+        $this->logger          = $logger;
     }
     
     
@@ -62,10 +70,12 @@ class GambioStoreAuth
      */
     public function requestNewAuthWithHeaders(array $headers)
     {
-        $apiUrl   = $this->configuration->get('GAMBIO_STORE_API_URL');
-        $response = $this->http->post($apiUrl . '/request_auth', [], [
-            CURLOPT_HTTPHEADER => $headers
-        ]);
+        $apiUrl               = $this->configuration->get('GAMBIO_STORE_API_URL');
+        $shopInformationArray = $this->shopInformation->getShopInformation();
+        $response             = $this->http->post($apiUrl . '/request_auth',
+            json_encode(['shopInformation' => $shopInformationArray]), [
+                CURLOPT_HTTPHEADER => $headers
+            ]);
         
         $statusCode = $response->getInformation(CURLINFO_HTTP_CODE);
         

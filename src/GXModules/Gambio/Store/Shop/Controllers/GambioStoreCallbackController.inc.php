@@ -85,15 +85,23 @@ class GambioStoreCallbackController extends HttpViewController
     
     
     /**
-     * Receives a new auth code for the Store
+     * Receives a new auth code for the Store and requests the first access and refresh token
      *
      * @return \JsonHttpControllerResponse
+     * @throws \GambioStoreRequestingAuthInvalidStatusException
      */
     public function actionIssueAuthCode()
     {
         $this->setup();
         
         $authCode = $this->_getPostData('authCode');
+        
+        if ($authCode === null) {
+            return new JsonHttpControllerResponse([
+                'success' => false
+            ]);
+        }
+        
         $clientId = $this->configuration->get('GAMBIO_STORE_TOKEN');
         
         $result = $this->auth->requestNewAuthWithHeaders([
@@ -103,6 +111,37 @@ class GambioStoreCallbackController extends HttpViewController
         
         return new JsonHttpControllerResponse([
             'success' => $result
+        ]);
+    }
+    
+    
+    /**
+     * Receives a new access and optionally a refresh token
+     *
+     * @return \JsonHttpControllerResponse
+     * @throws \GambioStoreRequestingAuthInvalidStatusException
+     */
+    public function actionReceiveAuth()
+    {
+        $this->setup();
+        
+        $accessToken = $this->_getPostData('accessToken');
+        $refreshToken = $this->_getPostData('refreshToken');
+    
+        if ($accessToken === null) {
+            return new JsonHttpControllerResponse([
+                'success' => false
+            ]);
+        }
+        
+        $this->configuration->set('GAMBIO_STORE_ACCESS_TOKEN', $accessToken);
+        
+        if ($refreshToken !== null) {
+            $this->configuration->set('GAMBIO_STORE_REFRESH_TOKEN', $refreshToken);
+        }
+        
+        return new JsonHttpControllerResponse([
+            'success' => true
         ]);
     }
 }
