@@ -26,6 +26,16 @@ class GambioStoreCallbackController extends HttpViewController
      */
     private $connector;
     
+    /**
+     * @var \GambioStoreConfiguration
+     */
+    private $configuration;
+    
+    /**
+     * @var \GambioStoreAuth
+     */
+    private $auth;
+    
     
     /**
      * Setup of our Connector classes
@@ -33,6 +43,8 @@ class GambioStoreCallbackController extends HttpViewController
     private function setup()
     {
         $this->connector = GambioStoreConnector::getInstance();
+        $this->configuration = $this->connector->getConfiguration();
+        $this->auth = $this->connector->getAuth();
     }
     
     
@@ -66,6 +78,29 @@ class GambioStoreCallbackController extends HttpViewController
     
         $result = $this->connector->verifyToken($storeToken);
     
+        return new JsonHttpControllerResponse([
+            'success' => $result
+        ]);
+    }
+    
+    
+    /**
+     * Receives a new auth code for the Store
+     *
+     * @return \JsonHttpControllerResponse
+     */
+    public function actionIssueAuthCode()
+    {
+        $this->setup();
+        
+        $authCode = $this->_getPostData('authCode');
+        $clientId = $this->configuration->get('GAMBIO_STORE_TOKEN');
+        
+        $result = $this->auth->requestNewAuthWithHeaders([
+            'X-CLIENT-ID' => $clientId,
+            'X-AUTH-CODE' => $authCode
+        ]);
+        
         return new JsonHttpControllerResponse([
             'success' => $result
         ]);

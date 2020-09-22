@@ -60,7 +60,7 @@ class GambioStoreAuth
      * @return bool Whether the request was successful or not
      * @throws \GambioStoreRequestingAuthInvalidStatusException
      */
-    public function requestNewAuthWithHeaders(array $headers): bool
+    public function requestNewAuthWithHeaders(array $headers)
     {
         $apiUrl   = $this->configuration->get('GAMBIO_STORE_API_URL');
         $response = $this->http->post($apiUrl . '/request_auth', [], [
