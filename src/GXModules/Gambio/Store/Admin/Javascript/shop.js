@@ -61,6 +61,39 @@ const sendShopInfo = (shopInfo) => {
 };
 
 /**
+ * Requests new auth headers from the Connector and sends them to the GUI
+ */
+const prepareAndSendNewAuthHeaders = () => {
+	GambioStore.callShop('admin.php?do=GambioStoreAjax/requestNewAuth')
+		.then((authHeaders) => {
+			GambioStore.messenger.sendMessage('send_auth_headers', {authHeaders});
+		})
+		.catch(err => {
+			switch(err.type) {
+				case(GambioStore.networkErrors.JSON_PARSE_ERROR):
+					GambioStore.showError(
+						GambioStore.translation.translate('WARNING_TITLE'),
+						GambioStore.translation.translate('NEW_AUTH_JSON_PARSE_ERROR')
+					);
+					break;
+				case(GambioStore.networkErrors.NETWORK_ERROR):
+					GambioStore.showError(
+						GambioStore.translation.translate('WARNING_TITLE'),
+						GambioStore.translation.translate('NEW_AUTH_NETWORK_ERROR')
+					);
+					break;
+				default:
+					GambioStore.showError(
+						GambioStore.translation.translate('WARNING_TITLE'),
+						GambioStore.translation.translate('UNKNOWN_ERROR')
+					);
+					break;
+			}
+		});
+}
+
+
+/**
  * Initiate messenger listeners upon a built document.
  */
 window.addEventListener('DOMContentLoaded', () => {
@@ -83,6 +116,8 @@ window.addEventListener('DOMContentLoaded', () => {
 	GambioStore.messenger.listenToMessage('reload_page', function() {
 		window.location.reload(true);
 	})
+	
+	GambioStore.messenger.listenToMessage('auth_expired', prepareAndSendNewAuthHeaders);
 	
 	GambioStore.messenger.listenToMessage('scroll_to_top', function() {
 		window.scrollTo({
