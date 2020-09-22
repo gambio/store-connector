@@ -71,9 +71,9 @@ window.addEventListener('DOMContentLoaded', () => {
 		fetchShopInfo().then(sendShopInfo);
 	});
 	
-	GambioStore.messenger.listenToMessage('request_store_token', function() {
-		const storeToken = document.getElementById('gambio-store-iframe').dataset.storeToken;
-		GambioStore.messenger.sendMessage('send_store_token', {'storeToken': storeToken});
+	GambioStore.messenger.listenToMessage('request_auth_headers', function() {
+		const authHeaders = JSON.parse(document.getElementById('gambio-store-iframe').dataset.storeAuthHeaders);
+		GambioStore.messenger.sendMessage('send_auth_headers', {'authHeaders': authHeaders});
 	});
 	
 	GambioStore.messenger.listenToMessage('send_data_processing_accepted', function() {
