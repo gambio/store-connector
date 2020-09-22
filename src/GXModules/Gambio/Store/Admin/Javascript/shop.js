@@ -109,6 +109,13 @@ window.addEventListener('DOMContentLoaded', () => {
 		GambioStore.messenger.sendMessage('send_auth_headers', {'authHeaders': authHeaders});
 	});
 	
+	GambioStore.messenger.listenToMessage('request_registration_headers', function() {
+		const clientId = JSON.parse(document.getElementById('gambio-store-iframe').dataset.storeClientId);
+		GambioStore.messenger.sendMessage('send_registration_headers', {'registrationHeaders': {
+			'X-CLIENT-ID': [clientId]
+			}});
+	});
+	
 	GambioStore.messenger.listenToMessage('send_data_processing_accepted', function() {
 		window.location.href = 'admin.php?do=GambioStore/AcceptDataProcessing';
 	});
