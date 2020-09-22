@@ -64,7 +64,7 @@ class GambioStoreCallbackController extends HttpViewController
     
         $storeToken = $this->_getPostData('storeToken');
     
-        $result = $this->connector->verifyRegistration($storeToken);
+        $result = $this->connector->verifyToken($storeToken);
     
         return new JsonHttpControllerResponse([
             'success' => $result

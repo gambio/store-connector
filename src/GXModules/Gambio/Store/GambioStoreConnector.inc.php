@@ -237,16 +237,14 @@ class GambioStoreConnector
      *
      * @return bool
      */
-    public function verifyRegistration($storeToken)
+    public function verifyToken($storeToken)
     {
         $result = $this->configuration->get('GAMBIO_STORE_TOKEN') === $storeToken;
         if ($result) {
-            $this->logger->notice('Registration verification succeed');
-            $this->configuration->set('GAMBIO_STORE_IS_REGISTERED', 'true');
+            $this->logger->notice('Token verification succeed');
         } else {
-            $this->logger->error('Registration verification failed');
+            $this->logger->error('Token verification failed. Received: ' . $storeToken);
         }
-        
         return $result;
     }
     
