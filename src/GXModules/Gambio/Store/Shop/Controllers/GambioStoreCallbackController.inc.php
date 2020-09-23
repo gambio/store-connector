@@ -140,6 +140,8 @@ class GambioStoreCallbackController extends HttpViewController
             $this->configuration->set('GAMBIO_STORE_REFRESH_TOKEN', $refreshToken);
         }
         
+        $this->configuration->set('GAMBIO_STORE_IS_REGISTERED', true);
+        
         return new JsonHttpControllerResponse([
             'success' => true
         ]);
