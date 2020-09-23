@@ -20,6 +20,7 @@ require_once 'Core/GambioStoreShopInformation.inc.php';
 require_once 'Core/GambioStoreCache.inc.php';
 require_once 'Core/GambioStoreBackup.inc.php';
 require_once 'Core/GambioStorePackageInstaller.inc.php';
+require_once 'Core/GambioStoreAuth.inc.php';
 require_once 'Core/Exceptions/GambioStoreLanguageNotResolvableException.inc.php';
 require_once 'Core/Exceptions/GambioStoreHttpErrorException.inc.php';
 require_once 'Core/Exceptions/GambioStoreUpdatesNotRetrievableException.inc.php';
