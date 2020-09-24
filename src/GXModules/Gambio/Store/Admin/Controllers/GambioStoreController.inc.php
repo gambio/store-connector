@@ -269,7 +269,7 @@ class GambioStoreController extends AdminHttpViewController
     private function getGambioStoreAuthHeaders()
     {
         return [
-            'X-ACCESS-TOKEN' => [$this->configuration->get('GAMBIO_STORE_ACCESS_TOKEN')]
+            'X-ACCESS-TOKEN' => $this->configuration->get('GAMBIO_STORE_ACCESS_TOKEN')
         ];
     }
     
