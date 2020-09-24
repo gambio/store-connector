@@ -110,9 +110,9 @@ window.addEventListener('DOMContentLoaded', () => {
 	});
 	
 	GambioStore.messenger.listenToMessage('request_registration_headers', function() {
-		const clientId = JSON.parse(document.getElementById('gambio-store-iframe').dataset.storeClientId);
+		const clientId = document.getElementById('gambio-store-iframe').dataset.storeClientId;
 		GambioStore.messenger.sendMessage('send_registration_headers', {'registrationHeaders': {
-			'X-CLIENT-ID': [clientId]
+			'X-CLIENT-ID': clientId
 			}});
 	});
 	
