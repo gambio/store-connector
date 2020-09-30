@@ -9,9 +9,10 @@
    --------------------------------------------------------------
 */
 
+require_once __DIR__ .'/AbstractGambioStoreController.inc.php';
 require_once __DIR__ . '/../../GambioStoreConnector.inc.php';
 
-class GambioStoreController extends AdminHttpViewController
+class GambioStoreController extends AbstractGambioStoreController 
 {
     /**
      * @var \GambioStoreConnector
@@ -165,7 +166,7 @@ class GambioStoreController extends AdminHttpViewController
         $this->setup();
         
         $gambioStoreUrl    = $this->getGambioStoreUrl();
-        $gambioStoreApiUrl = $this->getGambioStoreApiUrl();
+        $gambioStoreApiUrl = self::getGambioStoreApiUrl($this->configuration);
         
         if (isset($_POST['url'])
             && $_POST['url'] !== $gambioStoreUrl
@@ -261,53 +262,7 @@ class GambioStoreController extends AdminHttpViewController
     }
     
     
-    /**
-     * Gets the auth headers
-     *
-     * @return array
-     */
-    private function getGambioStoreAuthHeaders()
-    {
-        return [
-            'X-ACCESS-TOKEN' => $this->configuration->get('GAMBIO_STORE_ACCESS_TOKEN')
-        ];
-    }
     
-    
-    /**
-     * Gets the store api URL
-     *
-     * @return string
-     */
-    private function getGambioStoreApiUrl()
-    {
-        $gambioUrl = $this->configuration->get('GAMBIO_STORE_API_URL');
-        
-        // Fall back to the production Gambio Store api URL if none is set.
-        if (empty($gambioUrl)) {
-            $gambioUrl = 'https://store.gambio.com';
-            $this->configuration->set('GAMBIO_STORE_API_URL', $gambioUrl);
-        }
-        
-        return $gambioUrl;
-    }
-    
-    
-    /**
-     * Gets the store token
-     *
-     * @return mixed
-     */
-    private function getGambioStoreToken()
-    {
-        $gambioToken = $this->configuration->get('GAMBIO_STORE_TOKEN');
-        if (empty($gambioToken)) {
-            $gambioToken = $this->connector->generateToken();
-            $this->configuration->set('GAMBIO_STORE_TOKEN', $gambioToken);
-        }
-        
-        return $gambioToken;
-    }
     
     
     /**
@@ -373,8 +328,8 @@ class GambioStoreController extends AdminHttpViewController
         
         return new KeyValueCollection([
             'storeUrl'      => $this->getGambioStoreUrl() . $urlPostfix,
-            'clientId'      => $this->getGambioStoreToken(),
-            'authHeaders'   => $this->getGambioStoreAuthHeaders(),
+            'clientId'      => self::getGambioStoreToken($this->configuration, $this->connector),
+            'authHeaders'   => self::getGambioStoreAuthHeaders($this->configuration),
             'storeLanguage' => $language,
             'translations'  => $translations,
             'errors'        => $this->errors

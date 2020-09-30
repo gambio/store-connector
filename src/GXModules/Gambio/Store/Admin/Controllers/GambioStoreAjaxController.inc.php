@@ -9,6 +9,7 @@
    --------------------------------------------------------------
 */
 
+require_once __DIR__ .'/AbstractGambioStoreController.inc.php';
 require_once __DIR__ . '/../../GambioStoreConnector.inc.php';
 
 /**
@@ -19,7 +20,7 @@ require_once __DIR__ . '/../../GambioStoreConnector.inc.php';
  * @category System
  * @package  AdminHttpViewControllers
  */
-class GambioStoreAjaxController extends AdminHttpViewController
+class GambioStoreAjaxController extends AbstractGambioStoreController
 {
     /**
      * @var \GambioStoreConnector
@@ -58,6 +59,52 @@ class GambioStoreAjaxController extends AdminHttpViewController
         $this->themes        = $this->connector->getThemes();
         $this->logger        = $this->connector->getLogger();
         $this->compatibility = $this->connector->getCompatibility();
+    }
+    
+    public function actionRequestNewAuth()
+    {
+        $this->setup();
+       
+        $storeApiAuthUrl = self::getGambioStoreApiUrl($this->configuration) . '/request_auth';
+        $curlHandle = curl_init();
+       
+        $shopInformationJson = json_encode(['shopInformation' => $this->connector->getShopInformation()]);
+        $headers = ['Content-Type: application/json'];
+        $refreshToken = $this->configuration->get('GAMBIO_STORE_REFRESH_TOKEN');
+        if($refreshToken){
+           $headers[] = 'X-REFRESH-TOKEN: ' . $refreshToken; 
+        }
+        
+        curl_setopt($curlHandle, CURLOPT_URL, $storeApiAuthUrl);
+        curl_setopt($curlHandle, CURLOPT_POST, 1);
+        curl_setopt($curlHandle, CURLOPT_POSTFIELDS, $shopInformationJson);
+        curl_setopt($curlHandle, CURLOPT_HTTPHEADER, $headers);
+        curl_exec($curlHandle);
+        $response = curl_getinfo($curlHandle, CURLINFO_HTTP_CODE);
+        curl_close($curlHandle);
+      
+        if($response !== 200) {
+            $headers = ['Content-Type: application/json', 
+                        'X-CLIENT-ID: ' . self::getGambioStoreToken($this->configuration, $this->connector)];
+            $curlHandle = curl_init();
+            curl_setopt($curlHandle, CURLOPT_URL, $storeApiAuthUrl);
+            curl_setopt($curlHandle, CURLOPT_POST, 1);
+            curl_setopt($curlHandle, CURLOPT_POSTFIELDS, $shopInformationJson);
+            curl_setopt($curlHandle, CURLOPT_HTTPHEADER, $headers);
+            curl_exec($curlHandle);
+            $response = curl_getinfo($curlHandle, CURLINFO_HTTP_CODE);
+            curl_close($curlHandle);
+            
+            if($response !== 200){
+               return new JsonHttpControllerResponse(['success' => false, 'status' => $response]); 
+            }
+        }
+        
+        return new JsonHttpControllerResponse([
+            'success'=>true,
+            'headers'=>self::getGambioStoreAuthHeaders($this->configuration),
+            'status'=>$response
+        ]); 
     }
     
     /**
