@@ -71,8 +71,8 @@ class GambioStoreAjaxController extends AbstractGambioStoreController
         $shopInformationJson = json_encode(['shopInformation' => $this->connector->getShopInformation()]);
         $headers = ['Content-Type: application/json'];
         $refreshToken = $this->configuration->get('GAMBIO_STORE_REFRESH_TOKEN');
-        if($refreshToken){
-           $headers[] = 'X-REFRESH-TOKEN: ' . $refreshToken; 
+        if ($refreshToken) {
+            $headers[] = 'X-REFRESH-TOKEN: ' . $refreshToken;
         }
         
         curl_setopt($curlHandle, CURLOPT_URL, $storeApiAuthUrl);
@@ -83,8 +83,8 @@ class GambioStoreAjaxController extends AbstractGambioStoreController
         $response = curl_getinfo($curlHandle, CURLINFO_HTTP_CODE);
         curl_close($curlHandle);
       
-        if($response !== 200) {
-            $headers = ['Content-Type: application/json', 
+        if ($response !== 200) {
+            $headers = ['Content-Type: application/json',
                         'X-CLIENT-ID: ' . self::getGambioStoreToken($this->configuration, $this->connector)];
             $curlHandle = curl_init();
             curl_setopt($curlHandle, CURLOPT_URL, $storeApiAuthUrl);
@@ -95,8 +95,8 @@ class GambioStoreAjaxController extends AbstractGambioStoreController
             $response = curl_getinfo($curlHandle, CURLINFO_HTTP_CODE);
             curl_close($curlHandle);
             
-            if($response !== 200){
-               return new JsonHttpControllerResponse(['success' => false, 'status' => $response]); 
+            if ($response !== 200) {
+                return new JsonHttpControllerResponse(['success' => false, 'status' => $response]);
             }
         }
         
@@ -104,7 +104,7 @@ class GambioStoreAjaxController extends AbstractGambioStoreController
             'success'=>true,
             'headers'=>self::getGambioStoreAuthHeaders($this->configuration),
             'status'=>$response
-        ]); 
+        ]);
     }
     
     /**
@@ -203,8 +203,10 @@ class GambioStoreAjaxController extends AbstractGambioStoreController
         $this->setup();
         
         if (!isset($_GET, $_GET['themeName'])) {
-            $this->logger->warning('Can not check if theme is active because no theme name was provided',
-                ['getParams' => $_GET]);
+            $this->logger->warning(
+                'Can not check if theme is active because no theme name was provided',
+                ['getParams' => $_GET]
+            );
             
             return new JsonHttpControllerResponse(['success' => false]);
         }
@@ -227,8 +229,10 @@ class GambioStoreAjaxController extends AbstractGambioStoreController
         $this->setup();
         
         if (!isset($_POST, $_POST['themeStorageName'])) {
-            $this->logger->warning('Can not activate theme, because it was no theme storage name provided',
-                ['getParams' => $_POST]);
+            $this->logger->warning(
+                'Can not activate theme, because it was no theme storage name provided',
+                ['getParams' => $_POST]
+            );
             
             return new JsonHttpControllerResponse(['success' => false]);
         }
