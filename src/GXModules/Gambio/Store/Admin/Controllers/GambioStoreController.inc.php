@@ -9,10 +9,9 @@
    --------------------------------------------------------------
 */
 
-require_once __DIR__ .'/AbstractGambioStoreController.inc.php';
 require_once __DIR__ . '/../../GambioStoreConnector.inc.php';
 
-class GambioStoreController extends AbstractGambioStoreController 
+class GambioStoreController extends HttpViewController 
 {
     /**
      * @var \GambioStoreConnector
@@ -166,7 +165,7 @@ class GambioStoreController extends AbstractGambioStoreController
         $this->setup();
         
         $gambioStoreUrl    = $this->getGambioStoreUrl();
-        $gambioStoreApiUrl = self::getGambioStoreApiUrl($this->configuration);
+        $gambioStoreApiUrl = $this->getGambioStoreApiUrl();
         
         if (isset($_POST['url'])
             && $_POST['url'] !== $gambioStoreUrl
@@ -328,8 +327,8 @@ class GambioStoreController extends AbstractGambioStoreController
         
         return new KeyValueCollection([
             'storeUrl'      => $this->getGambioStoreUrl() . $urlPostfix,
-            'clientId'      => self::getGambioStoreToken($this->configuration, $this->connector),
-            'authHeaders'   => self::getGambioStoreAuthHeaders($this->configuration),
+            'clientId'      => $this->getGambioStoreToken(),
+            'authHeaders'   => $this->getGambioStoreAuthHeaders(),
             'storeLanguage' => $language,
             'translations'  => $translations,
             'errors'        => $this->errors
@@ -345,5 +344,60 @@ class GambioStoreController extends AbstractGambioStoreController
     private function appendError($errorIdentifier)
     {
         $this->errors[] = $errorIdentifier;
+    }
+    
+    /**
+     * Gets the auth headers
+     *
+     * @var \GambioStoreConfiguration $configuration
+     *
+     * @return array
+     */
+    private function getGambioStoreAuthHeaders()
+    {
+        return [
+            'X-ACCESS-TOKEN' => $this->configuration->get('GAMBIO_STORE_ACCESS_TOKEN')
+        ];
+    }
+    
+    
+    /**
+     * Gets the store api URL
+     *
+     * @var \GambioStoreConfiguration $configuration
+     *
+     * @return string
+     */
+    private function getGambioStoreApiUrl()
+    {
+        $gambioUrl = $this->configuration->get('GAMBIO_STORE_API_URL');
+        
+        // Fall back to the production Gambio Store api URL if none is set.
+        if (empty($gambioUrl)) {
+            $gambioUrl = 'https://store.gambio.com';
+            $this->configuration->set('GAMBIO_STORE_API_URL', $gambioUrl);
+        }
+        
+        return $gambioUrl;
+    }
+    
+    
+    /**
+     * Gets the store token
+     *
+     * @var \GambioStoreConfiguration $configuration
+     * @var \GambioStoreConnector $connector
+     *
+     * @return mixed
+     */
+    private function getGambioStoreToken()
+    {
+        $gambioStoreToken = $this->configuration->get('GAMBIO_STORE_TOKEN');
+        if (empty($gambioStoreToken)) {
+            $gambioStoreToken = $this->connector->generateToken();
+            $this->configuration->set('GAMBIO_STORE_TOKEN', $gambioStoreToken);
+        }
+        
+        return $gambioStoreToken;
     }
 }

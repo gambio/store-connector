@@ -9,7 +9,6 @@
    --------------------------------------------------------------
 */
 
-require_once __DIR__ .'/AbstractGambioStoreController.inc.php';
 require_once __DIR__ . '/../../GambioStoreConnector.inc.php';
 
 /**
@@ -20,7 +19,7 @@ require_once __DIR__ . '/../../GambioStoreConnector.inc.php';
  * @category System
  * @package  AdminHttpViewControllers
  */
-class GambioStoreAjaxController extends AbstractGambioStoreController
+class GambioStoreAjaxController extends HttpViewController
 {
     /**
      * @var \GambioStoreConnector
@@ -65,7 +64,7 @@ class GambioStoreAjaxController extends AbstractGambioStoreController
     {
         $this->setup();
        
-        $storeApiAuthUrl = self::getGambioStoreApiUrl($this->configuration) . '/request_auth';
+        $storeApiAuthUrl = $this->getGambioStoreApiUrl() . '/request_auth';
         $curlHandle = curl_init();
        
         $shopInformationJson = json_encode(['shopInformation' => $this->connector->getShopInformation()]);
@@ -85,7 +84,7 @@ class GambioStoreAjaxController extends AbstractGambioStoreController
       
         if ($response !== 200) {
             $headers = ['Content-Type: application/json',
-                        'X-CLIENT-ID: ' . self::getGambioStoreToken($this->configuration, $this->connector)];
+                        'X-CLIENT-ID: ' . $this->getGambioStoreToken()];
             $curlHandle = curl_init();
             curl_setopt($curlHandle, CURLOPT_URL, $storeApiAuthUrl);
             curl_setopt($curlHandle, CURLOPT_POST, 1);
@@ -102,7 +101,7 @@ class GambioStoreAjaxController extends AbstractGambioStoreController
         
         return new JsonHttpControllerResponse([
             'success'=>true,
-            'headers'=>self::getGambioStoreAuthHeaders($this->configuration),
+            'headers'=>$this->getGambioStoreAuthHeaders(),
             'status'=>$response
         ]);
     }
@@ -253,4 +252,59 @@ class GambioStoreAjaxController extends AbstractGambioStoreController
     {
         return new JsonHttpControllerResponse(['success' => true]);
     }
+    
+    /**
+     * Gets the auth headers
+     *
+     * @var \GambioStoreConfiguration $configuration
+     *
+     * @return array
+     */
+    private function getGambioStoreAuthHeaders()
+    {
+        return [
+            'X-ACCESS-TOKEN' => $this->configuration->get('GAMBIO_STORE_ACCESS_TOKEN')
+        ];
+    }
+    
+    
+    /**
+     * Gets the store api URL
+     *
+     * @var \GambioStoreConfiguration $configuration
+     *
+     * @return string
+     */
+    private function getGambioStoreApiUrl()
+    {
+        $gambioUrl = $this->configuration->get('GAMBIO_STORE_API_URL');
+        
+        // Fall back to the production Gambio Store api URL if none is set.
+        if (empty($gambioUrl)) {
+            $gambioUrl = 'https://store.gambio.com';
+            $this->configuration->set('GAMBIO_STORE_API_URL', $gambioUrl);
+        }
+        
+        return $gambioUrl;
+    }
+    
+    
+    /**
+     * Gets the store token
+     *
+     * @var \GambioStoreConfiguration $configuration
+     * @var \GambioStoreConnector $connector
+     *
+     * @return mixed
+     */
+    private function getGambioStoreToken()
+    {
+        $gambioStoreToken = $this->configuration->get('GAMBIO_STORE_TOKEN');
+        if (empty($gambioStoreToken)) {
+            $gambioStoreToken = $this->connector->generateToken();
+            $this->configuration->set('GAMBIO_STORE_TOKEN', $gambioStoreToken);
+        }
+        
+        return $gambioStoreToken;
+    } 
 }
