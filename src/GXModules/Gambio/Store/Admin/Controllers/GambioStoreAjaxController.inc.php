@@ -46,6 +46,11 @@ class GambioStoreAjaxController extends AdminHttpViewController
      */
     private $compatibility;
     
+    /**
+     * @var \GambioStoreAuth
+     */
+    private $storeAuth;
+    
     
     /**
      * Sets up this class avoiding the constructor.
@@ -54,6 +59,7 @@ class GambioStoreAjaxController extends AdminHttpViewController
     private function setup()
     {
         $this->connector     = GambioStoreConnector::getInstance();
+        $this->storeAuth     = $this->connector->getAuth();
         $this->configuration = $this->connector->getConfiguration();
         $this->themes        = $this->connector->getThemes();
         $this->logger        = $this->connector->getLogger();
@@ -64,46 +70,35 @@ class GambioStoreAjaxController extends AdminHttpViewController
     {
         $this->setup();
        
-        $storeApiAuthUrl = $this->getGambioStoreApiUrl() . '/request_auth';
-        $curlHandle = curl_init();
-       
-        $shopInformationJson = json_encode(['shopInformation' => $this->connector->getShopInformation()]);
         $headers = ['Content-Type: application/json'];
         $refreshToken = $this->configuration->get('GAMBIO_STORE_REFRESH_TOKEN');
-        if ($refreshToken) {
-            $headers[] = 'X-REFRESH-TOKEN: ' . $refreshToken;
-        }
-        
-        curl_setopt($curlHandle, CURLOPT_URL, $storeApiAuthUrl);
-        curl_setopt($curlHandle, CURLOPT_POST, 1);
-        curl_setopt($curlHandle, CURLOPT_POSTFIELDS, $shopInformationJson);
-        curl_setopt($curlHandle, CURLOPT_HTTPHEADER, $headers);
-        curl_exec($curlHandle);
-        $response = curl_getinfo($curlHandle, CURLINFO_HTTP_CODE);
-        curl_close($curlHandle);
-      
-        if ($response !== 200) {
-            $headers = ['Content-Type: application/json',
-                        'X-CLIENT-ID: ' . $this->getGambioStoreToken()];
-            $curlHandle = curl_init();
-            curl_setopt($curlHandle, CURLOPT_URL, $storeApiAuthUrl);
-            curl_setopt($curlHandle, CURLOPT_POST, 1);
-            curl_setopt($curlHandle, CURLOPT_POSTFIELDS, $shopInformationJson);
-            curl_setopt($curlHandle, CURLOPT_HTTPHEADER, $headers);
-            curl_exec($curlHandle);
-            $response = curl_getinfo($curlHandle, CURLINFO_HTTP_CODE);
-            curl_close($curlHandle);
-            
-            if ($response !== 200) {
-                return new JsonHttpControllerResponse(['success' => false, 'status' => $response]);
+        try {
+            if ($refreshToken) {
+                $headers[] = 'X-REFRESH-TOKEN: ' . $refreshToken;
+                if ($this->storeAuth->requestNewAuthWithHeaders($headers)) {
+                    return new JsonHttpControllerResponse([
+                        'success' => true,
+                        'headers' => $this->getGambioStoreAuthHeaders(),
+                        'status'  => 200
+                    ]);
+                }
             }
+            $headers = [
+                'Content-Type: application/json',
+                'X-CLIENT-ID: ' . $this->getGambioStoreToken()
+            ];
+            if ($this->storeAuth->requestNewAuthWithHeaders($headers)) {
+                return new JsonHttpControllerResponse([
+                    'success' => true,
+                    'headers' => $this->getGambioStoreAuthHeaders(),
+                    'status'  => 200
+                ]);
+            }
+    
+            return new JsonHttpControllerResponse(['success' => false, 'status' => 401]);
+        } catch (GambioStoreRequestingAuthInvalidStatusException $e) {
+            return new JsonHttpControllerResponse(['success' => false, 'status' => $e->getCode()]);
         }
-        
-        return new JsonHttpControllerResponse([
-            'success'=>true,
-            'headers'=>$this->getGambioStoreAuthHeaders(),
-            'status'=>$response
-        ]);
     }
     
     /**
