@@ -72,10 +72,16 @@ class GambioStoreAuth
     {
         $apiUrl               = $this->configuration->get('GAMBIO_STORE_API_URL');
         $shopInformationArray = $this->shopInformation->getShopInformation();
-        $response             = $this->http->post($apiUrl . '/request_auth',
-            json_encode(['shopInformation' => $shopInformationArray]), [
+    
+        $headers[] = 'Content-Type: application/json';
+        
+        $response             = $this->http->post(
+            $apiUrl . '/request_auth',
+            json_encode(['shopInformation' => $shopInformationArray]),
+            [
                 CURLOPT_HTTPHEADER => $headers
-            ]);
+            ]
+        );
         
         $statusCode = $response->getInformation(CURLINFO_HTTP_CODE);
         
@@ -85,8 +91,10 @@ class GambioStoreAuth
             case 401:
                 return false;
             default:
-                throw new GambioStoreRequestingAuthInvalidStatusException('Received invalid status code when requesting new authentication',
-                    $statusCode);
+                throw new GambioStoreRequestingAuthInvalidStatusException(
+                    'Received invalid status code when requesting new authentication',
+                    $statusCode
+                );
         }
     }
 }

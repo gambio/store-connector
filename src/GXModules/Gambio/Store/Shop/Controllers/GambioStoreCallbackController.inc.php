@@ -105,8 +105,8 @@ class GambioStoreCallbackController extends HttpViewController
         $clientId = $this->configuration->get('GAMBIO_STORE_TOKEN');
         
         $result = $this->auth->requestNewAuthWithHeaders([
-            'X-CLIENT-ID' => $clientId,
-            'X-AUTH-CODE' => $authCode
+            "X-CLIENT-ID: $clientId",
+            "X-AUTH-CODE: $authCode"
         ]);
         
         return new JsonHttpControllerResponse([
