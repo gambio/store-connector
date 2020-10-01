@@ -11,7 +11,7 @@
 
 require_once __DIR__ . '/../../GambioStoreConnector.inc.php';
 
-class GambioStoreController extends HttpViewController 
+class GambioStoreController extends AdminHttpViewController 
 {
     /**
      * @var \GambioStoreConnector
