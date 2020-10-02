@@ -66,7 +66,13 @@ class GambioStoreAuth
      * @param array $headers
      *
      * @return bool Whether the request was successful or not
+     * @throws \GambioStoreHttpErrorException
+     * @throws \GambioStoreHttpServerMissingException
+     * @throws \GambioStoreRelativeShopPathMissingException
      * @throws \GambioStoreRequestingAuthInvalidStatusException
+     * @throws \GambioStoreShopClassMissingException
+     * @throws \GambioStoreShopKeyMissingException
+     * @throws \GambioStoreShopVersionMissingException
      */
     public function requestNewAuthWithHeaders(array $headers)
     {

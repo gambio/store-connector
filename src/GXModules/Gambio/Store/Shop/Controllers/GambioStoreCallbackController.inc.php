@@ -88,7 +88,13 @@ class GambioStoreCallbackController extends HttpViewController
      * Receives a new auth code for the Store and requests the first access and refresh token
      *
      * @return \JsonHttpControllerResponse
+     * @throws \GambioStoreHttpErrorException
+     * @throws \GambioStoreHttpServerMissingException
+     * @throws \GambioStoreRelativeShopPathMissingException
      * @throws \GambioStoreRequestingAuthInvalidStatusException
+     * @throws \GambioStoreShopClassMissingException
+     * @throws \GambioStoreShopKeyMissingException
+     * @throws \GambioStoreShopVersionMissingException
      */
     public function actionIssueAuthCode()
     {
@@ -119,7 +125,6 @@ class GambioStoreCallbackController extends HttpViewController
      * Receives a new access and optionally a refresh token
      *
      * @return \JsonHttpControllerResponse
-     * @throws \GambioStoreRequestingAuthInvalidStatusException
      */
     public function actionReceiveAuth()
     {
