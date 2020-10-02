@@ -89,7 +89,7 @@ class GambioStoreAuth
             ]
         );
         
-        $statusCode = $response->getInformation(CURLINFO_HTTP_CODE);
+        $statusCode = $response->getStatus();
         
         switch ($statusCode) {
             case 200:

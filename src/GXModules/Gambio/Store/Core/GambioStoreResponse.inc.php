@@ -57,6 +57,7 @@ class GambioStoreResponse
         if ($key === null) {
             return $this->information;
         }
+        
         if (isset($this->information[$key])) {
             return $this->information[$key];
         }
@@ -102,5 +103,16 @@ class GambioStoreResponse
         }
         
         return null;
+    }
+    
+    
+    /**
+     * Returns the status code.
+     *
+     * @return array|null
+     */
+    public function getStatus()
+    {
+        return $this->getInformation('http_code');
     }
 }
