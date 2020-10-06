@@ -73,7 +73,11 @@ class GambioStoreAjaxController extends AdminHttpViewController
         try {
             $refreshToken = $this->configuration->get('GAMBIO_STORE_REFRESH_TOKEN');
             if ($refreshToken) {
-                $headers = ['Content-Type: application/json', 'X-REFRESH-TOKEN: ' . $refreshToken];
+                $headers = [
+                    'Content-Type: application/json',
+                    'X-REFRESH-TOKEN: ' . $refreshToken,
+                    'X-CLIENT-ID: ' . $this->getGambioStoreToken()
+                ];
                 if ($this->storeAuth->requestNewAuthWithHeaders($headers)) {
                     return new JsonHttpControllerResponse([
                         'success' => true,
