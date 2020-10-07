@@ -81,13 +81,17 @@ class GambioStoreAuth
     
         $headers[] = 'Content-Type: application/json';
         
-        $response             = $this->http->post(
-            $apiUrl . '/request_auth',
-            json_encode(['shopInformation' => $shopInformationArray]),
-            [
-                CURLOPT_HTTPHEADER => $headers
-            ]
-        );
+        try {
+            $response             = $this->http->post(
+                $apiUrl . '/request_auth',
+                json_encode(['shopInformation' => $shopInformationArray]),
+                [
+                    CURLOPT_HTTPHEADER => $headers
+                ]
+            );
+        } catch (GambioStoreHttpErrorException $exception) {
+            return false;
+        }
         
         $statusCode = $response->getStatus();
         
