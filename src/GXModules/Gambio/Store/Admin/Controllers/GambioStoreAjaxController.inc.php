@@ -41,6 +41,11 @@ class GambioStoreAjaxController extends AdminHttpViewController
      */
     private $logger;
     
+    /**
+     * @var \GambioStoreCompatibility
+     */
+    private $compatibility;
+    
     
     /**
      * Sets up this class avoiding the constructor.
@@ -52,8 +57,8 @@ class GambioStoreAjaxController extends AdminHttpViewController
         $this->configuration = $this->connector->getConfiguration();
         $this->themes        = $this->connector->getThemes();
         $this->logger        = $this->connector->getLogger();
+        $this->compatibility = $this->connector->getCompatibility();
     }
-    
     
     /**
      * Collects shop information and sends them back.

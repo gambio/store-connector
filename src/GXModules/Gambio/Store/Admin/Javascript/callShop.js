@@ -34,5 +34,10 @@ window.GambioStore = Object.assign({}, {
                 reject({type: networkErrors.NO_SUCCESS, contex: networkError});
             });
         })
-	}
+	},
+    visitShop: (...params) => {
+        return fetch(...params).catch(networkError => {
+            throw({type: networkErrors.NO_SUCCESS, contex: networkError});
+        });
+    }
 }, window.GambioStore);

@@ -13,6 +13,7 @@ require_once 'Exceptions/GambioStoreHttpServerMissingException.inc.php';
 require_once 'Exceptions/GambioStoreRelativeShopPathMissingException.inc.php';
 require_once 'Exceptions/GambioStoreShopKeyMissingException.inc.php';
 require_once 'Exceptions/GambioStoreShopVersionMissingException.inc.php';
+require_once 'Exceptions/GambioStoreShopClassMissingException.inc.php';
 
 
 class GambioStoreShopInformation
@@ -50,23 +51,47 @@ class GambioStoreShopInformation
      * @throws \GambioStoreRelativeShopPathMissingException
      * @throws \GambioStoreShopKeyMissingException
      * @throws \GambioStoreShopVersionMissingException
+     * @throws \GambioStoreShopClassMissingException
      */
     public function getShopInformation()
     {
         return [
-            'version' => 3,
-            'shop'    => [
+            'version'      => 3,
+            'shop'         => [
                 'url'     => $this->getShopUrl(),
                 'key'     => $this->getShopKey(),
                 'version' => $this->getShopVersion()
             ],
-            'server'  => [
+            'server'       => [
                 'phpVersion'   => $this->getPhpVersion(),
                 'mySQLVersion' => $this->getMySQLVersion()
             ],
-            'modules' => $this->getModuleVersionFiles(),
-            'themes'  => $this->getThemes()
+            'modules'      => $this->getModuleVersionFiles(),
+            'themes'       => $this->getThemes(),
+            'currentTheme' => $this->getCurrentTheme()
         ];
+    }
+    
+    
+    /**
+     * @return mixed
+     * @throws \GambioStoreShopClassMissingException
+     */
+    private function getCurrentTheme()
+    {
+        if (!class_exists('StaticGXCoreLoader')) {
+            throw new GambioStoreShopClassMissingException('The shop class StaticGXCoreLoader is not accessable');
+        }
+        
+        $currentTheme = '';
+        
+        if ($this->areThemesAvailable()) {
+            /* @var \ThemeControl $themeControl */
+            $themeControl = StaticGXCoreLoader::getThemeControl();
+            $currentTheme = $themeControl->isThemeSystemActive() ? $themeControl->getCurrentTheme() : '';
+        }
+        
+        return $currentTheme;
     }
     
     
@@ -187,5 +212,17 @@ class GambioStoreShopInformation
         }
         
         return $themes;
+    }
+    
+    /**
+     * Returns the status of theme support for this shop.
+     *
+     * @return bool
+     */
+    public function areThemesAvailable()
+    {
+        return defined('DIR_FS_CATALOG') && defined('CURRENT_THEME') && !empty(CURRENT_THEME)
+            ? is_dir(DIR_FS_CATALOG . 'themes/' . CURRENT_THEME)
+            : false;
     }
 }

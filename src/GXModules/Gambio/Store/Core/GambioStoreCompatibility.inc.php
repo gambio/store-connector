@@ -37,6 +37,11 @@ class GambioStoreCompatibility
      */
     const FEATURE_THEME_SERVICE = 'themeService';
     
+    /**
+     * Determines whether the shop has the CacheControl and PhraseCacheBuilder classes
+     */
+    const FEATURE_CACHE_CONTROL = 'cacheControl';
+    
     
     /**
      * GambioStoreCompatibility constructor.
@@ -67,6 +72,9 @@ class GambioStoreCompatibility
     
             case self::FEATURE_THEME_SERVICE:
                 return $this->doesFeatureThemeServiceExists();
+                
+            case self::FEATURE_CACHE_CONTROL:
+                return $this->doesFeatureCacheControlAndPhraseBuilderExists();
     
             default:
                 return false;
@@ -109,6 +117,17 @@ class GambioStoreCompatibility
     private function doesFeatureThemeServiceExists()
     {
         return class_exists('ThemeService');
+    }
+    
+    
+    /**
+     * Determines whether the shop has the CacheControl and PhraseCacheBuilder class
+     *
+     * @return bool
+     */
+    private function doesFeatureCacheControlAndPhraseBuilderExists()
+    {
+        return class_exists('CacheControl') && class_exists('PhraseCacheBuilder');
     }
 }
 

@@ -130,6 +130,10 @@ if (defined('StoreKey_MigrationScript')) {
                 if (!$this->configuration->has('GAMBIO_STORE_URL')) {
                     $this->configuration->create('GAMBIO_STORE_URL', 'https://store.gambio.com/a');
                 }
+                
+                if (!$this->configuration->has('GAMBIO_STORE_API_URL')) {
+                    $this->configuration->create('GAMBIO_STORE_API_URL', 'https://store.gambio.com');
+                }
     
                 if (!$this->configuration->has('GAMBIO_STORE_TOKEN')) {
                     $prefix    = 'STORE';
@@ -165,7 +169,7 @@ if (defined('StoreKey_MigrationScript')) {
             {
                 $this->database->query('
                 CREATE TABLE IF NOT EXISTS `gambio_store_cache` (
-        	      `cache_key` VARCHAR(30) NOT NULL PRIMARY KEY,
+        	      `cache_key` VARCHAR(255) NOT NULL PRIMARY KEY,
         	      `cache_value` TEXT NOT NULL
                 ) ENGINE=INNODB
             ');
