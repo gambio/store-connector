@@ -34,7 +34,7 @@ class GambioStoreDatabase
      *
      * @param \PDO $pdo
      */
-    public function __construct(\PDO $pdo)
+    public function __construct(PDO $pdo)
     {
         $this->pdo = $pdo;
     }
@@ -47,7 +47,7 @@ class GambioStoreDatabase
      *
      * @return \GambioStoreDatabase
      */
-    public static function connect(\GambioStoreFileSystem $fileSystem)
+    public static function connect(GambioStoreFileSystem $fileSystem)
     {
         if (self::$instance === null) {
             require_once $fileSystem->getShopDirectory() . '/admin/includes/configure.php';
@@ -80,13 +80,13 @@ class GambioStoreDatabase
     public function query($sql, array $parameters = [])
     {
         if ($parameters && !count(array_filter(array_keys($parameters), 'is_string'))) {
-            throw new \RuntimeException('Parameters array should be associative.');
+            throw new RuntimeException('Parameters array should be associative.');
         }
-    
+        
         $statement = $this->pdo->prepare($sql);
-    
+        
         $statement->execute($parameters);
-    
+        
         return $statement;
     }
     

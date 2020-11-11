@@ -53,7 +53,7 @@ if (defined('StoreKey_MigrationScript')) {
              *
              * @param \PDO $pdo
              */
-            public function __construct(\PDO $pdo)
+            public function __construct(PDO $pdo)
             {
                 $this->pdo = $pdo;
             }
@@ -66,7 +66,7 @@ if (defined('StoreKey_MigrationScript')) {
              *
              * @return \GambioStoreDatabase|\GambioStoreDatabaseFacade
              */
-            public static function connect(\GambioStoreFileSystemFacade $fileSystem)
+            public static function connect(GambioStoreFileSystemFacade $fileSystem)
             {
                 if (self::$instance === null) {
                     require_once $fileSystem->getShopDirectory() . '/admin/includes/configure.php';
@@ -99,7 +99,7 @@ if (defined('StoreKey_MigrationScript')) {
             public function query($sql, array $parameters = [])
             {
                 if ($parameters && !count(array_filter(array_keys($parameters), 'is_string'))) {
-                    throw new \RuntimeException('Parameters array should be associative.');
+                    throw new RuntimeException('Parameters array should be associative.');
                 }
                 
                 $statement = $this->pdo->prepare($sql);

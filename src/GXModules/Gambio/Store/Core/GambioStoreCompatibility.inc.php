@@ -63,19 +63,19 @@ class GambioStoreCompatibility
      */
     public function has($resource)
     {
-        switch($resource) {
+        switch ($resource) {
             case self::RESOURCE_GM_CONFIGURATION_TABLE:
                 return !$this->doesGxConfigurationTableExists();
-    
+            
             case self::FEATURE_THEME_CONTROL:
                 return $this->doesFeatureThemeControlExists();
-    
+            
             case self::FEATURE_THEME_SERVICE:
                 return $this->doesFeatureThemeServiceExists();
-                
+            
             case self::FEATURE_CACHE_CONTROL:
                 return $this->doesFeatureCacheControlAndPhraseBuilderExists();
-    
+            
             default:
                 return false;
         }

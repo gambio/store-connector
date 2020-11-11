@@ -16,5 +16,5 @@ require_once 'GambioStoreException.inc.php';
  */
 class GambioStoreZipException extends GambioStoreException
 {
-
+    
 }

@@ -1,17 +1,17 @@
 {extends file="get_usermod:layouts/main/layout.html"}
 
 {block name="content"}
-    {include file="get_usermod:/../../../GXModules/Gambio/Store/Admin/Html/gambio_store_errors.html"}
+{include file="get_usermod:/../../../GXModules/Gambio/Store/Admin/Html/gambio_store_errors.html"}
 
-    <div class="gambio-store downloads">
-        <div id="gambio-store-iframe"
-             data-store-client-id="{$content.clientId}"
-             data-store-auth-headers="{$content.authHeaders|json_encode}"
-             data-store-url="{$content.storeUrl}"
-             data-store-language="{$content.storeLanguage}"
-             data-store-translations="{$content.translations|json_encode}">
-        </div>
-
-        {include file="get_usermod:/../../../GXModules/Gambio/Store/Admin/Html/gambio_store_installing_package_modal.html"}
+<div class="gambio-store downloads">
+    <div data-store-auth-headers="{$content.authHeaders|json_encode}"
+         data-store-client-id="{$content.clientId}"
+         data-store-language="{$content.storeLanguage}"
+         data-store-translations="{$content.translations|json_encode}"
+         data-store-url="{$content.storeUrl}"
+         id="gambio-store-iframe">
     </div>
+    
+    {include file="get_usermod:/../../../GXModules/Gambio/Store/Admin/Html/gambio_store_installing_package_modal.html"}
+</div>
 {/block}

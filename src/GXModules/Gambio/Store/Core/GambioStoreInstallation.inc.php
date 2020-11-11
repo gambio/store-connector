@@ -159,6 +159,28 @@ class GambioStoreInstallation
     
     
     /**
+     * Returns unique installation id.
+     *
+     * @return mixed
+     */
+    private function getTransactionId()
+    {
+        return $this->packageData['details']['id'];
+    }
+    
+    
+    /**
+     * Returns array of installing files.
+     *
+     * @return array
+     */
+    private function getPackageFilesDestinations()
+    {
+        return array_column($this->packageData['fileList']['includedFiles'], 'destination');
+    }
+    
+    
+    /**
      * Exception handler function.
      *
      * @param $exception
@@ -243,51 +265,78 @@ class GambioStoreInstallation
     
     
     /**
-     * Performs Curl requests to download file from the provided url.
+     * @param $exception \Exception
      *
-     * @param       $url
-     *
-     * @return string
-     * @throws \GambioStoreHttpErrorException
+     * @throws \GambioStoreCacheException
+     * @throws \GambioStorePackageInstallationException
      */
-    private function getFileContent($url)
+    private function handleException($exception)
     {
-        $response = $this->http->get($url, [
-            CURLOPT_HTTPHEADER => ["X-STORE-TOKEN: $this->token"]
+        $message = 'Could not install package: ' . $this->packageData['details']['title']['de'];
+        $this->logger->error($message, [
+            'error' => [
+                'code'    => $exception->getCode(),
+                'message' => $exception->getMessage(),
+                'file'    => $exception->getFile(),
+                'line'    => $exception->getLine()
+            ]
         ]);
-        
-        $code = $response->getInformation('http_code');
-        
-        if ($code !== 200) {
-            throw new GambioStoreHttpErrorException('Error on download a file', [
-                'info'  => "Couldn't download a file via $url.",
-                'token' => $this->token
-            ]);
-        }
-        
-        return $response->getBody();
+        $this->cleanCache();
+        $this->cache->delete($this->getTransactionId());
+        throw new GambioStorePackageInstallationException($message);
     }
     
     
     /**
-     * Returns array of installing files.
+     * @param $progress
+     * @param $state
+     * @param $callback
      *
      * @return array
+     * @throws \GambioStoreCacheException
+     * @throws \GambioStorePackageInstallationException
      */
-    private function getPackageFilesDestinations()
+    private function nextProgressState($progress, $state, $callback)
     {
-        return array_column($this->packageData['fileList']['includedFiles'], 'destination');
+        try {
+            $destinations = $this->getPackageFilesDestinations();
+            
+            $progressArray = [
+                'success'  => true,
+                'state'    => $state,
+                'progress' => $progress
+            ];
+            call_user_func($callback);
+            $this->cache->set($this->getTransactionId(), json_encode($progressArray));
+            
+            return $progressArray;
+        } catch (GambioStoreException $e) {
+            $message = 'Could not install package: ' . $this->packageData['details']['title']['de'];
+            $this->logger->error($message, [
+                'context' => $e->getContext(),
+                'error'   => [
+                    'code'    => $e->getCode(),
+                    'message' => $e->getMessage(),
+                    'file'    => $e->getFile(),
+                    'line'    => $e->getLine()
+                ],
+            ]);
+            $this->cleanCache();
+            $this->restore($destinations);
+            $this->cache->delete($this->getTransactionId());
+            throw new GambioStorePackageInstallationException($message);
+        } catch (Exception $exception) {
+            $this->handleException($exception);
+        }
     }
     
     
     /**
-     * Returns unique installation id.
-     *
-     * @return mixed
+     * Removes temporary folders created during installation.
      */
-    private function getTransactionId()
+    private function cleanCache()
     {
-        return $this->packageData['details']['id'];
+        $this->fileSystem->remove('cache/GambioStore/');
     }
     
     
@@ -304,6 +353,72 @@ class GambioStoreInstallation
         }
         $this->backup->restorePackageFilesFromCache($files);
         $this->removeEmptyFolders($filesToRemove);
+    }
+    
+    
+    /**
+     * Remove all empty folders inside themes and GXModules related to this package
+     *
+     * @param $files
+     */
+    private function removeEmptyFolders($files)
+    {
+        // We'll only remove folders inside themes and GXModules
+        $foldersOfInterest = array_filter($files, function ($value) {
+            return strpos($value, 'themes/') === 0
+                   || strpos($value, 'GXModules/') === 0;
+        });
+        
+        // Lets make sure we only have folders
+        array_walk($foldersOfInterest, function (&$item) {
+            if (!is_dir($this->fileSystem->getShopDirectory() . '/' . $item)) {
+                $item = dirname($item);
+            }
+        });
+        
+        $foldersOfInterest = array_unique($foldersOfInterest);
+        
+        // Sort based on length to delete deepest folders first
+        usort($foldersOfInterest, function ($a, $b) {
+            return strlen($b) - strlen($a);
+        });
+        
+        foreach ($foldersOfInterest as $foldersToCheck) {
+            $this->removeEmptyFoldersRecursively($foldersToCheck);
+        }
+    }
+    
+    
+    /**
+     * Recursively delete each empty folder until either a folder is not empty or we reached themes or GXModules
+     *
+     * @param $path
+     */
+    private function removeEmptyFoldersRecursively($path)
+    {
+        if ($path === 'themes'
+            || $path === 'GXModules'
+            || !$this->isFolderEmpty($path)) {
+            return;
+        }
+        
+        $this->fileSystem->remove($path);
+        $this->removeEmptyFoldersRecursively(dirname($path));
+    }
+    
+    
+    /**
+     * Check if a folder is empty
+     *
+     * @param $folder
+     *
+     * @return bool
+     */
+    private function isFolderEmpty($folder)
+    {
+        $path = $this->fileSystem->getShopDirectory() . '/' . $folder;
+        
+        return @count(@scandir($path)) === 2;
     }
     
     
@@ -325,26 +440,6 @@ class GambioStoreInstallation
                                    . ' from package: ' . $this->packageData['details']['title']['de']);
             $this->downloadPackageFilesToCacheFolder();
         }
-    }
-    
-    
-    /**
-     * Installs a package.
-     *
-     * @throws \GambioStoreCreateDirectoryException
-     * @throws \GambioStoreFileMoveException
-     * @throws \GambioStoreFileNotFoundException
-     */
-    private function installPackage()
-    {
-        foreach ($this->getPackageFilesDestinations() as $file) {
-            $newPackageFile = 'cache/GambioStore/' . $this->getTransactionId() . '/' . $file;
-            
-            // Replace the old package file with new
-            $this->fileSystem->move($newPackageFile, $file);
-        }
-        
-        $this->logger->notice('Successfully installed package : ' . $this->packageData['details']['title']['de']);
     }
     
     
@@ -420,143 +515,48 @@ class GambioStoreInstallation
     
     
     /**
-     * Removes temporary folders created during installation.
-     */
-    private function cleanCache()
-    {
-        $this->fileSystem->remove('cache/GambioStore/');
-    }
-    
-    
-    /**
-     * Remove all empty folders inside themes and GXModules related to this package
+     * Performs Curl requests to download file from the provided url.
      *
-     * @param $files
-     */
-    private function removeEmptyFolders($files)
-    {
-        // We'll only remove folders inside themes and GXModules
-        $foldersOfInterest = array_filter($files, function ($value) {
-            return strpos($value, 'themes/') === 0
-                   || strpos($value, 'GXModules/') === 0;
-        });
-        
-        // Lets make sure we only have folders
-        array_walk($foldersOfInterest, function (&$item) {
-            if (!is_dir($this->fileSystem->getShopDirectory() . '/' . $item)) {
-                $item = dirname($item);
-            }
-        });
-        
-        $foldersOfInterest = array_unique($foldersOfInterest);
-        
-        // Sort based on length to delete deepest folders first
-        usort($foldersOfInterest, function ($a, $b) {
-            return strlen($b) - strlen($a);
-        });
-        
-        foreach ($foldersOfInterest as $foldersToCheck) {
-            $this->removeEmptyFoldersRecursively($foldersToCheck);
-        }
-    }
-    
-    
-    /**
-     * Recursively delete each empty folder until either a folder is not empty or we reached themes or GXModules
+     * @param       $url
      *
-     * @param $path
+     * @return string
+     * @throws \GambioStoreHttpErrorException
      */
-    private function removeEmptyFoldersRecursively($path)
+    private function getFileContent($url)
     {
-        if ($path === 'themes'
-            || $path === 'GXModules'
-            || !$this->isFolderEmpty($path)) {
-            return;
-        }
-        
-        $this->fileSystem->remove($path);
-        $this->removeEmptyFoldersRecursively(dirname($path));
-    }
-    
-    
-    /**
-     * Check if a folder is empty
-     *
-     * @param $folder
-     *
-     * @return bool
-     */
-    private function isFolderEmpty($folder)
-    {
-        $path = $this->fileSystem->getShopDirectory() . '/' . $folder;
-        
-        return @count(@scandir($path)) === 2;
-    }
-    
-    
-    /**
-     * @param $progress
-     * @param $state
-     * @param $callback
-     *
-     * @return array
-     * @throws \GambioStoreCacheException
-     * @throws \GambioStorePackageInstallationException
-     */
-    private function nextProgressState($progress, $state, $callback)
-    {
-        try {
-            $destinations = $this->getPackageFilesDestinations();
-            
-            $progressArray = [
-                'success'  => true,
-                'state'    => $state,
-                'progress' => $progress
-            ];
-            call_user_func($callback);
-            $this->cache->set($this->getTransactionId(), json_encode($progressArray));
-            
-            return $progressArray;
-        } catch (GambioStoreException $e) {
-            $message = 'Could not install package: ' . $this->packageData['details']['title']['de'];
-            $this->logger->error($message, [
-                'context' => $e->getContext(),
-                'error'   => [
-                    'code'    => $e->getCode(),
-                    'message' => $e->getMessage(),
-                    'file'    => $e->getFile(),
-                    'line'    => $e->getLine()
-                ],
-            ]);
-            $this->cleanCache();
-            $this->restore($destinations);
-            $this->cache->delete($this->getTransactionId());
-            throw new GambioStorePackageInstallationException($message);
-        } catch (Exception $exception) {
-            $this->handleException($exception);
-        }
-    }
-    
-    
-    /**
-     * @param $exception \Exception
-     *
-     * @throws \GambioStoreCacheException
-     * @throws \GambioStorePackageInstallationException
-     */
-    private function handleException($exception)
-    {
-        $message = 'Could not install package: ' . $this->packageData['details']['title']['de'];
-        $this->logger->error($message, [
-            'error' => [
-                'code'    => $exception->getCode(),
-                'message' => $exception->getMessage(),
-                'file'    => $exception->getFile(),
-                'line'    => $exception->getLine()
-            ]
+        $response = $this->http->get($url, [
+            CURLOPT_HTTPHEADER => ["X-STORE-TOKEN: $this->token"]
         ]);
-        $this->cleanCache();
-        $this->cache->delete($this->getTransactionId());
-        throw new GambioStorePackageInstallationException($message);
+        
+        $code = $response->getInformation('http_code');
+        
+        if ($code !== 200) {
+            throw new GambioStoreHttpErrorException('Error on download a file', [
+                'info'  => "Couldn't download a file via $url.",
+                'token' => $this->token
+            ]);
+        }
+        
+        return $response->getBody();
+    }
+    
+    
+    /**
+     * Installs a package.
+     *
+     * @throws \GambioStoreCreateDirectoryException
+     * @throws \GambioStoreFileMoveException
+     * @throws \GambioStoreFileNotFoundException
+     */
+    private function installPackage()
+    {
+        foreach ($this->getPackageFilesDestinations() as $file) {
+            $newPackageFile = 'cache/GambioStore/' . $this->getTransactionId() . '/' . $file;
+            
+            // Replace the old package file with new
+            $this->fileSystem->move($newPackageFile, $file);
+        }
+        
+        $this->logger->notice('Successfully installed package : ' . $this->packageData['details']['title']['de']);
     }
 }

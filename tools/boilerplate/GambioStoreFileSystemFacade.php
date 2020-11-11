@@ -46,6 +46,7 @@ if (defined('StoreKey_MigrationScript')) {
              */
             private $actionsPerformed = [];
             
+            
             /**
              * Renames a file. Any folders for the new name will be ignored.
              *
@@ -109,6 +110,7 @@ if (defined('StoreKey_MigrationScript')) {
                 
                 if (is_file($source)) {
                     $this->fileCopy($source, $destination);
+                    
                     return;
                 }
                 
@@ -124,7 +126,7 @@ if (defined('StoreKey_MigrationScript')) {
                         $this->createDirectory($destination . DIRECTORY_SEPARATOR . $iterator->getSubPathName());
                     } else {
                         $sourceFolder = dirname($item->getPathname());
-                        $subPath = str_replace($source, '', $sourceFolder);
+                        $subPath      = str_replace($source, '', $sourceFolder);
                         $this->fileCopy($item->getPathname(), $destination . $subPath);
                     }
                 }
@@ -218,8 +220,8 @@ if (defined('StoreKey_MigrationScript')) {
                     return $this->fileMove($source, $destination);
                 }
                 
-                $directory = new RecursiveDirectoryIterator($source, \RecursiveDirectoryIterator::SKIP_DOTS);
-                $iterator  = new RecursiveIteratorIterator($directory, \RecursiveIteratorIterator::SELF_FIRST);
+                $directory = new RecursiveDirectoryIterator($source, RecursiveDirectoryIterator::SKIP_DOTS);
+                $iterator  = new RecursiveIteratorIterator($directory, RecursiveIteratorIterator::SELF_FIRST);
                 
                 foreach ($iterator as $item) {
                     if ($item->isDir()) {
@@ -530,8 +532,6 @@ if (defined('StoreKey_MigrationScript')) {
             }
             
             
-            
-            
             /**
              * @throws \GambioStoreCreateDirectoryException
              * @throws \GambioStoreFileMoveException
@@ -564,7 +564,8 @@ if (defined('StoreKey_MigrationScript')) {
                     }
                 }
             }
-    
+            
+            
             public function test()
             {
                 file_put_contents($this->getShopDirectory() . '/GXModules/Gambio/Store/Logs/works.txt',

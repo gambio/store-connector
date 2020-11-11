@@ -38,17 +38,6 @@ class GambioStoreCallbackController extends HttpViewController
     
     
     /**
-     * Setup of our Connector classes
-     */
-    private function setup()
-    {
-        $this->connector = GambioStoreConnector::getInstance();
-        $this->configuration = $this->connector->getConfiguration();
-        $this->auth = $this->connector->getAuth();
-    }
-    
-    
-    /**
      * Currently not implemented
      *
      * @return \JsonHttpControllerResponse
@@ -73,14 +62,25 @@ class GambioStoreCallbackController extends HttpViewController
     public function actionVerify()
     {
         $this->setup();
-    
+        
         $storeToken = $this->_getPostData('storeToken');
-    
+        
         $result = $this->connector->verifyToken($storeToken);
-    
+        
         return new JsonHttpControllerResponse([
             'success' => $result
         ]);
+    }
+    
+    
+    /**
+     * Setup of our Connector classes
+     */
+    private function setup()
+    {
+        $this->connector     = GambioStoreConnector::getInstance();
+        $this->configuration = $this->connector->getConfiguration();
+        $this->auth          = $this->connector->getAuth();
     }
     
     
@@ -130,9 +130,9 @@ class GambioStoreCallbackController extends HttpViewController
     {
         $this->setup();
         
-        $accessToken = $this->_getPostData('accessToken');
+        $accessToken  = $this->_getPostData('accessToken');
         $refreshToken = $this->_getPostData('refreshToken');
-    
+        
         if ($accessToken === null) {
             return new JsonHttpControllerResponse([
                 'success' => false

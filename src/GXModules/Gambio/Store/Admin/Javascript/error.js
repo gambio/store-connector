@@ -11,7 +11,7 @@
 window.GambioStore = Object.assign({}, {
     /**
      * Displays an error in the error box.
-     * 
+     *
      * @param prefix string Error category name to prepend to the message.
      * @param message string The error's context message.
      */

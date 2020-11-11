@@ -42,7 +42,7 @@ class GambioStoreMigration
      * @param array                  $up
      * @param array                  $down
      */
-    public function __construct(\GambioStoreFileSystem $fileSystem, array $up, array $down)
+    public function __construct(GambioStoreFileSystem $fileSystem, array $up, array $down)
     {
         $this->fileSystem = $fileSystem;
         $this->up         = $up;
@@ -82,11 +82,26 @@ class GambioStoreMigration
         foreach ($this->up as $item) {
             try {
                 require_once $this->fileSystem->getShopDirectory() . '/' . $item;
-            } catch (\Exception $exception) {
+            } catch (Exception $exception) {
                 $fileSystem->rollback();
                 throw new GambioStoreUpMigrationException('Up migrations failed. File: ', 0, $item);
             }
         }
+    }
+    
+    
+    /**
+     * Requires all facades
+     */
+    private function requireFacades()
+    {
+        require_once 'Facades/GambioStoreFileSystemFacade.php';
+        require_once 'Facades/GambioStoreCompatibilityFacade.php';
+        require_once 'Facades/GambioStoreDatabaseFacade.php';
+        require_once 'Facades/GambioStoreConfigurationFacade.php';
+        require_once 'Facades/GambioStoreCacheFacade.php';
+        require_once 'Facades/GambioStoreHttpFacade.php';
+        require_once 'Facades/GambioStoreLoggerFacade.php';
     }
     
     
@@ -119,7 +134,7 @@ class GambioStoreMigration
             try {
                 require_once $this->fileSystem->getShopDirectory() . '/' . $item;
                 throw new Exception('Down migrations failed');
-            } catch (\Exception $exception) {
+            } catch (Exception $exception) {
                 $this->rollback();
                 throw new GambioStoreDownMigrationException('Down migrations failed. File: ', 0, $item);
             }
@@ -127,22 +142,8 @@ class GambioStoreMigration
     }
     
     
-    /**
-     * Requires all facades
-     */
-    private function requireFacades()
-    {
-        require_once 'Facades/GambioStoreFileSystemFacade.php';
-        require_once 'Facades/GambioStoreCompatibilityFacade.php';
-        require_once 'Facades/GambioStoreDatabaseFacade.php';
-        require_once 'Facades/GambioStoreConfigurationFacade.php';
-        require_once 'Facades/GambioStoreCacheFacade.php';
-        require_once 'Facades/GambioStoreHttpFacade.php';
-        require_once 'Facades/GambioStoreLoggerFacade.php';
-    }
-    
     private function rollback()
     {
-    
+        
     }
 }

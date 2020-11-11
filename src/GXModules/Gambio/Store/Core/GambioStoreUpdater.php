@@ -14,7 +14,7 @@ if (defined('StoreKey_MigrationScript')) {
     if (!defined('GambioStoreUpdater_included')) {
         
         define('GambioStoreUpdater_included', true);
-    
+        
         /**
          * Class GambioStoreUpdater
          *
@@ -194,11 +194,11 @@ if (defined('StoreKey_MigrationScript')) {
                 if (!$this->configuration->has('GAMBIO_STORE_API_URL')) {
                     $this->configuration->create('GAMBIO_STORE_API_URL', '');
                 }
-    
+                
                 if (!$this->configuration->has('GAMBIO_STORE_ACCESS_TOKEN')) {
                     $this->configuration->create('GAMBIO_STORE_ACCESS_TOKEN', '');
                 }
-    
+                
                 if (!$this->configuration->has('GAMBIO_STORE_REFRESH_TOKEN')) {
                     $this->configuration->create('GAMBIO_STORE_REFRESH_TOKEN', '');
                 }

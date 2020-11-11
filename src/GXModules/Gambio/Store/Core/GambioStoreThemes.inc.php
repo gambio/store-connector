@@ -50,31 +50,6 @@ class GambioStoreThemes
     
     
     /**
-     * Determines whether a theme is active
-     *
-     * @param $themeName
-     *
-     * @return bool
-     */
-    public function isActive($themeName)
-    {
-        if (!$this->compatibility->has(GambioStoreCompatibility::FEATURE_THEME_CONTROL)) {
-            return true;
-        }
-        
-        $themeControl = StaticGXCoreLoader::getThemeControl();
-        
-        foreach ($themeControl->getCurrentThemeHierarchy() as $theme) {
-            if ($theme === $themeName) {
-                return true;
-            }
-        }
-        
-        return false;
-    }
-    
-    
-    /**
      * Reimport content manager entries by theme name.
      *
      * @param $themeName
@@ -121,6 +96,31 @@ class GambioStoreThemes
     
     
     /**
+     * Determines whether a theme is active
+     *
+     * @param $themeName
+     *
+     * @return bool
+     */
+    public function isActive($themeName)
+    {
+        if (!$this->compatibility->has(GambioStoreCompatibility::FEATURE_THEME_CONTROL)) {
+            return true;
+        }
+        
+        $themeControl = StaticGXCoreLoader::getThemeControl();
+        
+        foreach ($themeControl->getCurrentThemeHierarchy() as $theme) {
+            if ($theme === $themeName) {
+                return true;
+            }
+        }
+        
+        return false;
+    }
+    
+    
+    /**
      * Activates a Theme
      *
      * @param string $themeName
@@ -142,8 +142,9 @@ class GambioStoreThemes
         try {
             $themeService->activateTheme($themeName);
             $this->logger->notice('Activation of theme: ' . $themeName . ' succeeded');
+            
             return true;
-        } catch (\Exception $exception) {
+        } catch (Exception $exception) {
             $this->logger->error('Could not activate theme: ' . $themeName, [
                 'error' => [
                     'code'    => $exception->getCode(),

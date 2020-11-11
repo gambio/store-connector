@@ -1,6 +1,6 @@
 /**
  * Possible error types that may be occurring during a call to the parent shop.
- * 
+ *
  * @type {{NETWORK_ERROR: string, JSON_PARSE_ERROR: string, NO_SUCCESS: string}}
  */
 const networkErrors = {
@@ -18,8 +18,8 @@ const networkErrors = {
  */
 window.GambioStore = Object.assign({}, {
     networkErrors,
-	callShop: (...params) => {
-	    return new Promise((resolve,reject) => {
+    callShop: (...params) => {
+        return new Promise((resolve, reject) => {
             fetch(...params).then(response => {
                 response.json().then(jsonResponse => {
                     if (jsonResponse.success === false) {
@@ -34,7 +34,7 @@ window.GambioStore = Object.assign({}, {
                 reject({type: networkErrors.NO_SUCCESS, context: networkError});
             });
         })
-	},
+    },
     visitShop: (...params) => {
         return fetch(...params).catch(networkError => {
             throw({type: networkErrors.NO_SUCCESS, context: networkError});

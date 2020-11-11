@@ -82,7 +82,7 @@ class GambioStoreBackup
         
         foreach ($files as $file) {
             $file .= '.bak';
-    
+            
             $this->fileSystem->remove($cacheDirectory . $file);
         }
     }
@@ -98,8 +98,8 @@ class GambioStoreBackup
     public function getDifferenceBetweenBackupAndActualPackage(array $files)
     {
         $difference = [];
-
-        foreach($files as $file) {
+        
+        foreach ($files as $file) {
             if (!is_file($this->fileSystem->getShopDirectory() . '/cache/GambioStore/backup/' . $file . '.bak')) {
                 $difference[] = $file;
             }

@@ -125,6 +125,7 @@ class GambioStoreConfiguration
         
         if ($this->compatibility->has(GambioStoreCompatibility::RESOURCE_GM_CONFIGURATION_TABLE)) {
             $this->gmSet($key, $value);
+            
             return;
         }
         

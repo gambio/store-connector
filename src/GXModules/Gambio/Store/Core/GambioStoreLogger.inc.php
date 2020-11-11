@@ -49,6 +49,80 @@ class GambioStoreLogger
     
     
     /**
+     * Logs with an arbitrary level.
+     *
+     * @param mixed  $level
+     * @param string $message
+     * @param array  $context
+     *
+     * @return void
+     */
+    public function log($level, $message, array $context = [])
+    {
+        if (isset($context['actionName'])) {
+            $suffix = $context['actionName'];
+            unset($context['actionName']);
+        } else {
+            $suffix = 'general';
+        }
+        
+        $now   = new DateTime();
+        $today = $now->format('Y-m-d');
+        $time  = $now->format('H:i:s');
+        
+        $fileName = $today . '-' . $suffix . '.log';
+        $logPath  = __DIR__ . '/../Logs/';
+        $cacheKey = 'LAST_LOG_FILE_CHECK';
+        
+        if ($this->cache->has($cacheKey)) {
+            if ($this->cache->get($cacheKey) !== $fileName) {
+                $this->deleteOneMonthOldLogsFromNow($now, $logPath, $suffix);
+                $this->cache->set($cacheKey, $fileName);
+            }
+        } else {
+            $this->cache->set($cacheKey, $fileName);
+        }
+        
+        if (count($context) === 0) {
+            $contextMessage = PHP_EOL;
+        } else {
+            ob_start();
+            print_r($context);
+            $prettifiedContext = ob_get_clean();
+            $contextMessage    = PHP_EOL . 'context: ' . $prettifiedContext;
+        }
+        
+        $logMeta = '[' . $time . '] [' . $level . '] ';
+        
+        @file_put_contents($logPath . $fileName, $logMeta . $message . $contextMessage, FILE_APPEND);
+    }
+    
+    
+    /**
+     * Deletes all logs older than a month from now.
+     *
+     * @param \DateTime $now
+     * @param string    $logPath
+     * @param string    $suffix
+     */
+    private function deleteOneMonthOldLogsFromNow(DateTime $now, $logPath, $suffix)
+    {
+        $logFiles = glob($logPath . '*.log');
+        
+        foreach ($logFiles as $logFile) {
+            $fileName       = str_replace($logPath, '', $logFile);
+            $fileDateString = str_replace('-' . $suffix . '.log', '', $fileName);
+            $fileDate       = DateTime::createFromFormat('Y-m-d', $fileDateString);
+            $timeDifference = $now->diff($fileDate);
+            
+            if ((int)$timeDifference->days > 30) {
+                @unlink($logFile);
+            }
+        }
+    }
+    
+    
+    /**
      * Action must be taken immediately.
      *
      * Example: Entire website down, database unavailable, etc. This should
@@ -158,76 +232,13 @@ class GambioStoreLogger
     
     
     /**
-     * Logs with an arbitrary level.
+     * Checks whether logs directory is writable. Returns true if so, false otherwise.
      *
-     * @param mixed  $level
-     * @param string $message
-     * @param array  $context
-     *
-     * @return void
+     * @return bool
      */
-    public function log($level, $message, array $context = [])
+    public function isWritable()
     {
-        if (isset($context['actionName'])) {
-            $suffix = $context['actionName'];
-            unset($context['actionName']);
-        } else {
-            $suffix = 'general';
-        }
-        
-        $now   = new DateTime();
-        $today = $now->format('Y-m-d');
-        $time  = $now->format('H:i:s');
-        
-        $fileName = $today . '-' . $suffix . '.log';
-        $logPath  = __DIR__ . '/../Logs/';
-        $cacheKey = 'LAST_LOG_FILE_CHECK';
-        
-        if ($this->cache->has($cacheKey)) {
-            if ($this->cache->get($cacheKey) !== $fileName) {
-                $this->deleteOneMonthOldLogsFromNow($now, $logPath, $suffix);
-                $this->cache->set($cacheKey, $fileName);
-            }
-        } else {
-            $this->cache->set($cacheKey, $fileName);
-        }
-        
-        if (count($context) === 0) {
-            $contextMessage = PHP_EOL;
-        } else {
-            ob_start();
-            print_r($context);
-            $prettifiedContext = ob_get_clean();
-            $contextMessage    = PHP_EOL . 'context: ' . $prettifiedContext;
-        }
-        
-        $logMeta = '[' . $time . '] [' . $level . '] ';
-        
-        @file_put_contents($logPath . $fileName, $logMeta . $message . $contextMessage, FILE_APPEND);
-    }
-    
-    
-    /**
-     * Deletes all logs older than a month from now.
-     *
-     * @param \DateTime $now
-     * @param string    $logPath
-     * @param string    $suffix
-     */
-    private function deleteOneMonthOldLogsFromNow(DateTime $now, $logPath, $suffix)
-    {
-        $logFiles = glob($logPath . '*.log');
-        
-        foreach ($logFiles as $logFile) {
-            $fileName       = str_replace($logPath, '', $logFile);
-            $fileDateString = str_replace('-' . $suffix . '.log', '', $fileName);
-            $fileDate       = DateTime::createFromFormat('Y-m-d', $fileDateString);
-            $timeDifference = $now->diff($fileDate);
-            
-            if ((int)$timeDifference->days > 30) {
-                @unlink($logFile);
-            }
-        }
+        return is_writable($this->getLogsPath());
     }
     
     
@@ -239,16 +250,5 @@ class GambioStoreLogger
     private function getLogsPath()
     {
         return __DIR__ . '/../Logs/';
-    }
-    
-    
-    /**
-     * Checks whether logs directory is writable. Returns true if so, false otherwise.
-     *
-     * @return bool
-     */
-    public function isWritable()
-    {
-        return is_writable($this->getLogsPath());
     }
 }

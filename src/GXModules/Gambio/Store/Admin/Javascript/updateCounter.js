@@ -9,42 +9,42 @@
  */
 
 const setUpdatesCounter = ({updatesCounter}) => {
-	const className = 'gambio-store-updates-counter';
-	
-	let updatesCounterElement = document.getElementsByClassName(className);
-	
-	if(updatesCounterElement.length && updatesCounterElement.style){
-		if (updatesCounter === 0){
-			updatesCounterElement.style.display = "none";
-			return;
-		}
-		updatesCounterElement.style.display = "inline";
-	}
-	
-	
-	if (updatesCounterElement.length) {
-		updatesCounterElement.innerHTML = updatesCounter;
-		return;
-	}
-	
-	updatesCounterElement = document.createElement('span');
-	updatesCounterElement.className = 'gambio-store-updates-counter';
-	updatesCounterElement.innerHTML = updatesCounter;
-	
-	const navItem = document.querySelector('#main-content .content-navigation .nav-item:last-child');
-	
-	if (!navItem) {
-		return;
-	}
-	
-	if (navItem.classList.contains('no-link')) {
-		navItem.appendChild(updatesCounterElement);
-	} else {
-		navItem.querySelector('a').appendChild(updatesCounterElement);
-	}
+    const className = 'gambio-store-updates-counter';
+    
+    let updatesCounterElement = document.getElementsByClassName(className);
+    
+    if (updatesCounterElement.length && updatesCounterElement.style) {
+        if (updatesCounter === 0) {
+            updatesCounterElement.style.display = "none";
+            return;
+        }
+        updatesCounterElement.style.display = "inline";
+    }
+    
+    
+    if (updatesCounterElement.length) {
+        updatesCounterElement.innerHTML = updatesCounter;
+        return;
+    }
+    
+    updatesCounterElement = document.createElement('span');
+    updatesCounterElement.className = 'gambio-store-updates-counter';
+    updatesCounterElement.innerHTML = updatesCounter;
+    
+    const navItem = document.querySelector('#main-content .content-navigation .nav-item:last-child');
+    
+    if (!navItem) {
+        return;
+    }
+    
+    if (navItem.classList.contains('no-link')) {
+        navItem.appendChild(updatesCounterElement);
+    } else {
+        navItem.querySelector('a').appendChild(updatesCounterElement);
+    }
 }
 
 
 window.addEventListener('DOMContentLoaded', function() {
-	GambioStore.messenger.listenToMessage('updates_counter', setUpdatesCounter);
+    GambioStore.messenger.listenToMessage('updates_counter', setUpdatesCounter);
 });

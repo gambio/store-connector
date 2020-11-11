@@ -46,27 +46,6 @@ class GambioStoreResponse
     
     
     /**
-     * Returns the response information
-     *
-     * @param null $key
-     *
-     * @return array|null
-     */
-    public function getInformation($key = null)
-    {
-        if ($key === null) {
-            return $this->information;
-        }
-        
-        if (isset($this->information[$key])) {
-            return $this->information[$key];
-        }
-        
-        return null;
-    }
-    
-    
-    /**
      * Returns the response body
      *
      * @return string
@@ -114,5 +93,26 @@ class GambioStoreResponse
     public function getStatus()
     {
         return $this->getInformation('http_code');
+    }
+    
+    
+    /**
+     * Returns the response information
+     *
+     * @param null $key
+     *
+     * @return array|null
+     */
+    public function getInformation($key = null)
+    {
+        if ($key === null) {
+            return $this->information;
+        }
+        
+        if (isset($this->information[$key])) {
+            return $this->information[$key];
+        }
+        
+        return null;
     }
 }

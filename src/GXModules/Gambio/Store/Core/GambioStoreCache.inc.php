@@ -54,10 +54,10 @@ class GambioStoreCache
     public function get($key)
     {
         // Key must be a string in the database.
-        $key              = (string)$key;
-        $sql              = 'SELECT cache_value FROM ' . self::CACHE_TABLE . ' WHERE cache_key = :cache_key LIMIT 1';
-        $query            = $this->database->query($sql, [':cache_key' => $key]);
-        $result           = $query->fetch();
+        $key    = (string)$key;
+        $sql    = 'SELECT cache_value FROM ' . self::CACHE_TABLE . ' WHERE cache_key = :cache_key LIMIT 1';
+        $query  = $this->database->query($sql, [':cache_key' => $key]);
+        $result = $query->fetch();
         
         if ($result === false) {
             throw new GambioStoreCacheException('Could not get key: ' . $key . ' from cache table', 0,

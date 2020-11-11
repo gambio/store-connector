@@ -11,7 +11,7 @@
 
 require_once __DIR__ . '/../../GambioStoreConnector.inc.php';
 
-class GambioStoreController extends AdminHttpViewController 
+class GambioStoreController extends AdminHttpViewController
 {
     /**
      * @var \GambioStoreConnector
@@ -34,6 +34,36 @@ class GambioStoreController extends AdminHttpViewController
      * @var array
      */
     private $errors = [];
+    
+    
+    /**
+     * Displays the installations page on the iframe
+     *
+     * @return mixed|\RedirectHttpControllerResponse
+     */
+    public function actionInstallations()
+    {
+        $this->setup();
+        
+        if ($this->configuration->get('GAMBIO_STORE_ACCEPTED_DATA_PROCESSING') !== true) {
+            return $this->actionDefault();
+        }
+        
+        if (!$this->acceptableErrorsTestPassed()) {
+            return $this->showCriticalErrorPage();
+        }
+        
+        $title    = new NonEmptyStringType($this->languageTextManager->get_text('PAGE_TITLE'));
+        $template = new ExistingFile(new NonEmptyStringType(__DIR__ . '/../Html/gambio_store.html'));
+        
+        setcookie('auto_updater_admin_check', 'admin_logged_in', time() + 5 * 60, '/');
+        
+        $data              = $this->getIFrameTemplateData('/installations');
+        $assets            = $this->getIFrameAssets();
+        $contentNavigation = $this->getStoreNavigation(false, true);
+        
+        return new AdminLayoutHttpControllerResponse($title, $template, $data, $assets, $contentNavigation);
+    }
     
     
     /**
@@ -95,6 +125,34 @@ class GambioStoreController extends AdminHttpViewController
     
     
     /**
+     * Checks for general errors with the Store and displays them in the frontend
+     */
+    private function acceptableErrorsTestPassed()
+    {
+        $passed = true;
+        
+        if (!$this->connector->getLogger()->isWritable()) {
+            $this->appendError('LOGS_FOLDER_PERMISSION_ERROR');
+        }
+        
+        if (!is_writable($this->connector->getFileSystem()->getShopDirectory() . '/GXModules/Gambio/Store')) {
+            $this->appendError('STORE_FOLDER_PERMISSION_ERROR');
+        }
+        
+        if (!extension_loaded('curl')) {
+            $this->appendError('CURL_EXTENSION_MISSING');
+        }
+        
+        if (!extension_loaded('PDO')) {
+            $this->appendError('PDO_EXTENSION_MISSING');
+            $passed = false;
+        }
+        
+        return $passed;
+    }
+    
+    
+    /**
      * To be returned upon encountering a critical error.
      * Make sure to append to the errors array first.
      *
@@ -126,32 +184,139 @@ class GambioStoreController extends AdminHttpViewController
     
     
     /**
-     * Displays the installations page on the iframe
+     * Returns the data for the iframe template
      *
-     * @return mixed|\RedirectHttpControllerResponse
+     * @param $urlPostfix
+     *
+     * @return \KeyValueCollection
      */
-    public function actionInstallations()
+    private function getIFrameTemplateData($urlPostfix)
     {
-        $this->setup();
+        $translations = $this->languageTextManager->get_section_array('gambio_store', $_SESSION['languages_id']);
         
-        if ($this->configuration->get('GAMBIO_STORE_ACCEPTED_DATA_PROCESSING') !== true) {
-            return $this->actionDefault();
+        try {
+            $language = $this->connector->getCurrentShopLanguageCode();
+        } catch (GambioStoreLanguageNotResolvableException $e) {
+            $language = 'en';
         }
         
-        if (!$this->acceptableErrorsTestPassed()) {
-            return $this->showCriticalErrorPage();
+        return new KeyValueCollection([
+            'storeUrl'      => $this->getGambioStoreUrl() . $urlPostfix,
+            'clientId'      => $this->getGambioStoreToken(),
+            'authHeaders'   => $this->getGambioStoreAuthHeaders(),
+            'storeLanguage' => $language,
+            'translations'  => $translations,
+            'errors'        => $this->errors
+        ]);
+    }
+    
+    
+    /**
+     * Returns all assets that are supposed to be on the iframe page
+     *
+     * @return mixed
+     */
+    private function getIFrameAssets()
+    {
+        return new AssetCollection([
+            new Asset('gambio_store.lang.inc.php'),
+            new Asset('../GXModules/Gambio/Store/Build/Admin/Javascript/promise_polyfill.js'),
+            new Asset('../GXModules/Gambio/Store/Build/Admin/Javascript/fetch_polyfill.js'),
+            new Asset('../GXModules/Gambio/Store/Build/Admin/Javascript/messenger.js'),
+            new Asset('../GXModules/Gambio/Store/Build/Admin/Javascript/translation.js'),
+            new Asset('../GXModules/Gambio/Store/Build/Admin/Javascript/callShop.js'),
+            new Asset('../GXModules/Gambio/Store/Build/Admin/Javascript/error.js'),
+            new Asset('../GXModules/Gambio/Store/Build/Admin/Javascript/iframe.js'),
+            new Asset('../GXModules/Gambio/Store/Build/Admin/Javascript/package.js'),
+            new Asset('../GXModules/Gambio/Store/Build/Admin/Javascript/shop.js'),
+            new Asset('../GXModules/Gambio/Store/Build/Admin/Javascript/updateCounter.js'),
+            new Asset('../GXModules/Gambio/Store/Build/Admin/Styles/gambio_store.css')
+        ]);
+    }
+    
+    
+    /**
+     * Returns the content navigation for the store pages (once registered and accepted privacy stuff)
+     *
+     * @param bool $mainPage
+     * @param bool $secondaryPage
+     *
+     * @return mixed
+     */
+    private function getStoreNavigation($mainPage = true, $secondaryPage = false)
+    {
+        $contentNavigation = MainFactory::create('ContentNavigationCollection', []);
+        $contentNavigation->add(new StringType($this->languageTextManager->get_text('DOWNLOADS', 'gambio_store')),
+            new StringType('admin.php?do=GambioStore'), new BoolType($mainPage));
+        $contentNavigation->add(new StringType($this->languageTextManager->get_text('INSTALLED_PACKAGES_AND_UPDATES',
+            'gambio_store')), new StringType('admin.php?do=GambioStore/Installations'), new BoolType($secondaryPage));
+        
+        return $contentNavigation;
+    }
+    
+    
+    /**
+     * Appends an error to the errors array.
+     *
+     * @param $errorIdentifier string the error's translational identifier.
+     */
+    private function appendError($errorIdentifier)
+    {
+        $this->errors[] = $errorIdentifier;
+    }
+    
+    
+    /**
+     * Gets the store URL
+     *
+     * @return string
+     */
+    private function getGambioStoreUrl()
+    {
+        $gambioUrl = $this->configuration->get('GAMBIO_STORE_URL');
+        
+        // Fall back to the production Gambio Store URL if none is set.
+        if (empty($gambioUrl)) {
+            $gambioUrl = 'https://store.gambio.com/a';
+            $this->configuration->set('GAMBIO_STORE_URL', $gambioUrl);
         }
         
-        $title    = new NonEmptyStringType($this->languageTextManager->get_text('PAGE_TITLE'));
-        $template = new ExistingFile(new NonEmptyStringType(__DIR__ . '/../Html/gambio_store.html'));
+        return $gambioUrl;
+    }
+    
+    
+    /**
+     * Gets the store token
+     *
+     * @return mixed
+     * @var \GambioStoreConnector     $connector
+     *
+     * @var \GambioStoreConfiguration $configuration
+     */
+    private function getGambioStoreToken()
+    {
+        $gambioStoreToken = $this->configuration->get('GAMBIO_STORE_TOKEN');
+        if (empty($gambioStoreToken)) {
+            $gambioStoreToken = $this->connector->generateToken();
+            $this->configuration->set('GAMBIO_STORE_TOKEN', $gambioStoreToken);
+        }
         
-        setcookie('auto_updater_admin_check', 'admin_logged_in', time() + 5 * 60, '/');
-        
-        $data              = $this->getIFrameTemplateData('/installations');
-        $assets            = $this->getIFrameAssets();
-        $contentNavigation = $this->getStoreNavigation(false, true);
-        
-        return new AdminLayoutHttpControllerResponse($title, $template, $data, $assets, $contentNavigation);
+        return $gambioStoreToken;
+    }
+    
+    
+    /**
+     * Gets the auth headers
+     *
+     * @return array
+     * @var \GambioStoreConfiguration $configuration
+     *
+     */
+    private function getGambioStoreAuthHeaders()
+    {
+        return [
+            'X-ACCESS-TOKEN' => $this->configuration->get('GAMBIO_STORE_ACCESS_TOKEN')
+        ];
     }
     
     
@@ -200,173 +365,11 @@ class GambioStoreController extends AdminHttpViewController
     
     
     /**
-     * Marks the data processing terms as accepted
-     *
-     * @return mixed|\RedirectHttpControllerResponse
-     */
-    public function actionAcceptDataProcessing()
-    {
-        $this->setup();
-        
-        $this->configuration->set('GAMBIO_STORE_ACCEPTED_DATA_PROCESSING', true);
-        
-        return $this->actionDefault();
-    }
-    
-    
-    /**
-     * Checks for general errors with the Store and displays them in the frontend
-     */
-    private function acceptableErrorsTestPassed()
-    {
-        $passed = true;
-        
-        if (!$this->connector->getLogger()->isWritable()) {
-            $this->appendError('LOGS_FOLDER_PERMISSION_ERROR');
-        }
-        
-        if (!is_writable($this->connector->getFileSystem()->getShopDirectory() . '/GXModules/Gambio/Store')) {
-            $this->appendError('STORE_FOLDER_PERMISSION_ERROR');
-        }
-        
-        if (!extension_loaded('curl')) {
-            $this->appendError('CURL_EXTENSION_MISSING');
-        }
-        
-        if (!extension_loaded('PDO')) {
-            $this->appendError('PDO_EXTENSION_MISSING');
-            $passed = false;
-        }
-        
-        return $passed;
-    }
-    
-    
-    /**
-     * Gets the store URL
-     *
-     * @return string
-     */
-    private function getGambioStoreUrl()
-    {
-        $gambioUrl = $this->configuration->get('GAMBIO_STORE_URL');
-        
-        // Fall back to the production Gambio Store URL if none is set.
-        if (empty($gambioUrl)) {
-            $gambioUrl = 'https://store.gambio.com/a';
-            $this->configuration->set('GAMBIO_STORE_URL', $gambioUrl);
-        }
-        
-        return $gambioUrl;
-    }
-    
-    
-    
-    
-    
-    /**
-     * Returns all assets that are supposed to be on the iframe page
-     *
-     * @return mixed
-     */
-    private function getIFrameAssets()
-    {
-        return new AssetCollection([
-            new Asset('gambio_store.lang.inc.php'),
-            new Asset('../GXModules/Gambio/Store/Build/Admin/Javascript/promise_polyfill.js'),
-            new Asset('../GXModules/Gambio/Store/Build/Admin/Javascript/fetch_polyfill.js'),
-            new Asset('../GXModules/Gambio/Store/Build/Admin/Javascript/messenger.js'),
-            new Asset('../GXModules/Gambio/Store/Build/Admin/Javascript/translation.js'),
-            new Asset('../GXModules/Gambio/Store/Build/Admin/Javascript/callShop.js'),
-            new Asset('../GXModules/Gambio/Store/Build/Admin/Javascript/error.js'),
-            new Asset('../GXModules/Gambio/Store/Build/Admin/Javascript/iframe.js'),
-            new Asset('../GXModules/Gambio/Store/Build/Admin/Javascript/package.js'),
-            new Asset('../GXModules/Gambio/Store/Build/Admin/Javascript/shop.js'),
-            new Asset('../GXModules/Gambio/Store/Build/Admin/Javascript/updateCounter.js'),
-            new Asset('../GXModules/Gambio/Store/Build/Admin/Styles/gambio_store.css')
-        ]);
-    }
-    
-    
-    /**
-     * Returns the content navigation for the store pages (once registered and accepted privacy stuff)
-     *
-     * @param bool $mainPage
-     * @param bool $secondaryPage
-     *
-     * @return mixed
-     */
-    private function getStoreNavigation($mainPage = true, $secondaryPage = false)
-    {
-        $contentNavigation = MainFactory::create('ContentNavigationCollection', []);
-        $contentNavigation->add(new StringType($this->languageTextManager->get_text('DOWNLOADS', 'gambio_store')),
-            new StringType('admin.php?do=GambioStore'), new BoolType($mainPage));
-        $contentNavigation->add(new StringType($this->languageTextManager->get_text('INSTALLED_PACKAGES_AND_UPDATES',
-            'gambio_store')), new StringType('admin.php?do=GambioStore/Installations'), new BoolType($secondaryPage));
-        
-        return $contentNavigation;
-    }
-    
-    
-    /**
-     * Returns the data for the iframe template
-     *
-     * @param $urlPostfix
-     *
-     * @return \KeyValueCollection
-     */
-    private function getIFrameTemplateData($urlPostfix)
-    {
-        $translations = $this->languageTextManager->get_section_array('gambio_store', $_SESSION['languages_id']);
-        
-        try {
-            $language = $this->connector->getCurrentShopLanguageCode();
-        } catch (GambioStoreLanguageNotResolvableException $e) {
-            $language = 'en';
-        }
-        
-        return new KeyValueCollection([
-            'storeUrl'      => $this->getGambioStoreUrl() . $urlPostfix,
-            'clientId'      => $this->getGambioStoreToken(),
-            'authHeaders'   => $this->getGambioStoreAuthHeaders(),
-            'storeLanguage' => $language,
-            'translations'  => $translations,
-            'errors'        => $this->errors
-        ]);
-    }
-    
-    
-    /**
-     * Appends an error to the errors array.
-     *
-     * @param $errorIdentifier string the error's translational identifier.
-     */
-    private function appendError($errorIdentifier)
-    {
-        $this->errors[] = $errorIdentifier;
-    }
-    
-    /**
-     * Gets the auth headers
-     *
-     * @var \GambioStoreConfiguration $configuration
-     *
-     * @return array
-     */
-    private function getGambioStoreAuthHeaders()
-    {
-        return [
-            'X-ACCESS-TOKEN' => $this->configuration->get('GAMBIO_STORE_ACCESS_TOKEN')
-        ];
-    }
-    
-    
-    /**
      * Gets the store api URL
      *
+     * @return string
      * @var \GambioStoreConfiguration $configuration
      *
-     * @return string
      */
     private function getGambioStoreApiUrl()
     {
@@ -383,21 +386,16 @@ class GambioStoreController extends AdminHttpViewController
     
     
     /**
-     * Gets the store token
+     * Marks the data processing terms as accepted
      *
-     * @var \GambioStoreConfiguration $configuration
-     * @var \GambioStoreConnector $connector
-     *
-     * @return mixed
+     * @return mixed|\RedirectHttpControllerResponse
      */
-    private function getGambioStoreToken()
+    public function actionAcceptDataProcessing()
     {
-        $gambioStoreToken = $this->configuration->get('GAMBIO_STORE_TOKEN');
-        if (empty($gambioStoreToken)) {
-            $gambioStoreToken = $this->connector->generateToken();
-            $this->configuration->set('GAMBIO_STORE_TOKEN', $gambioStoreToken);
-        }
+        $this->setup();
         
-        return $gambioStoreToken;
+        $this->configuration->set('GAMBIO_STORE_ACCEPTED_DATA_PROCESSING', true);
+        
+        return $this->actionDefault();
     }
 }

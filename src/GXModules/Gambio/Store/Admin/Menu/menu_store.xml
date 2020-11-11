@@ -4,6 +4,6 @@
 <admin_menu>
     <menugroup id="BOX_HEADING_GAMBIO_STORE" sort="260" class="fa fa-cloud-download"
                title="{$txt.BOX_GAMBIO_STORE|escape}" brand="alt" type="standalone">
-	    <menuitem sort="10" link="admin.php" link_param="do=GambioStore" title="{$txt.BOX_GAMBIO_STORE|escape}" />
+        <menuitem sort="10" link="admin.php" link_param="do=GambioStore" title="{$txt.BOX_GAMBIO_STORE|escape}" />
     </menugroup>
 </admin_menu>

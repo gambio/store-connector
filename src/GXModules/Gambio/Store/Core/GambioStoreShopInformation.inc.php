@@ -74,28 +74,6 @@ class GambioStoreShopInformation
     
     
     /**
-     * @return mixed
-     * @throws \GambioStoreShopClassMissingException
-     */
-    private function getCurrentTheme()
-    {
-        if (!class_exists('StaticGXCoreLoader')) {
-            throw new GambioStoreShopClassMissingException('The shop class StaticGXCoreLoader is not accessable');
-        }
-        
-        $currentTheme = '';
-        
-        if ($this->areThemesAvailable()) {
-            /* @var \ThemeControl $themeControl */
-            $themeControl = StaticGXCoreLoader::getThemeControl();
-            $currentTheme = $themeControl->isThemeSystemActive() ? $themeControl->getCurrentTheme() : '';
-        }
-        
-        return $currentTheme;
-    }
-    
-    
-    /**
      * Returns the shop URL
      *
      * @return string
@@ -179,7 +157,7 @@ class GambioStoreShopInformation
     private function getModuleVersionFiles()
     {
         $versionFiles = [];
-    
+        
         foreach (new DirectoryIterator($this->fileSystem->getShopDirectory() . '/version_info') as $file) {
             if ($file->isFile() && strpos($file->getFilename(), '.php')) {
                 $versionFiles[] = $file->getFilename();
@@ -198,7 +176,7 @@ class GambioStoreShopInformation
     private function getThemes()
     {
         $themes = [];
-    
+        
         foreach (new DirectoryIterator($this->fileSystem->getShopDirectory() . '/themes') as $directory) {
             if ($directory->isDir() && !$directory->isDot()) {
                 $themeJsonContents = @file_get_contents($directory->getPathname() . '/theme.json');
@@ -214,6 +192,29 @@ class GambioStoreShopInformation
         return $themes;
     }
     
+    
+    /**
+     * @return mixed
+     * @throws \GambioStoreShopClassMissingException
+     */
+    private function getCurrentTheme()
+    {
+        if (!class_exists('StaticGXCoreLoader')) {
+            throw new GambioStoreShopClassMissingException('The shop class StaticGXCoreLoader is not accessable');
+        }
+        
+        $currentTheme = '';
+        
+        if ($this->areThemesAvailable()) {
+            /* @var \ThemeControl $themeControl */
+            $themeControl = StaticGXCoreLoader::getThemeControl();
+            $currentTheme = $themeControl->isThemeSystemActive() ? $themeControl->getCurrentTheme() : '';
+        }
+        
+        return $currentTheme;
+    }
+    
+    
     /**
      * Returns the status of theme support for this shop.
      *
@@ -221,8 +222,8 @@ class GambioStoreShopInformation
      */
     public function areThemesAvailable()
     {
-        return defined('DIR_FS_CATALOG') && defined('CURRENT_THEME') && !empty(CURRENT_THEME)
-            ? is_dir(DIR_FS_CATALOG . 'themes/' . CURRENT_THEME)
-            : false;
+        return defined('DIR_FS_CATALOG') && defined('CURRENT_THEME') && !empty(CURRENT_THEME) ? is_dir(DIR_FS_CATALOG
+                                                                                                       . 'themes/'
+                                                                                                       . CURRENT_THEME) : false;
     }
 }

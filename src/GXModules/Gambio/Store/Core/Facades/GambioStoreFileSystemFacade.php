@@ -22,8 +22,8 @@ if (defined('StoreKey_MigrationScript')) {
         require_once __DIR__ . '/../Exceptions/FileSystemExceptions/GambioStoreCreateDirectoryException.inc.php';
         require_once __DIR__ . '/../Exceptions/FileSystemExceptions/GambioStorePathIsNotDirectoryException.inc.php';
         require_once __DIR__ . '/../Exceptions/FileSystemExceptions/GambioStoreFileExistsException.inc.php';
-    
-    
+        
+        
         /**
          * This class is used to perform actions on the filesystem within the shop folder.
          * This class is a facade for using the functionality of the GambioStore module by third-party packages
@@ -45,6 +45,7 @@ if (defined('StoreKey_MigrationScript')) {
              * @var array
              */
             private $actionsPerformed = [];
+            
             
             /**
              * Renames a file. Any folders for the new name will be ignored.
@@ -109,6 +110,7 @@ if (defined('StoreKey_MigrationScript')) {
                 
                 if (is_file($source)) {
                     $this->fileCopy($source, $destination);
+                    
                     return;
                 }
                 
@@ -124,7 +126,7 @@ if (defined('StoreKey_MigrationScript')) {
                         $this->createDirectory($destination . DIRECTORY_SEPARATOR . $iterator->getSubPathName());
                     } else {
                         $sourceFolder = dirname($item->getPathname());
-                        $subPath = str_replace($source, '', $sourceFolder);
+                        $subPath      = str_replace($source, '', $sourceFolder);
                         $this->fileCopy($item->getPathname(), $destination . $subPath);
                     }
                 }
@@ -218,8 +220,8 @@ if (defined('StoreKey_MigrationScript')) {
                     return $this->fileMove($source, $destination);
                 }
                 
-                $directory = new RecursiveDirectoryIterator($source, \RecursiveDirectoryIterator::SKIP_DOTS);
-                $iterator  = new RecursiveIteratorIterator($directory, \RecursiveIteratorIterator::SELF_FIRST);
+                $directory = new RecursiveDirectoryIterator($source, RecursiveDirectoryIterator::SKIP_DOTS);
+                $iterator  = new RecursiveIteratorIterator($directory, RecursiveIteratorIterator::SELF_FIRST);
                 
                 foreach ($iterator as $item) {
                     if ($item->isDir()) {
@@ -503,20 +505,20 @@ if (defined('StoreKey_MigrationScript')) {
                     case 'copy':
                     case 'move':
                     case 'rename':
-                    if ($ignoreFileNotFoundException) {
-                        $this->actionsPerformed[] = ['remove', $arguments];
-                        try {
-                            $returnValue = call_user_func_array([$this, '_' . $method], $arguments);
-                        } catch (GambioStoreFileNotFoundException $exception) {
-                            // do nothing
+                        if ($ignoreFileNotFoundException) {
+                            $this->actionsPerformed[] = ['remove', $arguments];
+                            try {
+                                $returnValue = call_user_func_array([$this, '_' . $method], $arguments);
+                            } catch (GambioStoreFileNotFoundException $exception) {
+                                // do nothing
+                            }
+                            
+                            return $returnValue;
                         }
-    
-                        return $returnValue;
-                    }
-    
-                    $this->actionsPerformed[] = [$method, $arguments];
-    
-                    return call_user_func_array([$this, '_' . $method], $arguments);
+                        
+                        $this->actionsPerformed[] = [$method, $arguments];
+                        
+                        return call_user_func_array([$this, '_' . $method], $arguments);
                 }
             }
             

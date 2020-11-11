@@ -17,12 +17,12 @@ declare(strict_types=1);
 
 require_once __DIR__ . '/../vendor/autoload.php';
 
-use PUGX\Poser\Render\SvgFlatSquareRender;
 use PUGX\Poser\Poser;
+use PUGX\Poser\Render\SvgFlatSquareRender;
 
 // Make the folder for the badges if it does not exist yet
 if (!@mkdir("badges") && !is_dir("badges")) {
-    throw new \RuntimeException(sprintf('Directory "%s" was not created', "badges"));
+    throw new RuntimeException(sprintf('Directory "%s" was not created', "badges"));
 }
 
 /**

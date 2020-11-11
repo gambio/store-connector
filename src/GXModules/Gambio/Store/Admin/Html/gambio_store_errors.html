@@ -2,10 +2,10 @@
 
 <div id="gambio-store-error-container" style="width:74%; max-width: 1350px;">
     {foreach $content.errors as $error}
-        <div class="alert alert-danger">
-            <b>{$gambio_store['WARNING_TITLE']}</b>
-            <br>
-            {$gambio_store[$error]}
-        </div>
+    <div class="alert alert-danger">
+        <b>{$gambio_store['WARNING_TITLE']}</b>
+        <br>
+        {$gambio_store[$error]}
+    </div>
     {/foreach}
 </div>

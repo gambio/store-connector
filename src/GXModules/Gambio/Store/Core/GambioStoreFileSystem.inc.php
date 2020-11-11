@@ -21,41 +21,6 @@ require_once 'Exceptions/FileSystemExceptions/GambioStoreFileExistsException.inc
 class GambioStoreFileSystem
 {
     /**
-     * Moves source file from to the destination directory.
-     * Creates destination directory recursively in case it doesn't exist.
-     *
-     * @param $source
-     * @param $destination
-     *
-     * @throws \GambioStoreFileNotFoundException
-     * @throws \GambioStoreFileMoveException
-     * @throws \GambioStoreCreateDirectoryException
-     */
-    private function fileMove($source, $destination)
-    {
-        if (file_exists($destination) && is_file($destination)) {
-            throw new GambioStoreFileExistsException('File already exists: ' . $destination, 1, [
-                'info' => "File with this name already exists on attempt to move file $source to $destination"
-            ]);
-        }
-        
-        if (!file_exists($source) || !is_file($source)) {
-            throw new GambioStoreFileNotFoundException('File not found: ' . $source, 1, [
-                'info' => "File not found on attempt to move file $source to $destination"
-            ]);
-        }
-    
-        if (!file_exists(dirname($destination))) {
-            $this->createDirectory(dirname($destination));
-        }
-        
-        if (!rename($source, $destination)) {
-            throw new GambioStoreFileMoveException("Could not move file $source to $destination folder");
-        }
-    }
-    
-    
-    /**
      * Renames a file or directory. E.g ...rename('directoryName/oldFileName.php', 'newFileName.php');
      *
      * @param $oldName
@@ -74,7 +39,7 @@ class GambioStoreFileSystem
                 'info' => "File or folder not found on attempt to rename $oldName"
             ]);
         }
-    
+        
         if (file_exists($newName) && is_file($newName)) {
             throw new GambioStoreFileExistsException('File already exists: ' . $newName, 1, [
                 'info' => "File with this name already exists on attempt to rename file $oldName to $newName"
@@ -86,6 +51,17 @@ class GambioStoreFileSystem
                 'info' => 'Please contact the server administrator'
             ]);
         }
+    }
+    
+    
+    /**
+     * Returns shop directory path.
+     *
+     * @return string
+     */
+    public function getShopDirectory()
+    {
+        return realpath(__DIR__ . '/../../../..');
     }
     
     
@@ -104,15 +80,16 @@ class GambioStoreFileSystem
     {
         $source      = $this->getShopDirectory() . '/' . $source;
         $destination = $this->getShopDirectory() . '/' . $destination;
-    
+        
         if (is_file($source)) {
             $this->fileCopy($source, $destination);
+            
             return;
         }
-    
+        
         $directory = new RecursiveDirectoryIterator($source, RecursiveDirectoryIterator::SKIP_DOTS);
         $iterator  = new RecursiveIteratorIterator($directory, RecursiveIteratorIterator::SELF_FIRST);
-    
+        
         foreach ($iterator as $item) {
             if ($item->isDir()) {
                 /**
@@ -122,9 +99,73 @@ class GambioStoreFileSystem
                 $this->createDirectory($destination . DIRECTORY_SEPARATOR . $iterator->getSubPathName());
             } else {
                 $sourceFolder = dirname($item->getPathname());
-                $subPath = str_replace($source, '', $sourceFolder);
+                $subPath      = str_replace($source, '', $sourceFolder);
                 $this->fileCopy($item->getPathname(), $destination . $subPath);
             }
+        }
+    }
+    
+    
+    /**
+     * Copies file from source to destination.
+     * In case folders of destination path are not exist, they will be created.
+     *
+     * @param string $source
+     * @param string $destination
+     *
+     * @throws \GambioStoreCreateDirectoryException
+     * @throws \GambioStoreFileNotFoundException|\GambioStoreFileCopyException
+     */
+    private function fileCopy($source, $destination)
+    {
+        if (file_exists($destination) && is_file($destination)) {
+            throw new GambioStoreFileExistsException('File already exists: ' . $destination, 1, [
+                'info' => "File with this name already exists on attempt to copy file $source to $destination"
+            ]);
+        }
+        
+        if (!file_exists($source) || !is_file($source)) {
+            throw new GambioStoreFileNotFoundException('No such file: ' . $source);
+        }
+        
+        $this->createDirectory(dirname($destination));
+        
+        if (!copy($source, $destination)) {
+            throw new GambioStoreFileCopyException("Couldn't copy file " . $source);
+        }
+    }
+    
+    
+    /**
+     * Crates a directory recursively.
+     *
+     * @param string $path
+     *
+     * @throws \GambioStoreCreateDirectoryException
+     */
+    public function createDirectory($path)
+    {
+        if (is_dir($path)) {
+            return;
+        }
+        
+        if (!@mkdir($path, 0777, true) && !is_dir($path)) {
+            
+            if (is_file($path)) {
+                throw new GambioStoreCreateDirectoryException('Could not create a folder ' . $path, 1, [
+                    'info' => 'There is already a file exists for the path: ' . $path
+                ]);
+            }
+            
+            if (is_link($path)) {
+                throw new GambioStoreCreateDirectoryException('Could not create a folder ' . $path, 2, [
+                    'info' => 'There is already a symlink exists for this path! ' . $path
+                ]);
+            }
+            
+            throw new GambioStoreCreateDirectoryException('Could not create a folder ' . $path, 3, [
+                'info' => 'Please contact the server administrator'
+            ]);
         }
     }
     
@@ -148,11 +189,12 @@ class GambioStoreFileSystem
         
         if (is_file($source)) {
             $this->fileMove($source, $destination);
+            
             return;
         }
         
         $directory = new RecursiveDirectoryIterator($source, \RecursiveDirectoryIterator::SKIP_DOTS);
-        $iterator = new RecursiveIteratorIterator($directory, \RecursiveIteratorIterator::SELF_FIRST);
+        $iterator  = new RecursiveIteratorIterator($directory, \RecursiveIteratorIterator::SELF_FIRST);
         
         foreach ($iterator as $item) {
             if ($item->isDir()) {
@@ -164,6 +206,41 @@ class GambioStoreFileSystem
             } else {
                 $this->fileMove($item, $destination . DIRECTORY_SEPARATOR . $iterator->getSubPathName());
             }
+        }
+    }
+    
+    
+    /**
+     * Moves source file from to the destination directory.
+     * Creates destination directory recursively in case it doesn't exist.
+     *
+     * @param $source
+     * @param $destination
+     *
+     * @throws \GambioStoreFileNotFoundException
+     * @throws \GambioStoreFileMoveException
+     * @throws \GambioStoreCreateDirectoryException
+     */
+    private function fileMove($source, $destination)
+    {
+        if (file_exists($destination) && is_file($destination)) {
+            throw new GambioStoreFileExistsException('File already exists: ' . $destination, 1, [
+                'info' => "File with this name already exists on attempt to move file $source to $destination"
+            ]);
+        }
+        
+        if (!file_exists($source) || !is_file($source)) {
+            throw new GambioStoreFileNotFoundException('File not found: ' . $source, 1, [
+                'info' => "File not found on attempt to move file $source to $destination"
+            ]);
+        }
+        
+        if (!file_exists(dirname($destination))) {
+            $this->createDirectory(dirname($destination));
+        }
+        
+        if (!rename($source, $destination)) {
+            throw new GambioStoreFileMoveException("Could not move file $source to $destination folder");
         }
     }
     
@@ -186,14 +263,14 @@ class GambioStoreFileSystem
         if (!file_exists($path)) {
             return true;
         }
-    
+        
         if (is_file($path)) {
             return @unlink($path);
         }
-    
+        
         $directory = new RecursiveDirectoryIterator($path, RecursiveDirectoryIterator::SKIP_DOTS);
         $iterator  = new RecursiveIteratorIterator($directory, RecursiveIteratorIterator::CHILD_FIRST);
-    
+        
         $success = true;
         
         foreach ($iterator as $item) {
@@ -203,7 +280,7 @@ class GambioStoreFileSystem
                 $success = $success && @unlink($item->getRealPath());
             }
         }
-    
+        
         return $success && @rmdir($path);
     }
     
@@ -221,6 +298,21 @@ class GambioStoreFileSystem
         $this->checkIfPathIsDirectory($directoryPath);
         
         return glob($directoryPath . '/**', GLOB_ONLYDIR);
+    }
+    
+    
+    /**
+     * Checks if provided path is a directory.
+     *
+     * @param string $path
+     *
+     * @throws \GambioStorePathIsNotDirectoryException
+     */
+    private function checkIfPathIsDirectory($path)
+    {
+        if (!is_dir($path)) {
+            throw new GambioStorePathIsNotDirectoryException('Path :' . $path . ' is not a directory');
+        }
     }
     
     
@@ -249,8 +341,8 @@ class GambioStoreFileSystem
                 }
             }
         } catch (Exception $exception) {
-            throw new GambioStoreDirectoryContentException('Could not get content form directory:' . $directoryPath, 0, [],
-                $exception);
+            throw new GambioStoreDirectoryContentException('Could not get content form directory:' . $directoryPath, 0,
+                [], $exception);
         }
         
         return $recursiveDirectories;
@@ -297,8 +389,8 @@ class GambioStoreFileSystem
                 $recursiveFileList[] = realpath($path->__toString());
             }
         } catch (Exception $exception) {
-            throw new GambioStoreDirectoryContentException('Could not get content form directory:' . $directoryPath, 0, [],
-                $exception);
+            throw new GambioStoreDirectoryContentException('Could not get content form directory:' . $directoryPath, 0,
+                [], $exception);
         }
         
         return $recursiveFileList;
@@ -349,8 +441,8 @@ class GambioStoreFileSystem
                 }
             }
         } catch (Exception $exception) {
-            throw new GambioStoreDirectoryContentException('Could not get content form directory:' . $directoryPath, 0, [],
-                $exception);
+            throw new GambioStoreDirectoryContentException('Could not get content form directory:' . $directoryPath, 0,
+                [], $exception);
         }
         
         return $recursiveContentsList;
@@ -358,102 +450,13 @@ class GambioStoreFileSystem
     
     
     /**
-     * Crates a directory recursively.
-     *
-     * @param string $path
-     *
-     * @throws \GambioStoreCreateDirectoryException
-     */
-    public function createDirectory($path)
-    {
-        if (is_dir($path)) {
-            return;
-        }
-    
-        if (!@mkdir($path, 0777, true) && !is_dir($path)) {
-        
-            if (is_file($path)) {
-                throw new GambioStoreCreateDirectoryException('Could not create a folder ' . $path, 1, [
-                    'info' => 'There is already a file exists for the path: ' . $path
-                ]);
-            }
-        
-            if (is_link($path)) {
-                throw new GambioStoreCreateDirectoryException('Could not create a folder ' . $path, 2, [
-                    'info' => 'There is already a symlink exists for this path! ' . $path
-                ]);
-            }
-            
-            throw new GambioStoreCreateDirectoryException('Could not create a folder ' . $path, 3, [
-                'info' => 'Please contact the server administrator'
-            ]);
-        }
-    }
-    
-    
-    /**
-     * Copies file from source to destination.
-     * In case folders of destination path are not exist, they will be created.
-     *
-     * @param string $source
-     * @param string $destination
-     *
-     * @throws \GambioStoreCreateDirectoryException
-     * @throws \GambioStoreFileNotFoundException|\GambioStoreFileCopyException
-     */
-    private function fileCopy($source, $destination)
-    {
-        if (file_exists($destination) && is_file($destination)) {
-            throw new GambioStoreFileExistsException('File already exists: ' . $destination, 1, [
-                'info' => "File with this name already exists on attempt to copy file $source to $destination"
-            ]);
-        }
-        
-        if (!file_exists($source) || !is_file($source)) {
-            throw new GambioStoreFileNotFoundException('No such file: ' . $source);
-        }
-    
-        $this->createDirectory(dirname($destination));
-    
-        if (!copy($source, $destination)) {
-            throw new GambioStoreFileCopyException("Couldn't copy file " . $source);
-        }
-    }
-    
-    
-    /**
-     * Checks if provided path is a directory.
-     *
-     * @param string $path
-     *
-     * @throws \GambioStorePathIsNotDirectoryException
-     */
-    private function checkIfPathIsDirectory($path)
-    {
-        if (!is_dir($path)) {
-            throw new GambioStorePathIsNotDirectoryException('Path :' . $path . ' is not a directory');
-        }
-    }
-    
-    
-    /**
-     * Returns shop directory path.
-     *
-     * @return string
-     */
-    public function getShopDirectory()
-    {
-        return realpath(__DIR__ . '/../../../..');
-    }
-    
-     /**
      * Returns themes directory path.
      *
      * @return string
      */
     public function getThemeDirectory()
     {
-     return  $this->getShopDirectory() . '/themes';
+        return $this->getShopDirectory() . '/themes';
     }
     
     

@@ -174,9 +174,9 @@ class GambioStoreHttp
     public function post($url, $data = [], $options = [])
     {
         $options += [
-            CURLOPT_POST       => true,
+            CURLOPT_POST           => true,
             CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_POSTFIELDS => $data
+            CURLOPT_POSTFIELDS     => $data
         ];
         
         return $this->request($url, $options);

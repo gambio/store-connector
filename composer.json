@@ -1,43 +1,43 @@
 {
-	"name": "gambio-store/store-connector",
-	"description": "The Store Connector module enables the integration of Gambio Store into Gambio GX shops.",
-	"type": "project",
-	"license": "GPL-2.0",
+    "name": "gambio-store/store-connector",
+    "description": "The Store Connector module enables the integration of Gambio Store into Gambio GX shops.",
+    "type": "project",
+    "license": "GPL-2.0",
     "minimum-stability": "stable",
-	"scripts": {
-		"coverage": "php vendor/bin/phpunit --log-junit docs/coverage/coverage.xml --coverage-html docs/coverage",
-		"metrics": "php vendor/phpmetrics/phpmetrics/bin/phpmetrics --config=./metrics.json --junit=./docs/coverage/coverage.xml",
-		"lint": "mkdir -p docs/lint && php vendor/bin/phpcs --standard=PSR2 src > docs/lint/lint.txt",
-		"badge:metrics": "php vendor/phpmetrics/phpmetrics/bin/phpmetrics --report-violations=badges/violations.xml ./src",
-		"badge:coverage": "php vendor/bin/phpunit --coverage-xml badges/coverage",
-		"serve:metrics" : "google-chrome  ./docs/metrics/index.html || firefox ./docs/metrics/index.html",
-		"badge:tests": "php vendor/bin/phpunit --log-junit badges/tests.xml"
-	},
-	"repositories": [
-		{
-			"type": "vcs",
-			"url": "https://sources.gambio-server.net/gambio/readme-badger.git"
-		}
-	],
-	"authors": [
-		{
-			"name": "Gambio GmbH",
-			"email": "info@gambio.de"
-		}
-	],
-	"require": {
-		"php": ">=5.6.0",
-		"ext-json": "*",
+    "scripts": {
+        "coverage": "php vendor/bin/phpunit --log-junit docs/coverage/coverage.xml --coverage-html docs/coverage",
+        "metrics": "php vendor/phpmetrics/phpmetrics/bin/phpmetrics --config=./metrics.json --junit=./docs/coverage/coverage.xml",
+        "lint": "mkdir -p docs/lint && php vendor/bin/phpcs --standard=PSR2 src > docs/lint/lint.txt",
+        "badge:metrics": "php vendor/phpmetrics/phpmetrics/bin/phpmetrics --report-violations=badges/violations.xml ./src",
+        "badge:coverage": "php vendor/bin/phpunit --coverage-xml badges/coverage",
+        "serve:metrics": "google-chrome  ./docs/metrics/index.html || firefox ./docs/metrics/index.html",
+        "badge:tests": "php vendor/bin/phpunit --log-junit badges/tests.xml"
+    },
+    "repositories": [
+        {
+            "type": "vcs",
+            "url": "https://sources.gambio-server.net/gambio/readme-badger.git"
+        }
+    ],
+    "authors": [
+        {
+            "name": "Gambio GmbH",
+            "email": "info@gambio.de"
+        }
+    ],
+    "require": {
+        "php": ">=5.6.0",
+        "ext-json": "*",
         "ext-curl": "*",
         "ext-mbstring": "*",
         "ext-pdo": "*"
     },
     "require-dev": {
-	    "roave/security-advisories": "dev-master",
-	    "phpunit/phpunit": "^7",
-	    "mikey179/vfsStream": "^1.6",
-	    "fzaninotto/faker": "^1.6",
-	    "phpmetrics/phpmetrics": "^2.7",
-		"squizlabs/php_codesniffer": "^3.5"
+        "roave/security-advisories": "dev-master",
+        "phpunit/phpunit": "^7",
+        "mikey179/vfsStream": "^1.6",
+        "fzaninotto/faker": "^1.6",
+        "phpmetrics/phpmetrics": "^2.7",
+        "squizlabs/php_codesniffer": "^3.5"
     }
 }

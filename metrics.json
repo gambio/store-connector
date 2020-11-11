@@ -1,14 +1,17 @@
 {
-	"includes": [
-		"./src"
-	],
-	"report": {
-		"html": "./docs/metrics"
-	},
-	"plugins": {
-		"git": {
-			"binary": "git"
-		}
-	},
-	"extensions": [ "php", "inc"]
+    "includes": [
+        "./src"
+    ],
+    "report": {
+        "html": "./docs/metrics"
+    },
+    "plugins": {
+        "git": {
+            "binary": "git"
+        }
+    },
+    "extensions": [
+        "php",
+        "inc"
+    ]
 }

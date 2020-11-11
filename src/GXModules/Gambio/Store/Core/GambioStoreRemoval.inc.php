@@ -120,66 +120,6 @@ class GambioStoreRemoval
     
     
     /**
-     * Error handler function.
-     *
-     * @param $code
-     * @param $message
-     * @param $file
-     * @param $line
-     *
-     * @throws \Exception
-     */
-    public function handleUnexpectedError($code, $message, $file, $line)
-    {
-        if ($code === E_USER_ERROR) {
-            $this->logger->critical('Critical error during package removal from package: ' . $this->packageData['name'],
-                [
-                    'error' => [
-                        'code'    => $code,
-                        'message' => $message,
-                        'file'    => $file,
-                        'line'    => $line
-                    ]
-                ]);
-            $this->backup->restorePackageFilesFromCache($this->packageData['files_list']);
-            die();
-        }
-        
-        if ($code !== 2) {
-            $this->logger->warning('Minor error during package removal from package: ' . $this->packageData['name'], [
-                'error' => [
-                    'code'    => $code,
-                    'message' => $message,
-                    'file'    => $file,
-                    'line'    => $line
-                ]
-            ]);
-        }
-    }
-    
-    
-    /**
-     * Exception handler function.
-     *
-     * @param $exception
-     *
-     * @throws \Exception
-     */
-    public function handleUnexpectedException(Exception $exception)
-    {
-        $this->logger->critical('Critical error during package removal from package: ' . $this->packageData['name'], [
-            'error' => [
-                'code'    => $exception->getCode(),
-                'message' => $exception->getMessage(),
-                'file'    => $exception->getFile(),
-                'line'    => $exception->getLine()
-            ]
-        ]);
-        $this->backup->restorePackageFilesFromCache($this->packageData['files_list']);
-    }
-    
-    
-    /**
      * Remove all empty folders inside themes and GXModules related to this package
      *
      * @param $files
@@ -242,5 +182,65 @@ class GambioStoreRemoval
         $path = $this->fileSystem->getShopDirectory() . '/' . $folder;
         
         return @count(@scandir($path)) === 2;
+    }
+    
+    
+    /**
+     * Error handler function.
+     *
+     * @param $code
+     * @param $message
+     * @param $file
+     * @param $line
+     *
+     * @throws \Exception
+     */
+    public function handleUnexpectedError($code, $message, $file, $line)
+    {
+        if ($code === E_USER_ERROR) {
+            $this->logger->critical('Critical error during package removal from package: ' . $this->packageData['name'],
+                [
+                    'error' => [
+                        'code'    => $code,
+                        'message' => $message,
+                        'file'    => $file,
+                        'line'    => $line
+                    ]
+                ]);
+            $this->backup->restorePackageFilesFromCache($this->packageData['files_list']);
+            die();
+        }
+        
+        if ($code !== 2) {
+            $this->logger->warning('Minor error during package removal from package: ' . $this->packageData['name'], [
+                'error' => [
+                    'code'    => $code,
+                    'message' => $message,
+                    'file'    => $file,
+                    'line'    => $line
+                ]
+            ]);
+        }
+    }
+    
+    
+    /**
+     * Exception handler function.
+     *
+     * @param $exception
+     *
+     * @throws \Exception
+     */
+    public function handleUnexpectedException(Exception $exception)
+    {
+        $this->logger->critical('Critical error during package removal from package: ' . $this->packageData['name'], [
+            'error' => [
+                'code'    => $exception->getCode(),
+                'message' => $exception->getMessage(),
+                'file'    => $exception->getFile(),
+                'line'    => $exception->getLine()
+            ]
+        ]);
+        $this->backup->restorePackageFilesFromCache($this->packageData['files_list']);
     }
 }

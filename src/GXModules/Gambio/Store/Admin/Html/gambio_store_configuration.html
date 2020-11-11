@@ -2,42 +2,42 @@
 {load_language_text section="gambio_store" name="gambio_store"}
 {block name="content"}
 <div class="gx-container breakpoint-small">
-	<div class="col-md-12">
-		<form
-			data-cy="gambio-store-configuration-form"
-			id="gambio-store-configuration-form"
-			class="form-horizontal"
-			action=""
-			method="post">
-			<fieldset>
-				<legend>{$gambio_store['CONFIGURATION']}</legend>
-				<div class="form-group">
-					<label for="store-gui-url" class="control-label col-sm-4">STORE URL</label>
-					<div class="col-sm-8" data-gx-widget="switcher">
-						<input
-							data-cy="store-gui-url-input"
-							id="store-gui-url"
-							type="text"
-							class="form-control"
-							name="url"
-							value="{$content['url']}">
-					</div>
-				</div>
-				<div class="form-group">
-					<label for="store-api-url" class="control-label col-sm-4">STORE API URL</label>
-					<div class="col-sm-8" data-gx-widget="switcher">
-						<input
-							data-cy="store-api-url-input"
-							id="store-api-url"
-							type="text"
-							class="form-control"
-							name="apiUrl"
-							value="{$content['apiUrl']}">
-					</div>
-				</div>
-			</fieldset>
-		</form>
-	</div>
+    <div class="col-md-12">
+        <form
+            action=""
+            class="form-horizontal"
+            data-cy="gambio-store-configuration-form"
+            id="gambio-store-configuration-form"
+            method="post">
+            <fieldset>
+                <legend>{$gambio_store['CONFIGURATION']}</legend>
+                <div class="form-group">
+                    <label class="control-label col-sm-4" for="store-gui-url">STORE URL</label>
+                    <div class="col-sm-8" data-gx-widget="switcher">
+                        <input
+                            class="form-control"
+                            data-cy="store-gui-url-input"
+                            id="store-gui-url"
+                            name="url"
+                            type="text"
+                            value="{$content['url']}">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="control-label col-sm-4" for="store-api-url">STORE API URL</label>
+                    <div class="col-sm-8" data-gx-widget="switcher">
+                        <input
+                            class="form-control"
+                            data-cy="store-api-url-input"
+                            id="store-api-url"
+                            name="apiUrl"
+                            type="text"
+                            value="{$content['apiUrl']}">
+                    </div>
+                </div>
+            </fieldset>
+        </form>
+    </div>
 </div>
 {/block}
 

@@ -128,7 +128,7 @@ gulp.src = function() {
     'watch',
     'dev',
     'build',
-	'testPackage'
+    'testPackage'
 ]
     .forEach(task => gulp.task(task, require('./tools/gulp/' + task)(gulp, $)));
 

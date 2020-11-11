@@ -33,7 +33,7 @@ abstract class GambioStoreException extends Exception
         $this->context = array_merge($context, [
             'exception' => static::class
         ]);
-    
+        
         parent::__construct($message, $code, $previous);
     }
     

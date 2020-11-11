@@ -75,33 +75,6 @@ class GambioStorePackageInstaller
     
     
     /**
-     * Sets shop offline.
-     */
-    private function setShopOffline()
-    {
-        $this->configuration->set('GM_SHOP_OFFLINE', 'checked');
-    }
-    
-    
-    /**
-     * Sets shop online.
-     */
-    private function setShopOnline()
-    {
-        $this->configuration->set('GM_SHOP_OFFLINE', '');
-    }
-    
-    
-    /**
-     * @return bool indicating wether the shop is online.
-     */
-    private function isShopOnline()
-    {
-        return $this->configuration->get('GM_SHOP_OFFLINE') !== 'checked';
-    }
-    
-    
-    /**
      * Installs a package.
      *
      * @param $packageData
@@ -126,7 +99,7 @@ class GambioStorePackageInstaller
             $response = $installation->perform();
             
             if ($response['progress'] === 0) {
-                $wasShopOnline         = $this->isShopOnline();
+                $wasShopOnline = $this->isShopOnline();
                 $this->cache->set($wasShopOnlineCacheKey, $wasShopOnline);
             }
         } catch (Exception $exception) {
@@ -148,7 +121,7 @@ class GambioStorePackageInstaller
                 $themeDirectoryName = $packageData['details']['folder_name_inside_shop'] ? : $packageData['details']['filename'];
                 $this->themes->reimportContentManagerEntries($themeDirectoryName);
             }
-    
+            
             if ($this->cache->get($wasShopOnlineCacheKey)) {
                 $this->setShopOnline();
                 $this->cache->delete($wasShopOnlineCacheKey);
@@ -159,6 +132,24 @@ class GambioStorePackageInstaller
         }
         
         return $response;
+    }
+    
+    
+    /**
+     * @return bool indicating wether the shop is online.
+     */
+    private function isShopOnline()
+    {
+        return $this->configuration->get('GM_SHOP_OFFLINE') !== 'checked';
+    }
+    
+    
+    /**
+     * Sets shop online.
+     */
+    private function setShopOnline()
+    {
+        $this->configuration->set('GM_SHOP_OFFLINE', '');
     }
     
     
@@ -237,6 +228,15 @@ class GambioStorePackageInstaller
         restore_exception_handler();
         
         return $response;
+    }
+    
+    
+    /**
+     * Sets shop offline.
+     */
+    private function setShopOffline()
+    {
+        $this->configuration->set('GM_SHOP_OFFLINE', 'checked');
     }
 }
 

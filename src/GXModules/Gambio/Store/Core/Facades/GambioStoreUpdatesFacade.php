@@ -67,7 +67,7 @@ if (defined('StoreKey_MigrationScript')) {
                     foreach ($updates as $update) {
                         GambioStoreConnector::getInstance()->installPackage($update);
                     }
-                } catch (\Exception $exception) {
+                } catch (Exception $exception) {
                     $message = 'An update could not be installed!';
                     GambioStoreConnector::getInstance()->getLogger()->error($message, [
                         'error' => [
