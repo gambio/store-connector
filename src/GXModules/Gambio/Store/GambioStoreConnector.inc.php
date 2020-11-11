@@ -20,6 +20,7 @@ require_once 'Core/GambioStoreShopInformation.inc.php';
 require_once 'Core/GambioStoreCache.inc.php';
 require_once 'Core/GambioStoreBackup.inc.php';
 require_once 'Core/GambioStorePackageInstaller.inc.php';
+require_once 'Core/GambioStoreAuth.inc.php';
 require_once 'Core/Exceptions/GambioStoreLanguageNotResolvableException.inc.php';
 require_once 'Core/Exceptions/GambioStoreHttpErrorException.inc.php';
 require_once 'Core/Exceptions/GambioStoreUpdatesNotRetrievableException.inc.php';
@@ -86,6 +87,11 @@ class GambioStoreConnector
      */
     private $http;
     
+    /**
+     * @var \GambioStoreAuth
+     */
+    private $auth;
+    
     
     /**
      * GambioStoreConnector constructor.
@@ -113,7 +119,8 @@ class GambioStoreConnector
         GambioStoreCache $cache,
         GambioStoreHttp $http,
         GambioStoreBackup $backup,
-        GambioStorePackageInstaller $installer
+        GambioStorePackageInstaller $installer,
+        GambioStoreAuth $auth
     ) {
         $this->database        = $database;
         $this->configuration   = $configuration;
@@ -123,9 +130,10 @@ class GambioStoreConnector
         $this->fileSystem      = $fileSystem;
         $this->shopInformation = $shopInformation;
         $this->cache           = $cache;
-        $this->http           = $http;
+        $this->http            = $http;
         $this->backup          = $backup;
         $this->installer       = $installer;
+        $this->auth            = $auth;
     }
     
     
@@ -146,10 +154,12 @@ class GambioStoreConnector
         $backup          = new GambioStoreBackup($fileSystem);
         $logger          = new GambioStoreLogger($cache);
         $themes          = new GambioStoreThemes($compatibility, $fileSystem, $logger);
-        $installer       = new GambioStorePackageInstaller($fileSystem, $configuration, $cache, $logger, $backup, $themes, $compatibility);
+        $installer       = new GambioStorePackageInstaller($fileSystem, $configuration, $cache, $logger, $backup,
+            $themes);
+        $auth            = new GambioStoreAuth($configuration, $http, $shopInformation, $logger);
         
         return new self($database, $configuration, $compatibility, $logger, $themes, $fileSystem, $shopInformation,
-            $cache, $http, $backup, $installer);
+            $cache, $http, $backup, $installer, $auth);
     }
     
     
@@ -172,6 +182,15 @@ class GambioStoreConnector
     public function getCompatibility()
     {
         return $this->compatibility;
+    }
+    
+    
+    /**
+     * Returns the auth
+     */
+    public function getAuth()
+    {
+        return $this->auth;
     }
     
     
@@ -237,14 +256,13 @@ class GambioStoreConnector
      *
      * @return bool
      */
-    public function verifyRegistration($storeToken)
+    public function verifyToken($storeToken)
     {
         $result = $this->configuration->get('GAMBIO_STORE_TOKEN') === $storeToken;
         if ($result) {
-            $this->logger->notice('Registration verification succeed');
-            $this->configuration->set('GAMBIO_STORE_IS_REGISTERED', 'true');
+            $this->logger->notice('Token verification succeed');
         } else {
-            $this->logger->error('Registration verification failed');
+            $this->logger->error('Token verification failed. Received: ' . $storeToken);
         }
         
         return $result;
@@ -369,6 +387,7 @@ class GambioStoreConnector
         return $this->installer->uninstallPackage($postData);
     }
     
+    
     /**
      * Retrieves the number of available updates for the current shop version from the store.
      * Note that this returns an empty array silently if either:
@@ -435,6 +454,7 @@ class GambioStoreConnector
         return $response['updates'];
     }
     
+    
     /***
      * Checks if shop is allowed to get updates.
      * Note this returns false if :
@@ -460,6 +480,7 @@ class GambioStoreConnector
         
         return true;
     }
+    
     
     /**
      * Gets the store api URL

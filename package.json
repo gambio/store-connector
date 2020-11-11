@@ -15,11 +15,12 @@
   "scripts": {
     "start": "gulp dev",
     "build": "gulp",
+	"sync" : "gulp scripts && gulp styles && gulp sync && sudo chmod 777 -R  docker/*/shop/src/GXModules/Gambio/Store",
     "configure": "yarn && composer install",
     "test": "gulp test"
   },
   "dependencies": {},
-  "devDependencies": {
+	"devDependencies": {
     "@babel/cli": "^7.10.1",
     "@babel/core": "^7.10.1",
     "@babel/polyfill": "^7.10.1",

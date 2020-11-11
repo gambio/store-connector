@@ -22,8 +22,8 @@ if (defined('StoreKey_MigrationScript')) {
         require_once __DIR__ . '/../Exceptions/FileSystemExceptions/GambioStoreCreateDirectoryException.inc.php';
         require_once __DIR__ . '/../Exceptions/FileSystemExceptions/GambioStorePathIsNotDirectoryException.inc.php';
         require_once __DIR__ . '/../Exceptions/FileSystemExceptions/GambioStoreFileExistsException.inc.php';
-        
-        
+    
+    
         /**
          * This class is used to perform actions on the filesystem within the shop folder.
          * This class is a facade for using the functionality of the GambioStore module by third-party packages
@@ -495,13 +495,13 @@ if (defined('StoreKey_MigrationScript')) {
                 $ignoreFileNotFoundException = false;
                 switch ($method) {
                     case 'remove':
-                        $method = 'fileMove';
-                        // Add full path to the shop since we mimic the remove action.
-                        $arguments[1]                = $this->getShopDirectory() . '/cache/backup/migrations/' . $arguments[0];
-                        $arguments[0]                = $this->getShopDirectory() . '/' . $arguments[0];
+                        $method = 'move';
+                        // Add full path to the shop since 8e mimic the remove action.
+                        $arguments[1]                = 'cache/backup/migrations/' . $arguments[0];
+                        $arguments[0]                = $arguments[0];
                         $ignoreFileNotFoundException = true;
-                    case 'fileCopy':
-                    case 'fileMove':
+                    case 'copy':
+                    case 'move':
                     case 'rename':
                     if ($ignoreFileNotFoundException) {
                         $this->actionsPerformed[] = ['remove', $arguments];
@@ -554,7 +554,7 @@ if (defined('StoreKey_MigrationScript')) {
                             break;
                         case 'remove':
                             try {
-                                $this->_fileMove($action[1][1], $action[1][0]);
+                                $this->_move($action[1][1], $action[1][0]);
                             } catch (GambioStoreFileNotFoundException $exception) {
                                 // do nothing
                             }

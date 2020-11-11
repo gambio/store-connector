@@ -1,0 +1,28 @@
+stages:
+    - build
+    - run
+
+default:
+    cache:
+        key: "$CI_COMMIT_SHA-cache"
+        paths:
+            - vendor/
+    before_script:
+        - echo '[LOGTIME]' `date` && echo `date` '[start]'
+        - pwd
+        - whoami
+        - ls -la
+        - export
+    after_script:
+        - echo '[LOGTIME]' `date`
+
+badges:
+    stage: run
+    when: on_success
+    script:
+        - '# Badges for store-connector'
+        - chmod +x .gitlab-ci/badges.sh
+        - .gitlab-ci/badges.sh
+
+include:
+    -   local: '.gitlab-ci-stage.yml'

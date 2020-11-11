@@ -5,7 +5,8 @@
 
     <div class="gambio-store downloads">
         <div id="gambio-store-iframe"
-             data-store-token="{$content.storeToken}"
+             data-store-client-id="{$content.clientId}"
+             data-store-auth-headers="{$content.authHeaders|json_encode}"
              data-store-url="{$content.storeUrl}"
              data-store-language="{$content.storeLanguage}"
              data-store-translations="{$content.translations|json_encode}">

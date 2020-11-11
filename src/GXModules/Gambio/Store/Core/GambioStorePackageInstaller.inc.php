@@ -111,8 +111,6 @@ class GambioStorePackageInstaller
      */
     public function installPackage($packageData)
     {
-        $wasShopOnline = $this->isShopOnline();
-        
         $migration = new GambioStoreMigration($this->fileSystem,
             isset($packageData['migrations']['up']) ? $packageData['migrations']['up'] : [],
             isset($packageData['migrations']['down']) ? $packageData['migrations']['down'] : []);
@@ -123,28 +121,42 @@ class GambioStorePackageInstaller
             $this->cache, $this->logger, $this->fileSystem, $this->backup, $migration, $http);
         
         try {
-            if ($wasShopOnline) {
-                $this->setShopOffline();
-            }
+            $wasShopOnlineCacheKey = 'WAS_SHOP_ONLINE_' . $packageData['details']['id'];
+            
             $response = $installation->perform();
+            
+            if ($response['progress'] === 0) {
+                $wasShopOnline         = $this->isShopOnline();
+                $this->cache->set($wasShopOnlineCacheKey, $wasShopOnline);
+            }
         } catch (Exception $exception) {
             restore_error_handler();
             restore_exception_handler();
+            
+            if ($this->cache->get($wasShopOnlineCacheKey)) {
+                $this->setShopOnline();
+                $this->cache->delete($wasShopOnlineCacheKey);
+            }
+            
             throw $exception;
         }
-        finally {
-            if ($wasShopOnline) {
-                $this->setShopOnline();
+        
+        if ($response['progress'] === 100) {
+            
+            if (isset($packageData['details']['folder_name_inside_shop'])
+                || isset($packageData['details']['filename'])) {
+                $themeDirectoryName = $packageData['details']['folder_name_inside_shop'] ? : $packageData['details']['filename'];
+                $this->themes->reimportContentManagerEntries($themeDirectoryName);
             }
+    
+            if ($this->cache->get($wasShopOnlineCacheKey)) {
+                $this->setShopOnline();
+                $this->cache->delete($wasShopOnlineCacheKey);
+            }
+            
+            restore_error_handler();
+            restore_exception_handler();
         }
-        
-        if (isset($packageData['details']['folder_name_inside_shop']) || isset($packageData['details']['filename'])) {
-            $themeDirectoryName = $packageData['details']['folder_name_inside_shop'] ? : $packageData['details']['filename'];
-            $this->themes->reimportContentManagerEntries($themeDirectoryName);
-        }
-        
-        restore_error_handler();
-        restore_exception_handler();
         
         return $response;
     }
@@ -208,6 +220,11 @@ class GambioStorePackageInstaller
         } catch (Exception $exception) {
             restore_error_handler();
             restore_exception_handler();
+            
+            if ($wasShopOnline) {
+                $this->setShopOnline();
+            }
+            
             throw $exception;
         }
         finally {

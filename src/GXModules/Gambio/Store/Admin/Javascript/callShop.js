@@ -31,13 +31,13 @@ window.GambioStore = Object.assign({}, {
                     reject({type: networkErrors.JSON_PARSE_ERROR, context: jsonParseError});
                 });
             }).catch(networkError => {
-                reject({type: networkErrors.NO_SUCCESS, contex: networkError});
+                reject({type: networkErrors.NO_SUCCESS, context: networkError});
             });
         })
 	},
     visitShop: (...params) => {
         return fetch(...params).catch(networkError => {
-            throw({type: networkErrors.NO_SUCCESS, contex: networkError});
+            throw({type: networkErrors.NO_SUCCESS, context: networkError});
         });
     }
 }, window.GambioStore);

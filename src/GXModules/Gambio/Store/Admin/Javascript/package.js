@@ -69,8 +69,11 @@ const installPackage = (data, progressCallback) => {
 				progress = response.progress ? response.progress : progress;
 				progressCallback(progress);
 			}
-   
-			await GambioStore.clearShopCache();
+			setTimeout(async () => {
+				await showClearCache();
+				await GambioStore.clearShopCache();
+			}, 500)
+			
 		} catch (e) {
 			reject(e);
 		}
@@ -113,7 +116,7 @@ const uninstallPackage = async (data) => {
 			redirect: 'error'
 		});
 	} catch (error) {
-		window.location.reload(true);
+		location.reload();
 		return;
 	}
 	
@@ -127,7 +130,7 @@ const uninstallPackage = async (data) => {
 			method: 'post',
 			body: formData
 		});
-        await GambioStore.clearShopCache();
+		await GambioStore.clearShopCache();
 		
 		GambioStore.messenger.sendMessage('uninstall_succeeded');
 	} catch (error) {
@@ -164,10 +167,7 @@ const startPackageInstallation = async (data) => {
 	} catch {
 		GambioStore.messenger.sendMessage('installation_failed');
 	} finally {
-		setTimeout(() => {
-			$installingPackageModal.modal('hide');
-			updateProgressCallback(0);
-		}, 2000);
+		$installingPackageModal.modal('hide');
 	}
 }
 
@@ -185,6 +185,18 @@ const updateProgressCallback = (progress) => {
 	progressBar.textContent = progress + '%';
 };
 
+const showClearCache = () => {
+	const modalBody = document
+		.getElementsByClassName('installing-package modal').item(0)
+		.getElementsByClassName('modal-body').item(0);
+	
+	const cacheClearingText = GambioStore.translation.translate('CLEARING_CACHE');
+	const description = `<p class="progress-description">${cacheClearingText}</p>`
+	const loadingSpinner = '<br><div class="text-center"><i class="fas fa-spinner text-primary fa-spin fa-3x loading-spinner"></i></div>'
+	modalBody.innerHTML = '';
+	modalBody.innerHTML = description + loadingSpinner
+};
+
 /**
  * Install process to install packages by data.
  *
@@ -200,7 +212,7 @@ const install = async (data) => {
 			redirect: 'error'
 		});
 	} catch (error) {
-		window.location.reload(true);
+		location.reload();
 		return;
 	}
 	

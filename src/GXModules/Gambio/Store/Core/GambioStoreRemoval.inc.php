@@ -17,7 +17,12 @@ require_once 'Exceptions/GambioStoreRemovalException.inc.php';
 /**
  * Class GambioStoreRemoval
  *
- * Performs a Store package removal and take care of all the required actions.
+ * The class performs a package removal in the shop. The class receives the packages files to remove.
+ *
+ * The main logic is in the `perform` method. It moves the package files to the backup folder to simulate deletion.
+ * This allows us to restore the package files if an error occurs. Afterwards empty directories are removed.
+ * Lastly the package migrations are run. If this step was successful, the backup is removed and the package removal
+ * completed. If at any point an error occurs, the package will be restored from the backup.
  *
  * Execute the downgrade script if needed.
  */

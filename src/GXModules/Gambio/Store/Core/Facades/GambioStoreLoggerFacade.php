@@ -18,6 +18,20 @@ if (defined('StoreKey_MigrationScript')) {
          * Class GambioStoreLoggerFacade
          *
          * This class enables store related debug logging, information that are particularly useful for troubleshooting.
+         *
+         * This class is the facade for the GambioStoreLogger class.
+         *
+         * The class is used for migration scripts that can be run after an installation or uninstallation of a package
+         * through the Store. It is not included in our Connector Core logic and has a define constant to prevent it
+         * from being loaded until desired. This was introduced to ensure that during a self update of the Connector,
+         * the class will have been replaced with its updated counter part before being loaded into PHP memory,
+         * allowing us to execute new code during the self update.
+         *
+         * Functionality is implemented by duplicating methods of the original class.
+         *
+         * The initial check for the StoreKey_MigrationScript constant avoids automatic class auto-loading
+         * by the shop's "MainFactory" since we need a unique new version during the update.
+         *
          */
         class GambioStoreLoggerFacade
         {

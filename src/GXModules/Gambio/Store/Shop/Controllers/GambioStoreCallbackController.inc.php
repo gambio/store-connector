@@ -26,6 +26,16 @@ class GambioStoreCallbackController extends HttpViewController
      */
     private $connector;
     
+    /**
+     * @var \GambioStoreConfiguration
+     */
+    private $configuration;
+    
+    /**
+     * @var \GambioStoreAuth
+     */
+    private $auth;
+    
     
     /**
      * Setup of our Connector classes
@@ -33,6 +43,8 @@ class GambioStoreCallbackController extends HttpViewController
     private function setup()
     {
         $this->connector = GambioStoreConnector::getInstance();
+        $this->configuration = $this->connector->getConfiguration();
+        $this->auth = $this->connector->getAuth();
     }
     
     
@@ -64,10 +76,79 @@ class GambioStoreCallbackController extends HttpViewController
     
         $storeToken = $this->_getPostData('storeToken');
     
-        $result = $this->connector->verifyRegistration($storeToken);
+        $result = $this->connector->verifyToken($storeToken);
     
         return new JsonHttpControllerResponse([
             'success' => $result
+        ]);
+    }
+    
+    
+    /**
+     * Receives a new auth code for the Store and requests the first access and refresh token
+     *
+     * @return \JsonHttpControllerResponse
+     * @throws \GambioStoreHttpErrorException
+     * @throws \GambioStoreHttpServerMissingException
+     * @throws \GambioStoreRelativeShopPathMissingException
+     * @throws \GambioStoreRequestingAuthInvalidStatusException
+     * @throws \GambioStoreShopClassMissingException
+     * @throws \GambioStoreShopKeyMissingException
+     * @throws \GambioStoreShopVersionMissingException
+     */
+    public function actionIssueAuthCode()
+    {
+        $this->setup();
+        
+        $authCode = $this->_getPostData('authCode');
+        
+        if ($authCode === null) {
+            return new JsonHttpControllerResponse([
+                'success' => false
+            ]);
+        }
+        
+        $clientId = $this->configuration->get('GAMBIO_STORE_TOKEN');
+        
+        $result = $this->auth->requestNewAuthWithHeaders([
+            "X-CLIENT-ID: $clientId",
+            "X-AUTH-CODE: $authCode"
+        ]);
+        
+        return new JsonHttpControllerResponse([
+            'success' => $result
+        ]);
+    }
+    
+    
+    /**
+     * Receives a new access and optionally a refresh token
+     *
+     * @return \JsonHttpControllerResponse
+     */
+    public function actionReceiveAuth()
+    {
+        $this->setup();
+        
+        $accessToken = $this->_getPostData('accessToken');
+        $refreshToken = $this->_getPostData('refreshToken');
+    
+        if ($accessToken === null) {
+            return new JsonHttpControllerResponse([
+                'success' => false
+            ]);
+        }
+        
+        $this->configuration->set('GAMBIO_STORE_ACCESS_TOKEN', $accessToken);
+        
+        if ($refreshToken !== null) {
+            $this->configuration->set('GAMBIO_STORE_REFRESH_TOKEN', $refreshToken);
+        }
+        
+        $this->configuration->set('GAMBIO_STORE_IS_REGISTERED', true);
+        
+        return new JsonHttpControllerResponse([
+            'success' => true
         ]);
     }
 }
