@@ -1,8 +1,6 @@
 # Gambio Store Connector
 > Store integration module for GX shops. 
 
-<img src="https://store.gambio.com/cdn/gitlab/store-connector/tests.svg" height="22" alt="Tests"> <img src="https://store.gambio.com/cdn/gitlab/store-connector/coverage.svg" height="22"  alt="Coverage"/> <img src="https://store.gambio.com/cdn/gitlab/store-connector/violations.svg" height="22" alt="Violations">
-
 The Gambio Store Connector enables the integration of the Gambio Store service into GX shops. This repository holds all  
 the code required for the module, along with all the variants included in the final released archive. 
 
