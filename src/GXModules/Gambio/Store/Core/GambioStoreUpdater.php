@@ -192,7 +192,7 @@ if (defined('StoreKey_MigrationScript')) {
                 }
                 
                 if (!$this->configuration->has('GAMBIO_STORE_API_URL')) {
-                    $this->configuration->create('GAMBIO_STORE_API_URL', '');
+                    $this->configuration->create('GAMBIO_STORE_API_URL', 'https://api.store.gambio.com/a');
                 }
                 
                 if (!$this->configuration->has('GAMBIO_STORE_ACCESS_TOKEN')) {
