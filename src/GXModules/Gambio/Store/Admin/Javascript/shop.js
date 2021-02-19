@@ -122,6 +122,10 @@ window.addEventListener('DOMContentLoaded', () => {
         window.location.href = 'admin.php?do=GambioStore/AcceptDataProcessing';
     });
     
+    GambioStore.messenger.listenToMessage('store_migrated', function() {
+        window.location.href = 'admin.php?do=GambioStore/StoreMigrated';
+    });
+    
     GambioStore.messenger.listenToMessage('reload_page', function() {
         window.location.reload(true);
     })

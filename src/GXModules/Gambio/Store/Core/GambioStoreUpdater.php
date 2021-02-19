@@ -202,6 +202,10 @@ if (defined('StoreKey_MigrationScript')) {
                 if (!$this->configuration->has('GAMBIO_STORE_REFRESH_TOKEN')) {
                     $this->configuration->create('GAMBIO_STORE_REFRESH_TOKEN', '');
                 }
+    
+                if (!$this->configuration->has('GAMBIO_STORE_MIGRATED')) {
+                    $this->configuration->create('GAMBIO_STORE_MIGRATED', 0);
+                }
             }
             
             

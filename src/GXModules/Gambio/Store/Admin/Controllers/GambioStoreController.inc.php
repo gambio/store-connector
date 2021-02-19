@@ -109,6 +109,8 @@ class GambioStoreController extends AdminHttpViewController
             $data = $this->getIFrameTemplateData('/dataprocessing');
         } elseif ($this->configuration->get('GAMBIO_STORE_IS_REGISTERED') === false) {
             $data = $this->getIFrameTemplateData('/register');
+        } elseif ((bool) $this->configuration->get('GAMBIO_STORE_MIGRATED') !== true) {
+            $data = $this->getIFrameTemplateData('/migrate');
         } elseif ($this->configuration->get('GAMBIO_STORE_ACCEPTED_DATA_PROCESSING') === true) {
             $contentNavigation = $this->getStoreNavigation();
             $data              = $this->getIFrameTemplateData('/downloads');
@@ -396,6 +398,27 @@ class GambioStoreController extends AdminHttpViewController
         
         $this->configuration->set('GAMBIO_STORE_ACCEPTED_DATA_PROCESSING', true);
         
+        return $this->actionDefault();
+    }
+    
+    
+    
+    
+    /**
+     * Return whether the data processing has been accepted.
+     *
+     * @return JsonHttpControllerResponse
+     */
+    public function actionStoreMigrated()
+    {
+        $this->setup();
+        
+        if ($this->configuration->has('GAMBIO_STORE_MIGRATED')) {
+            $this->configuration->set('GAMBIO_STORE_MIGRATED', 1);
+        } else {
+            $this->configuration->create('GAMBIO_STORE_MIGRATED', 1);
+        }
+    
         return $this->actionDefault();
     }
 }
