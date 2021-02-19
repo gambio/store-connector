@@ -400,25 +400,4 @@ class GambioStoreController extends AdminHttpViewController
         
         return $this->actionDefault();
     }
-    
-    
-    
-    
-    /**
-     * Return whether the data processing has been accepted.
-     *
-     * @return JsonHttpControllerResponse
-     */
-    public function actionStoreMigrated()
-    {
-        $this->setup();
-        
-        if ($this->configuration->has('GAMBIO_STORE_MIGRATED')) {
-            $this->configuration->set('GAMBIO_STORE_MIGRATED', 1);
-        } else {
-            $this->configuration->create('GAMBIO_STORE_MIGRATED', 1);
-        }
-    
-        return $this->actionDefault();
-    }
 }

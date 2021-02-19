@@ -123,7 +123,11 @@ window.addEventListener('DOMContentLoaded', () => {
     });
     
     GambioStore.messenger.listenToMessage('store_migrated', function() {
-        window.location.href = 'admin.php?do=GambioStore/StoreMigrated';
+        return new Promise((resolve) => {
+            GambioStore.callShop('admin.php?do=GambioStoreAjax/StoreMigrated')
+                .then(window.location.reload(true))
+                .catch();
+        });
     });
     
     GambioStore.messenger.listenToMessage('reload_page', function() {

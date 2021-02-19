@@ -304,4 +304,22 @@ class GambioStoreAjaxController extends AdminHttpViewController
         
         return $gambioUrl;
     }
+    
+    /**
+     * Sets a value that Gambio Store has been migrated.
+     *
+     * @return JsonHttpControllerResponse
+     */
+    public function actionStoreMigrated()
+    {
+        $this->setup();
+        
+        if ($this->configuration->has('GAMBIO_STORE_MIGRATED')) {
+            $this->configuration->set('GAMBIO_STORE_MIGRATED', 1);
+        } else {
+            $this->configuration->create('GAMBIO_STORE_MIGRATED', 1);
+        }
+    
+        return new JsonHttpControllerResponse(['success' => true]);
+    }
 }
