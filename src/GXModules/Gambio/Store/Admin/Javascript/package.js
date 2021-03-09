@@ -82,27 +82,6 @@ const installPackage = (data, progressCallback) => {
 }
 
 /**
- * Ensure that file permissions for a theme installation are valid.
- *
- * @param data
- * @returns {Promise<boolean>}
- */
-const isFilePermissionCorrect = async (data) => {
-    const formData = new FormData();
-    
-    formData.append('gambioStoreData', JSON.stringify(data));
-    try {
-        await GambioStore.callShop('admin.php?do=GambioStoreAjax/CheckFilePermissions', {
-            method: 'post',
-            body: formData
-        })
-        return true;
-    } catch {
-        return false;
-    }
-}
-
-/**
  * Uninstall a theme
  *
  * @param data
