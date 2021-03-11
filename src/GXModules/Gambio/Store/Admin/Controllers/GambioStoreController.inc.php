@@ -46,7 +46,11 @@ class GambioStoreController extends AdminHttpViewController
         $this->setup();
         
         if ($this->configuration->get('GAMBIO_STORE_ACCEPTED_DATA_PROCESSING') !== true) {
-            return $this->actionDefault();
+            $this->actionDefault();
+        }
+        
+        if ((bool) $this->configuration->get('GAMBIO_STORE_MIGRATED') !== true) {
+            $this->actionDefault();
         }
         
         if (!$this->acceptableErrorsTestPassed()) {
@@ -330,6 +334,10 @@ class GambioStoreController extends AdminHttpViewController
     public function actionConfiguration()
     {
         $this->setup();
+    
+        if ((bool) $this->configuration->get('GAMBIO_STORE_MIGRATED') !== true) {
+            $this->actionDefault();
+        }
         
         $gambioStoreUrl    = $this->getGambioStoreUrl();
         $gambioStoreApiUrl = $this->getGambioStoreApiUrl();
