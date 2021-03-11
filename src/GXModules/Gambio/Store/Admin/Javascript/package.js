@@ -114,6 +114,7 @@ const uninstallPackage = async (data) => {
 	await reloadPageOnInactiveSession();
 	
 	const formData = new FormData();
+	const $installingPackageModal = $('.installing-package.modal');
 	const modalBody = document
 		.getElementsByClassName('installing-package modal').item(0)
 		.getElementsByClassName('modal-body').item(0);
@@ -127,13 +128,21 @@ const uninstallPackage = async (data) => {
 			body: formData
 		});
 		
-		showClearCache();
-		GambioStore.clearShopCache()
+		await new Promise((resolve, reject) => {
+			setTimeout(() => {
+				showClearCache();
+				$installingPackageModal.modal('show');
+				GambioStore.clearShopCache()
+					.then(resolve)
+					.catch(reject);
+			}, 500)
+		});
 		
 		GambioStore.messenger.sendMessage('uninstall_succeeded');
 	} catch (error) {
 		GambioStore.messenger.sendMessage('uninstall_failed', error.context || error);
 	} finally {
+		$installingPackageModal.modal('hide');
 		modalBody.innerHTML = modalBodyInnerHtml;
 	}
 }
@@ -195,13 +204,13 @@ const updateProgressCallback = (progress) => {
  * Replaces the progressbar in the modal with a loading spinner and emptying cache infromation.
  */
 const showClearCache = () => {
+	const cacheClearingText = GambioStore.translation.translate('CLEARING_CACHE');
+	const description = `<p class="progress-description">${cacheClearingText}</p>`
+	const loadingSpinner = '<br><div class="text-center"><i class="fas fa-spinner text-primary fa-spin fa-3x loading-spinner"></i></div>'
 	const modalBody = document
 		.getElementsByClassName('installing-package modal').item(0)
 		.getElementsByClassName('modal-body').item(0);
 	
-	const cacheClearingText = GambioStore.translation.translate('CLEARING_CACHE');
-	const description = `<p class="progress-description">${cacheClearingText}</p>`
-	const loadingSpinner = '<br><div class="text-center"><i class="fas fa-spinner text-primary fa-spin fa-3x loading-spinner"></i></div>'
 	modalBody.innerHTML = '';
 	modalBody.innerHTML = description + loadingSpinner
 };
