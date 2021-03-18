@@ -98,6 +98,7 @@ window.addEventListener('DOMContentLoaded', () => {
 	GambioStore.messenger.addListener('request_registration_headers', sendRegistrationHeaders);
 	GambioStore.messenger.addListener('update_shop_information', sendCollectedShopInformation);
 	GambioStore.messenger.addListener('request_shop_information', sendCollectedShopInformation);
+	GambioStore.messenger.addListener('reload_page_on_inactive_session', GambioStore.shop.reloadPageOnInactiveSession);
 	
 	GambioStore.messenger.addListener('reload_page', () =>( window.location.reload()));
 	GambioStore.messenger.addListener('scroll_to_top', () => (window.scrollTo(0, 0)));
