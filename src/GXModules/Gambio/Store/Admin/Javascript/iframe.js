@@ -1,9 +1,7 @@
 /**
  * Builds the Iframe into the html document with store url and language code.
- *
- * @returns {Promise<void>}
  */
-const build = async () => {
+const build = () => {
     const div = document.getElementById('gambio-store-iframe');
     const storeUrl = div.dataset.storeUrl;
     const iframe = document.createElement('iframe');
@@ -46,8 +44,8 @@ const onResponseIframeHeight = (payload) => {
  * Listens to iframe type messages
  * Creates the iframe after dome is loaded.
  */
-window.addEventListener('DOMContentLoaded', (event) => {
+window.addEventListener('DOMContentLoaded',() => {
     adjustBackgroundColor();
-    GambioStore.messenger.listenToMessage('response_iframe_height', onResponseIframeHeight);
-    build().catch();
+	GambioStore.messenger.addListener('response_iframe_height', onResponseIframeHeight);
+	build();
 });

@@ -9,18 +9,20 @@
  */
 
 window.GambioStore = Object.assign({}, {
-    /**
-     * Displays an error in the error box.
-     *
-     * @param prefix string Error category name to prepend to the message.
-     * @param message string The error's context message.
-     */
-    showError(prefix, message) {
-        const errorContainer = document.getElementById('gambio-store-error-container');
-        const errorAlert = document.createElement('div');
-        errorAlert.classList.add("alert", "alert-danger");
-        errorAlert.innerHTML = '<b>' + prefix + ':</b><br/>' + message;
-        
-        errorContainer.append(errorAlert);
-    }
+	error:{
+		/**
+		 * Displays an error in the error box.
+		 *
+		 * @param prefix string Error category name to prepend to the message.
+		 * @param message string The error's context message.
+		 */
+		show(prefix, message) {
+			const errorContainer = document.getElementById('gambio-store-error-container');
+			const errorAlert = document.createElement('div');
+			errorAlert.classList.add("alert", "alert-danger");
+			errorAlert.innerHTML = '<b>' + prefix + ':</b><br/>' + message;
+			
+			errorContainer.append(errorAlert);
+		}
+	}
 }, window.GambioStore)

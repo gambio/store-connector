@@ -22,9 +22,9 @@ const activateTheme = async (data) => {
 			method: 'POST',
 			body: formData
 		});
-		GambioStore.messenger.sendMessage('activation_succeeded');
+		GambioStore.messenger.send('activation_succeeded');
 	} catch {
-		GambioStore.messenger.sendMessage('activation_failed')
+		GambioStore.messenger.send('activation_failed')
 	}
 	
 }
@@ -82,7 +82,7 @@ const installPackage = async (data, progressCallback) => {
 	await new Promise((resolve, reject) => {
 		setTimeout(() => {
 			showClearCache();
-			GambioStore.clearShopCache()
+			GambioStore.shop.clearShopCache()
 				.then(resolve)
 				.catch(reject);
 		}, 500)
@@ -90,28 +90,12 @@ const installPackage = async (data, progressCallback) => {
 }
 
 /**
- * Reloads the page if the admin session is expired.
- * Forces the user to log out.
- * @returns {Promise<void>}
- */
-const reloadPageOnInactiveSession = async () => {
-	try {
-		await GambioStore.callShop('admin.php?do=GambioStoreAjax/IsSessionActive', {
-			method: 'get',
-			redirect: 'error'
-		});
-	} catch (error) {
-		location.reload();
-	}
-};
-
-/**
  * Uninstall a theme
  *
  * @param data
  */
 const uninstallPackage = async (data) => {
-	await reloadPageOnInactiveSession();
+	await GambioStore.shop.reloadPageOnInactiveSession();
 	
 	const formData = new FormData();
 	const $installingPackageModal = $('.installing-package.modal');
@@ -132,15 +116,15 @@ const uninstallPackage = async (data) => {
 			setTimeout(() => {
 				showClearCache();
 				$installingPackageModal.modal('show');
-				GambioStore.clearShopCache()
+				GambioStore.shop.clearShopCache()
 					.then(resolve)
 					.catch(reject);
 			}, 500)
 		});
 		
-		GambioStore.messenger.sendMessage('uninstall_succeeded');
+		GambioStore.messenger.send('uninstall_succeeded');
 	} catch (error) {
-		GambioStore.messenger.sendMessage('uninstall_failed', error.context || error);
+		GambioStore.messenger.send('uninstall_failed', error.context || error);
 	} finally {
 		$installingPackageModal.modal('hide');
 		modalBody.innerHTML = modalBodyInnerHtml;
@@ -177,9 +161,9 @@ const startPackageInstallation = async (data) => {
 			}
 		}
 		
-		GambioStore.messenger.sendMessage('installation_succeeded')
+		GambioStore.messenger.send('installation_succeeded')
 	} catch (error) {
-		GambioStore.messenger.sendMessage('installation_failed');
+		GambioStore.messenger.send('installation_failed');
 	} finally {
 		$installingPackageModal.modal('hide');
 		modalBody.innerHTML = modalBodyInnerHtml;
@@ -222,7 +206,7 @@ const showClearCache = () => {
  * @return {Promise<void>}
  */
 const install = async (data) => {
-	await reloadPageOnInactiveSession();
+	await GambioStore.shop.reloadPageOnInactiveSession();
 	
 	const progressDescription = document
 		.getElementsByClassName('installing-package modal').item(0)
@@ -234,8 +218,8 @@ const install = async (data) => {
 }
 
 window.addEventListener('DOMContentLoaded', () => {
-	GambioStore.messenger.listenToMessage('start_installation_process', install);
-	GambioStore.messenger.listenToMessage('uninstall_theme', uninstallPackage);
-	GambioStore.messenger.listenToMessage('uninstall_package', uninstallPackage);
-	GambioStore.messenger.listenToMessage('activate_theme', activateTheme);
+	GambioStore.messenger.addListener('start_installation_process', install);
+	GambioStore.messenger.addListener('uninstall_theme', uninstallPackage);
+	GambioStore.messenger.addListener('uninstall_package', uninstallPackage);
+	GambioStore.messenger.addListener('activate_theme', activateTheme);
 });

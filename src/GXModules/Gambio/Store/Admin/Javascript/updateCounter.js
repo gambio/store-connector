@@ -46,5 +46,5 @@ const setUpdatesCounter = ({updatesCounter}) => {
 
 
 window.addEventListener('DOMContentLoaded', function() {
-    GambioStore.messenger.listenToMessage('updates_counter', setUpdatesCounter);
+    GambioStore.messenger.addListener('updates_counter', setUpdatesCounter);
 });

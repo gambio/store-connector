@@ -18,7 +18,7 @@ window.GambioStore = Object.assign({}, {
          * @param type
          * @param payload
          */
-        sendMessage(type, payload) {
+        send(type, payload) {
             const iframe = document.getElementById('storeIframe');
             if (payload === undefined) {
                 payload = null;
@@ -30,7 +30,7 @@ window.GambioStore = Object.assign({}, {
          * @param messageType
          * @param callback
          */
-        listenToMessage(messageType, callback) {
+        addListener(messageType, callback) {
             const proxyCallback = ({data}) => {
                 const {type, payload} = data;
                 

@@ -14,30 +14,37 @@ const networkErrors = {
  * Serves as an HTTP Client to the parent shop.
  *
  * @param params see fetch API params.
- * @returns {Promise<unknown>}
+ * @returns {Promise<{}>}
  */
 window.GambioStore = Object.assign({}, {
-    networkErrors,
-    callShop: (...params) => {
-        return new Promise((resolve, reject) => {
-            fetch(...params).then(response => {
-                response.json().then(jsonResponse => {
-                    if (jsonResponse.success === false) {
-                        reject({type: networkErrors.NO_SUCCESS, context: jsonResponse});
-                    } else {
-                        resolve(jsonResponse);
-                    }
-                }).catch(jsonParseError => {
-                    reject({type: networkErrors.JSON_PARSE_ERROR, context: jsonParseError});
-                });
-            }).catch(networkError => {
-                reject({type: networkErrors.NO_SUCCESS, context: networkError});
-            });
-        })
-    },
-    visitShop: (...params) => {
-        return fetch(...params).catch(networkError => {
-            throw({type: networkErrors.NO_SUCCESS, context: networkError});
-        });
-    }
+	networkErrors,
+	callShop: async (...params) => {
+		let response, jsonResponse
+		
+		try {
+			response = await fetch(...params);
+		} catch (networkError) {
+			throw {type: networkErrors.NO_SUCCESS, context: networkError}
+		}
+		
+		try {
+			jsonResponse = await response.json();
+		} catch (jsonParseError) {
+			throw {type: networkErrors.JSON_PARSE_ERROR, context: jsonParseError}
+		}
+		
+		
+		if (jsonResponse.success === false) {
+			throw {type: networkErrors.NO_SUCCESS, context: jsonResponse};
+		}
+		
+		return jsonResponse;
+	},
+	visitShop: async (...params) => {
+		try {
+			return await fetch(...params);
+		} catch (networkError) {
+			throw {type: networkErrors.NO_SUCCESS, context: networkError};
+		}
+	}
 }, window.GambioStore);

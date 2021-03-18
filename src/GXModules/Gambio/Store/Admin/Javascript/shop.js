@@ -16,40 +16,6 @@
  * @module Controllers/gambio_store
  */
 
-/**
- * Return shop information
- *
- * @returns {Promise<Object>}
- */
-const fetchShopInfo = () => {
-    return new Promise((resolve) => {
-        GambioStore.callShop('admin.php?do=GambioStoreAjax/collectShopInformation')
-            .then(resolve)
-            .catch(err => {
-                switch (err.type) {
-                    case(GambioStore.networkErrors.JSON_PARSE_ERROR):
-                        GambioStore.showError(
-                            GambioStore.translation.translate('WARNING_TITLE'),
-                            GambioStore.translation.translate('SHOP_INFORMATION_JSON_PARSE_ERROR')
-                        );
-                        break;
-                    case(GambioStore.networkErrors.NETWORK_ERROR):
-                        GambioStore.showError(
-                            GambioStore.translation.translate('WARNING_TITLE'),
-                            GambioStore.translation.translate('SHOP_INFORMATION_NETWORK_ERROR')
-                        );
-                        break;
-                    default:
-                        GambioStore.showError(
-                            GambioStore.translation.translate('WARNING_TITLE'),
-                            GambioStore.translation.translate('UNKNOWN_ERROR')
-                        );
-                        break;
-                }
-                return {};
-            });
-    })
-};
 
 /**
  * Send shop information data to Iframe
@@ -57,114 +23,171 @@ const fetchShopInfo = () => {
  * @param {Object} shopInfo Shop information data
  */
 const sendShopInfo = (shopInfo) => {
-    GambioStore.messenger.sendMessage('send_shop_information', {shopInfo});
+	GambioStore.messenger.send('send_shop_information', {shopInfo});
 };
 
 /**
  * Requests new auth headers from the Connector and sends them to the GUI
  */
-const prepareAndSendNewAuthHeaders = () => {
-    GambioStore.callShop('admin.php?do=GambioStoreAjax/requestNewAuth')
-        .then((authHeaders) => {
-            GambioStore.messenger.sendMessage('send_auth_headers', {authHeaders});
-        })
-        .catch(err => {
-            switch (err.type) {
-                case(GambioStore.networkErrors.JSON_PARSE_ERROR):
-                    GambioStore.showError(
-                        GambioStore.translation.translate('WARNING_TITLE'),
-                        GambioStore.translation.translate('NEW_AUTH_JSON_PARSE_ERROR')
-                    );
-                    break;
-                case(GambioStore.networkErrors.NETWORK_ERROR):
-                    GambioStore.showError(
-                        GambioStore.translation.translate('WARNING_TITLE'),
-                        GambioStore.translation.translate('NEW_AUTH_NETWORK_ERROR')
-                    );
-                    break;
-                default:
-                    GambioStore.showError(
-                        GambioStore.translation.translate('WARNING_TITLE'),
-                        GambioStore.translation.translate('UNKNOWN_ERROR')
-                    );
-                    break;
-            }
-        });
+const prepareAndSendNewAuthHeaders = async () => {
+	try{
+		const authHeaders = await GambioStore.callShop('admin.php?do=GambioStoreAjax/requestNewAuth')
+		
+		GambioStore.messenger.send('send_auth_headers', {authHeaders});
+	}catch (error){
+		switch (error.type) {
+			case(GambioStore.networkErrors.JSON_PARSE_ERROR):
+				GambioStore.error.show(
+					GambioStore.translation.translate('WARNING_TITLE'),
+					GambioStore.translation.translate('NEW_AUTH_JSON_PARSE_ERROR')
+				);
+				break;
+			case(GambioStore.networkErrors.NETWORK_ERROR):
+				GambioStore.error.show(
+					GambioStore.translation.translate('WARNING_TITLE'),
+					GambioStore.translation.translate('NEW_AUTH_NETWORK_ERROR')
+				);
+				break;
+			default:
+				GambioStore.error.show(
+					GambioStore.translation.translate('WARNING_TITLE'),
+					GambioStore.translation.translate('UNKNOWN_ERROR')
+				);
+				break;
+		}
+	}
 }
+
+/**
+ * Collects the
+ * @returns {Promise<void>}
+ */
+const sendCollectedShopInformation = async () => {
+	const shopInformation = await GambioStore.shop.fetchShopInfo();
+	await sendShopInfo(shopInformation);
+}
+
+/**
+ * Sends the auth headers from the iframe tag to the gui.
+ */
+const sendAuthHeaders = () => {
+	const authHeadersString = document.getElementById('gambio-store-iframe').dataset.storeAuthHeaders;
+	const authHeaders = JSON.parse(authHeadersString);
+	GambioStore.messenger.send('send_auth_headers', {'authHeaders': authHeaders});
+};
+
+/**
+ * Sends the registration headers from the iframe tag to the gui.
+ */
+const sendRegistrationHeaders = () => {
+	const clientId = document.getElementById('gambio-store-iframe').dataset.storeClientId;
+	GambioStore.messenger.send('send_registration_headers', {
+		'registrationHeaders': {
+			'X-CLIENT-ID': clientId
+		}
+	});
+};
 
 
 /**
- * Initiate messenger listeners upon a built document.
+ * Initiate messenger listen a built document.
  */
 window.addEventListener('DOMContentLoaded', () => {
-    GambioStore.messenger.listenToMessage('update_shop_information', function() {
-        fetchShopInfo().then(sendShopInfo);
-    });
-    GambioStore.messenger.listenToMessage('request_shop_information', function() {
-        fetchShopInfo().then(sendShopInfo);
-    });
-    
-    GambioStore.messenger.listenToMessage('request_auth_headers', function() {
-        const authHeaders = JSON.parse(document.getElementById('gambio-store-iframe').dataset.storeAuthHeaders);
-        GambioStore.messenger.sendMessage('send_auth_headers', {'authHeaders': authHeaders});
-    });
-    
-    GambioStore.messenger.listenToMessage('request_registration_headers', function() {
-        const clientId = document.getElementById('gambio-store-iframe').dataset.storeClientId;
-        GambioStore.messenger.sendMessage('send_registration_headers', {
-            'registrationHeaders': {
-                'X-CLIENT-ID': clientId
-            }
-        });
-    });
-    
-    GambioStore.messenger.listenToMessage('send_data_processing_accepted', function() {
-        window.location.href = 'admin.php?do=GambioStore/AcceptDataProcessing';
-    });
-    
-    GambioStore.messenger.listenToMessage('store_migrated', function() {
-        return new Promise((resolve) => {
-            GambioStore.callShop('admin.php?do=GambioStoreAjax/StoreMigrated')
-                .then(window.location.reload(true))
-                .catch();
-        });
-    });
-    
-    GambioStore.messenger.listenToMessage('reload_page', function() {
-        window.location.reload(true);
-    })
-    
-    GambioStore.messenger.listenToMessage('auth_expired', prepareAndSendNewAuthHeaders);
-    
-    GambioStore.messenger.listenToMessage('scroll_to_top', function() {
-        window.scrollTo({
-            top: 0,
-            left: 0
-        });
-    });
+	GambioStore.messenger.addListener('request_auth_headers', sendAuthHeaders);
+	GambioStore.messenger.addListener('auth_expired', prepareAndSendNewAuthHeaders);
+	GambioStore.messenger.addListener('request_registration_headers', sendRegistrationHeaders);
+	GambioStore.messenger.addListener('update_shop_information', sendCollectedShopInformation);
+	GambioStore.messenger.addListener('request_shop_information', sendCollectedShopInformation);
+	
+	GambioStore.messenger.addListener('reload_page', () =>( window.location.reload()));
+	GambioStore.messenger.addListener('scroll_to_top', () => (window.scrollTo(0, 0)));
+	
+	GambioStore.messenger.addListener('send_data_processing_accepted', () => {
+		window.location.href = 'admin.php?do=GambioStore/AcceptDataProcessing';
+	});
+	GambioStore.messenger.addListener('store_migrated', async () => {
+		await GambioStore.callShop('admin.php?do=GambioStoreAjax/StoreMigrated');
+		window.location.reload();
+	});
+	
 });
 
 window.GambioStore = Object.assign({}, {
-    clearShopCache: async () => {
-        try {
-            await Promise.all([
-                GambioStore.visitShop('clear_cache.php?manual_output=submit', {
-                    method: 'get'
-                }),
-                GambioStore.visitShop('clear_cache.php?manual_text_cache=submit', {
-                    method: 'get'
-                }),
-                GambioStore.visitShop('clear_cache.php?manual_data_cache=submit', {
-                    method: 'get'
-                })
-            ]);
-            
-            const shopUrl = window.location.pathname.replace('admin/admin.php', '');
-            
-            await fetch(shopUrl).catch(networkError => {
-                throw({type: networkErrors.NO_SUCCESS, contex: networkError});
-            });
-        } catch (e) {
-        }
-    }
+	shop: {
+		/**
+		 * Reloads the page if the admin session is expired.
+		 * Forces the user to log out.
+		 * @returns {Promise<void>}
+		 */
+		reloadPageOnInactiveSession: async () => {
+			try {
+				await GambioStore.callShop('admin.php?do=GambioStoreAjax/IsSessionActive', {
+					method: 'get',
+					redirect: 'error'
+				});
+			} catch {
+				location.reload();
+			}
+		},
+		/**
+		 * Makes shop requests to clear the cache of the shop in the background.
+		 * @returns {Promise<void>}
+		 */
+		clearShopCache: async () => {
+			try {
+				await Promise.all([
+					GambioStore.visitShop('clear_cache.php?manual_output=submit', {
+						method: 'get'
+					}),
+					GambioStore.visitShop('clear_cache.php?manual_text_cache=submit', {
+						method: 'get'
+					}),
+					GambioStore.visitShop('clear_cache.php?manual_data_cache=submit', {
+						method: 'get'
+					})
+				]);
+				
+				const shopUrl = window.location.pathname.replace('admin/admin.php', '');
+				
+				await fetch(shopUrl);
+				
+			} catch (error) {
+				if (typeof error.NO_SUCCESS !== 'undefined') {
+					throw {type: networkErrors.NO_SUCCESS, context: error};
+				}
+			}
+		},
+		/**
+		 * Return shop information
+		 *
+		 * @returns {Promise<Object>}
+		 */
+		fetchShopInfo: async () => {
+			try {
+				return await GambioStore.callShop('admin.php?do=GambioStoreAjax/collectShopInformation')
+			} catch (error) {
+				switch (error.type) {
+					case(GambioStore.networkErrors.JSON_PARSE_ERROR):
+						GambioStore.error.show(
+							GambioStore.translation.translate('WARNING_TITLE'),
+							GambioStore.translation.translate('SHOP_INFORMATION_JSON_PARSE_ERROR')
+						);
+						break;
+					case(GambioStore.networkErrors.NETWORK_ERROR):
+						GambioStore.error.show(
+							GambioStore.translation.translate('WARNING_TITLE'),
+							GambioStore.translation.translate('SHOP_INFORMATION_NETWORK_ERROR')
+						);
+						break;
+					default:
+						GambioStore.error.show(
+							GambioStore.translation.translate('WARNING_TITLE'),
+							GambioStore.translation.translate('UNKNOWN_ERROR')
+						);
+						break;
+				}
+				return {};
+			}
+		}
+	}
 }, window.GambioStore);
