@@ -121,19 +121,41 @@ if (defined('StoreKey_MigrationScript')) {
              */
             private function updateMenu()
             {
-                $menuPath = $this->fileSystem->getShopDirectory() . '/system/conf/admin_menu/gambio_menu.xml';
-                
-                $menuContent = file_get_contents($menuPath);
-                
-                $gambioStoreMenuRegex = '/.<menugroup id="BOX_HEADING_GAMBIO_STORE.*\s.*\s.*\s.*\s.<\/menugroup>/i';
-                
-                $menuContent = preg_replace($gambioStoreMenuRegex, '', $menuContent);
-                
-                $appStoreMenuRegex = '/.<menugroup id="BOX_HEADING_APP_STORE.*\s.*\s.*\s.*\s.<\/menugroup>/i';
-                
-                $menuContent = preg_replace($appStoreMenuRegex, '', $menuContent);
-                
-                file_put_contents($menuPath, $menuContent);
+                $hasNewMenuSystem = realpath($this->fileSystem->getShopDirectory().'/GambioAdmin/Layout/Menu/data/GambioAdminMenu.json');
+                $hasOldXmlMenuFile = realpath($this->fileSystem->getShopDirectory().'/system/conf/admin_menu/gambio_menu.xml');
+    
+                if ($hasNewMenuSystem !== false) {
+                    $newMenuPath = $this->fileSystem->getShopDirectory() . '/GambioAdmin/Layout/Menu/data/GambioAdminMenu.json';
+        
+                    $menuEntriesJson = file_get_contents($newMenuPath);
+                    $menuEntries = json_decode($menuEntriesJson);
+        
+                    foreach($menuEntries as $key => $menuEntry){
+                        if($menuEntry->id === 'BOX_HEADING_APP_STORE'){
+                            unset($menuEntries[$key]);
+                        }
+                    }
+        
+                    $adjustedMenuEntriesJson = json_encode($menuEntries, JSON_PRETTY_PRINT);
+                    file_put_contents($newMenuPath,$adjustedMenuEntriesJson);
+                }
+    
+    
+                if ($hasOldXmlMenuFile !== false) {
+                    $oldMenuPath = $this->fileSystem->getShopDirectory() . '/system/conf/admin_menu/gambio_menu.xml';
+        
+                    $menuContent = file_get_contents($oldMenuPath);
+        
+                    $gambioStoreMenuRegex = '/.<menugroup id="BOX_HEADING_GAMBIO_STORE.*\s.*\s.*\s.*\s.<\/menugroup>/i';
+        
+                    $menuContent = preg_replace($gambioStoreMenuRegex, '', $menuContent);
+        
+                    $appStoreMenuRegex = '/.<menugroup id="BOX_HEADING_APP_STORE.*\s.*\s.*\s.*\s.<\/menugroup>/i';
+        
+                    $menuContent = preg_replace($appStoreMenuRegex, '', $menuContent);
+        
+                    file_put_contents($oldMenuPath, $menuContent);
+                }
             }
             
             

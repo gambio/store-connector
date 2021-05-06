@@ -1,0 +1,16 @@
+{
+	"id": "BOX_HEADING_GAMBIO_STORE",
+	"sort": 260,
+	"class": "fa fa-cloud-download",
+	"title": "admin_menu.BOX_GAMBIO_STORE",
+	"type": "standalone",
+	"brand": "alt",
+	"items": [
+		{
+			"sort": 10,
+			"link": "admin.php",
+			"link_param": "do=GambioStore",
+			"title": "admin_menu.BOX_GAMBIO_STORE"
+		}
+	]
+}
