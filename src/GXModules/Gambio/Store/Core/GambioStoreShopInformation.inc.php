@@ -57,11 +57,11 @@ class GambioStoreShopInformation
     {
         return [
             'version'          => 3,
-            'connectorVersion' => $this->getConnectorVersion(),
             'shop'             => [
                 'url'     => $this->getShopUrl(),
                 'key'     => $this->getShopKey(),
-                'version' => $this->getShopVersion()
+                'version' => $this->getShopVersion(),
+                'connectorVersion' => $this->getConnectorVersion(),
             ],
             'server'           => [
                 'phpVersion'   => $this->getPhpVersion(),
