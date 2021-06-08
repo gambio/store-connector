@@ -56,19 +56,20 @@ class GambioStoreShopInformation
     public function getShopInformation()
     {
         return [
-            'version'      => 3,
-            'shop'         => [
+            'version'          => 3,
+            'connectorVersion' => $this->getConnectorVersion(),
+            'shop'             => [
                 'url'     => $this->getShopUrl(),
                 'key'     => $this->getShopKey(),
                 'version' => $this->getShopVersion()
             ],
-            'server'       => [
+            'server'           => [
                 'phpVersion'   => $this->getPhpVersion(),
                 'mySQLVersion' => $this->getMySQLVersion()
             ],
-            'modules'      => $this->getModuleVersionFiles(),
-            'themes'       => $this->getThemes(),
-            'currentTheme' => $this->getCurrentTheme()
+            'modules'          => $this->getModuleVersionFiles(),
+            'themes'           => $this->getThemes(),
+            'currentTheme'     => $this->getCurrentTheme()
         ];
     }
     
@@ -83,11 +84,15 @@ class GambioStoreShopInformation
     private function getShopUrl()
     {
         if (!defined('HTTP_SERVER')) {
-            throw new GambioStoreHttpServerMissingException('The HTTP Server constant is missing from the configure.php file in admin.');
+            throw new GambioStoreHttpServerMissingException(
+                'The HTTP Server constant is missing from the configure.php file in admin.'
+            );
         }
         
         if (!defined('DIR_WS_CATALOG')) {
-            throw new GambioStoreRelativeShopPathMissingException('The DIR_WS_CATALOG constant is missing from the configure.php file in admin.');
+            throw new GambioStoreRelativeShopPathMissingException(
+                'The DIR_WS_CATALOG constant is missing from the configure.php file in admin.'
+            );
         }
         
         return HTTP_SERVER . DIR_WS_CATALOG;
@@ -120,7 +125,9 @@ class GambioStoreShopInformation
         require $this->fileSystem->getShopDirectory() . '/release_info.php';
         
         if (!isset($gx_version)) {
-            throw new GambioStoreShopVersionMissingException('The release_info.php no longer includes a $gx_version variable or the file is missing.');
+            throw new GambioStoreShopVersionMissingException(
+                'The release_info.php no longer includes a $gx_version variable or the file is missing.'
+            );
         }
         
         return $gx_version;
@@ -165,6 +172,30 @@ class GambioStoreShopInformation
         }
         
         return $versionFiles;
+    }
+    
+    
+    /**
+     * Returns the current connector version of the shop
+     *
+     * @return array|false
+     */
+    private function getConnectorVersion()
+    {
+        $connectorVersions = [];
+        
+        foreach (new DirectoryIterator($this->fileSystem->getShopDirectory() . '/version_info') as $file) {
+            if ($file->isFile() && strpos($file->getFilename(), '.php')
+                && strpos($file->getFilename(), 'gambio_store-') === 0) {
+                $connectorVersions[] = $file->getFilename();
+            }
+        }
+        
+        sort($connectorVersions);
+        
+        $latestConnectorReceiptFile = array_pop($connectorVersions);
+        
+        return str_replace(['gambio_store-', '.php', '_'], ["", "", '.'], $latestConnectorReceiptFile);
     }
     
     
@@ -222,8 +253,8 @@ class GambioStoreShopInformation
      */
     public function areThemesAvailable()
     {
-        return defined('DIR_FS_CATALOG') && defined('CURRENT_THEME') && !empty(CURRENT_THEME) ? is_dir(DIR_FS_CATALOG
-                                                                                                       . 'themes/'
-                                                                                                       . CURRENT_THEME) : false;
+        return defined('DIR_FS_CATALOG') && defined('CURRENT_THEME') && !empty(CURRENT_THEME) ? is_dir(
+            DIR_FS_CATALOG . 'themes/' . CURRENT_THEME
+        ) : false;
     }
 }
