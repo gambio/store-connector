@@ -83,6 +83,36 @@ if (defined('StoreKey_MigrationScript')) {
                 $this->createDatabaseKeysIfNotExists();
                 $this->createCacheTableIfNotExists();
                 $this->updateBoilerplateScss();
+                $this->createAdminAccessEntriesIfNotExists();
+            }
+
+
+            /**
+             * Creates the necessary Admin Access entries in the database.
+             */
+            private function createAdminAccessEntriesIfNotExists()
+            {
+                $this->database->query(
+                    "INSERT INTO `admin_access_groups` (
+                                      admin_access_group_id, parent_id, sort_order, protected
+                                      ) VALUES 
+                           (57, 0, 57, 1)"
+                );
+                
+                $this->database->query(
+                    "INSERT INTO `admin_access_group_items` (
+                                      admin_access_group_id, identifier, type
+                                      ) VALUES 
+                           (57, 'GambioStore', 'CONTROLLER'), (57, 'GambioStoreAjax', 'CONTROLLER')"
+                );
+
+                $this->database->query(
+                    "INSERT INTO `admin_access_group_descriptions` (
+                                      admin_access_group_id, language_id, name, description
+                                      ) VALUES 
+                           (57, 1, 'Gambio Store', 'Allows the usage of the Gambio Store.'), 
+                            (57, 2, 'Gambio Store', 'Erlaubt die Nutzung des Gambio Stores.')"
+                );
             }
             
             
