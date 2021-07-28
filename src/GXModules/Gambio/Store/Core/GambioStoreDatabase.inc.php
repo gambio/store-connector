@@ -10,6 +10,7 @@
 */
 
 require_once 'GambioStoreFileSystem.inc.php';
+require_once 'Exceptions/GambioStoreDatabaseConnectionFailedException.inc.php';
 
 /**
  * Class GambioStoreDatabase
