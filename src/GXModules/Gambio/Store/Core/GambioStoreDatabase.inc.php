@@ -10,6 +10,7 @@
 */
 
 require_once 'GambioStoreFileSystem.inc.php';
+require_once 'Exceptions/GambioStoreDatabaseConnectionFailedException.inc.php';
 
 /**
  * Class GambioStoreDatabase
@@ -53,7 +54,7 @@ class GambioStoreDatabase
         if (self::$instance === null) {
             require_once $fileSystem->getShopDirectory() . '/admin/includes/configure.php';
     
-            $dsn = 'mysql: host=' . DB_SERVER . ';dbname=`' . DB_DATABASE . '`';
+            $dsn = 'mysql:host=' . DB_SERVER . ';dbname=' . DB_DATABASE;
             try {
                 $pdo = new PDO($dsn, DB_SERVER_USERNAME, DB_SERVER_PASSWORD);
     
