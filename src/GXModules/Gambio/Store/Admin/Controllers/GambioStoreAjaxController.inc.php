@@ -49,9 +49,20 @@ class GambioStoreAjaxController extends AdminHttpViewController
     /**
      * @var \GambioStoreAuth
      */
-    private $storeAuth;
+    private $auth;
     
     
+    /**
+     * Request new auth headers from api.
+     *
+     * @return \JsonHttpControllerResponse
+     * @throws \GambioStoreHttpErrorException
+     * @throws \GambioStoreHttpServerMissingException
+     * @throws \GambioStoreRelativeShopPathMissingException
+     * @throws \GambioStoreShopClassMissingException
+     * @throws \GambioStoreShopKeyMissingException
+     * @throws \GambioStoreShopVersionMissingException
+     */
     public function actionRequestNewAuth()
     {
         $this->setup();
@@ -63,10 +74,10 @@ class GambioStoreAjaxController extends AdminHttpViewController
                     'X-REFRESH-TOKEN: ' . $refreshToken,
                     'X-CLIENT-ID: ' . $this->getGambioStoreToken()
                 ];
-                if ($this->storeAuth->requestNewAuthWithHeaders($headers)) {
+                if ($this->auth->requestNewAuthWithHeaders($headers)) {
                     return new JsonHttpControllerResponse([
                         'success' => true,
-                        'headers' => $this->getGambioStoreAuthHeaders(),
+                        'headers' => $this->auth->getGambioStoreAuthHeaders(),
                         'status'  => 200
                     ]);
                 }
@@ -76,17 +87,17 @@ class GambioStoreAjaxController extends AdminHttpViewController
                 'Content-Type: application/json',
                 'X-CLIENT-ID: ' . $this->getGambioStoreToken()
             ];
-            if ($this->storeAuth->requestNewAuthWithHeaders($headers)) {
+            if ($this->auth->requestNewAuthWithHeaders($headers)) {
                 return new JsonHttpControllerResponse([
                     'success' => true,
-                    'headers' => $this->getGambioStoreAuthHeaders(),
+                    'headers' => $this->auth->getGambioStoreAuthHeaders(),
                     'status'  => 200
                 ]);
             }
             
             return new JsonHttpControllerResponse(['success' => false, 'status' => 401]);
-        } catch (GambioStoreRequestingAuthInvalidStatusException $e) {
-            return new JsonHttpControllerResponse(['success' => false, 'status' => $e->getCode()]);
+        } catch (GambioStoreRequestingAuthInvalidStatusException $exception) {
+            return new JsonHttpControllerResponse(['success' => false, 'status' => $exception->getCode()]);
         }
     }
     
@@ -98,7 +109,7 @@ class GambioStoreAjaxController extends AdminHttpViewController
     private function setup()
     {
         $this->connector     = GambioStoreConnector::getInstance();
-        $this->storeAuth     = $this->connector->getAuth();
+        $this->auth          = $this->connector->getAuth();
         $this->configuration = $this->connector->getConfiguration();
         $this->themes        = $this->connector->getThemes();
         $this->logger        = $this->connector->getLogger();
@@ -123,21 +134,6 @@ class GambioStoreAjaxController extends AdminHttpViewController
         }
         
         return $gambioStoreToken;
-    }
-    
-    
-    /**
-     * Gets the auth headers
-     *
-     * @return array
-     * @var \GambioStoreConfiguration $configuration
-     *
-     */
-    private function getGambioStoreAuthHeaders()
-    {
-        return [
-            'X-ACCESS-TOKEN' => $this->configuration->get('GAMBIO_STORE_ACCESS_TOKEN')
-        ];
     }
     
     
@@ -180,7 +176,7 @@ class GambioStoreAjaxController extends AdminHttpViewController
     /**
      * Uninstalls a package
      *
-     * @return mixed
+     * @return JsonHttpControllerResponse
      */
     public function actionUninstallPackage()
     {
@@ -190,8 +186,9 @@ class GambioStoreAjaxController extends AdminHttpViewController
         $packageName = $packageData['folder_name_inside_shop'] | $packageData['filename'];
         
         if ($this->connector->isThemeActive($packageName)) {
-            $this->logger->warning('The theme ' . $packageData['details']['title']['de']
-                                   . 'is active and not allowed to be removed');
+            $this->logger->warning(
+                'The theme ' . $packageData['details']['title']['de'] . 'is active and not allowed to be removed'
+            );
             
             // Theme is active and can not be uninstalled
             return new JsonHttpControllerResponse(['success' => false, 'errorCode' => 101]);
@@ -199,7 +196,7 @@ class GambioStoreAjaxController extends AdminHttpViewController
         
         try {
             $response = $this->connector->uninstallPackage($packageData);
-        } catch (Exception $e) {
+        } catch (Exception $exception) {
             return new JsonHttpControllerResponse(['success' => false]);
         }
         
@@ -237,8 +234,10 @@ class GambioStoreAjaxController extends AdminHttpViewController
         $this->setup();
         
         if (!isset($_GET, $_GET['themeName'])) {
-            $this->logger->warning('Can not check if theme is active because no theme name was provided',
-                ['getParams' => $_GET]);
+            $this->logger->warning(
+                'Can not check if theme is active because no theme name was provided',
+                ['getParams' => $_GET]
+            );
             
             return new JsonHttpControllerResponse(['success' => false]);
         }
@@ -261,8 +260,10 @@ class GambioStoreAjaxController extends AdminHttpViewController
         $this->setup();
         
         if (!isset($_POST, $_POST['themeStorageName'])) {
-            $this->logger->warning('Can not activate theme, because it was no theme storage name provided',
-                ['getParams' => $_POST]);
+            $this->logger->warning(
+                'Can not activate theme, because it was no theme storage name provided',
+                ['getParams' => $_POST]
+            );
             
             return new JsonHttpControllerResponse(['success' => false]);
         }
@@ -286,26 +287,6 @@ class GambioStoreAjaxController extends AdminHttpViewController
     
     
     /**
-     * Gets the store api URL
-     *
-     * @return string
-     * @var \GambioStoreConfiguration $configuration
-     *
-     */
-    private function getGambioStoreApiUrl()
-    {
-        $gambioUrl = $this->configuration->get('GAMBIO_STORE_API_URL');
-        
-        // Fall back to the production Gambio Store api URL if none is set.
-        if (empty($gambioUrl)) {
-            $gambioUrl = 'https://store.gambio.com';
-            $this->configuration->set('GAMBIO_STORE_API_URL', $gambioUrl);
-        }
-        
-        return $gambioUrl;
-    }
-    
-    /**
      * Sets a value that Gambio Store has been migrated.
      *
      * @return JsonHttpControllerResponse
@@ -319,7 +300,7 @@ class GambioStoreAjaxController extends AdminHttpViewController
         } else {
             $this->configuration->create('GAMBIO_STORE_MIGRATED', 1);
         }
-    
+        
         return new JsonHttpControllerResponse(['success' => true]);
     }
 }

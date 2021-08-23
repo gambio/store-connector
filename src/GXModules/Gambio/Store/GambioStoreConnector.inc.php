@@ -156,7 +156,7 @@ class GambioStoreConnector
         $themes          = new GambioStoreThemes($compatibility, $fileSystem, $logger);
         $installer       = new GambioStorePackageInstaller($fileSystem, $configuration, $cache, $logger, $backup,
             $themes);
-        $auth            = new GambioStoreAuth($configuration, $http, $shopInformation, $logger);
+        $auth            = new GambioStoreAuth($configuration, $http, $shopInformation);
         
         return new self($database, $configuration, $compatibility, $logger, $themes, $fileSystem, $shopInformation,
             $cache, $http, $backup, $installer, $auth);
@@ -406,14 +406,14 @@ class GambioStoreConnector
         
         try {
             $shopInformationArray = $this->shopInformation->getShopInformation();
-            $storeToken           = $this->configuration->get('GAMBIO_STORE_TOKEN');
             $apiUrl               = $this->getGambioStoreApiUrl();
             $response             = $this->http->post($apiUrl . '/connector/updates',
-                json_encode(['shopInformation' => $shopInformationArray]), [
-                    CURLOPT_HTTPHEADER => [
+                json_encode(['shopInformation' => $shopInformationArray]),
+                [
+                    CURLOPT_HTTPHEADER => array_merge([
                         'Content-Type:application/json',
-                        'X-STORE-TOKEN: ' . $storeToken
-                    ]
+                    ],
+                    $this->auth->getGambioStoreAuthHeaders())
                 ]);
             
             $response = json_decode($response->getBody(), true);
