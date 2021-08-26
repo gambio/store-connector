@@ -49,7 +49,7 @@ class GambioStoreController extends AdminHttpViewController
             $this->actionDefault();
         }
         
-        if ((bool) $this->configuration->get('GAMBIO_STORE_MIGRATED') !== true) {
+        if ((bool)$this->configuration->get('GAMBIO_STORE_MIGRATED') !== true) {
             $this->actionDefault();
         }
         
@@ -113,7 +113,7 @@ class GambioStoreController extends AdminHttpViewController
             $data = $this->getIFrameTemplateData('/dataprocessing');
         } elseif ($this->configuration->get('GAMBIO_STORE_IS_REGISTERED') === false) {
             $data = $this->getIFrameTemplateData('/register');
-        } elseif ((bool) $this->configuration->get('GAMBIO_STORE_MIGRATED') !== true) {
+        } elseif ((bool)$this->configuration->get('GAMBIO_STORE_MIGRATED') !== true) {
             $data = $this->getIFrameTemplateData('/migrate');
         } elseif ($this->configuration->get('GAMBIO_STORE_ACCEPTED_DATA_PROCESSING') === true) {
             $contentNavigation = $this->getStoreNavigation();
@@ -166,8 +166,11 @@ class GambioStoreController extends AdminHttpViewController
      */
     private function showCriticalErrorPage()
     {
-        $template          = new ExistingFile(new NonEmptyStringType(__DIR__
-                                                                     . '/../Html/gambio_store_critical_errors.html'));
+        $template          = new ExistingFile(
+            new NonEmptyStringType(
+                __DIR__ . '/../Html/gambio_store_critical_errors.html'
+            )
+        );
         $assets            = $this->getIFrameAssets();
         $contentNavigation = MainFactory::create('ContentNavigationCollection', []);
         $title             = new NonEmptyStringType($this->languageTextManager->get_text('PAGE_TITLE'));
@@ -208,7 +211,7 @@ class GambioStoreController extends AdminHttpViewController
         
         return new KeyValueCollection([
             'storeUrl'      => $this->getGambioStoreUrl() . $urlPostfix,
-            'clientId'      => $this->getGambioStoreToken(),
+            'storeToken'    => $this->getGambioStoreToken(),
             'authHeaders'   => $this->getGambioStoreAuthHeaders(),
             'storeLanguage' => $language,
             'translations'  => $translations,
@@ -252,10 +255,21 @@ class GambioStoreController extends AdminHttpViewController
     private function getStoreNavigation($mainPage = true, $secondaryPage = false)
     {
         $contentNavigation = MainFactory::create('ContentNavigationCollection', []);
-        $contentNavigation->add(new StringType($this->languageTextManager->get_text('DOWNLOADS', 'gambio_store')),
-            new StringType('admin.php?do=GambioStore'), new BoolType($mainPage));
-        $contentNavigation->add(new StringType($this->languageTextManager->get_text('INSTALLED_PACKAGES_AND_UPDATES',
-            'gambio_store')), new StringType('admin.php?do=GambioStore/Installations'), new BoolType($secondaryPage));
+        $contentNavigation->add(
+            new StringType($this->languageTextManager->get_text('DOWNLOADS', 'gambio_store')),
+            new StringType('admin.php?do=GambioStore'),
+            new BoolType($mainPage)
+        );
+        $contentNavigation->add(
+            new StringType(
+                $this->languageTextManager->get_text(
+                    'INSTALLED_PACKAGES_AND_UPDATES',
+                    'gambio_store'
+                )
+            ),
+            new StringType('admin.php?do=GambioStore/Installations'),
+            new BoolType($secondaryPage)
+        );
         
         return $contentNavigation;
     }
@@ -334,10 +348,6 @@ class GambioStoreController extends AdminHttpViewController
     public function actionConfiguration()
     {
         $this->setup();
-    
-        if ((bool) $this->configuration->get('GAMBIO_STORE_MIGRATED') !== true) {
-            $this->actionDefault();
-        }
         
         $gambioStoreUrl    = $this->getGambioStoreUrl();
         $gambioStoreApiUrl = $this->getGambioStoreApiUrl();

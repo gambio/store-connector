@@ -72,7 +72,7 @@ class GambioStoreAjaxController extends AdminHttpViewController
             if ($refreshToken) {
                 $headers = [
                     'X-REFRESH-TOKEN: ' . $refreshToken,
-                    'X-CLIENT-ID: ' . $this->getGambioStoreToken()
+                    'X-STORE-TOKEN: ' . $this->getGambioStoreToken()
                 ];
                 if ($this->auth->requestNewAuthWithHeaders($headers)) {
                     return new JsonHttpControllerResponse([
@@ -85,7 +85,7 @@ class GambioStoreAjaxController extends AdminHttpViewController
             
             $headers = [
                 'Content-Type: application/json',
-                'X-CLIENT-ID: ' . $this->getGambioStoreToken()
+                'X-STORE-TOKEN: ' . $this->getGambioStoreToken()
             ];
             if ($this->auth->requestNewAuthWithHeaders($headers)) {
                 return new JsonHttpControllerResponse([

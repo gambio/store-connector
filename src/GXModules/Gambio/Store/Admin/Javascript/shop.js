@@ -80,10 +80,10 @@ const sendAuthHeaders = () => {
  * Sends the registration headers from the iframe tag to the gui.
  */
 const sendRegistrationHeaders = () => {
-	const clientId = document.getElementById('gambio-store-iframe').dataset.storeClientId;
+	const storeToken = document.getElementById('gambio-store-iframe').dataset.storeToken;
 	GambioStore.messenger.send('send_registration_headers', {
 		'registrationHeaders': {
-			'X-CLIENT-ID': clientId
+			'X-STORE-TOKEN': storeToken
 		}
 	});
 };
