@@ -82,6 +82,7 @@ if (defined('StoreKey_MigrationScript')) {
                 $this->updateMenu();
                 $this->createDatabaseKeysIfNotExists();
                 $this->createCacheTableIfNotExists();
+                $this->setUpdateNeededFlag(true);
                 $this->updateBoilerplateScss();
                 $this->createAdminAccessEntriesIfNotExists();
             }
@@ -310,6 +311,20 @@ if (defined('StoreKey_MigrationScript')) {
             private function ensureStoreFolderIsWritableForUpdates()
             {
                 @chmod($this->fileSystem->getShopDirectory() . '/GXModules/Gambio/Store', 0777);
+            }
+
+
+            /**
+             * Sets "Update needed" flag in the database. If it's true, the gui will display the force update page.
+             * @param bool $value
+             */
+            private function setUpdateNeededFlag($value = true)
+            {
+                if (!$this->configuration->has('GAMBIO_STORE_CONNECTOR_UPDATE_REQUIRED')) {
+                    $this->configuration->create('GAMBIO_STORE_CONNECTOR_UPDATE_REQUIRED', $value);
+                } else {
+                    $this->configuration->set('GAMBIO_STORE_CONNECTOR_UPDATE_REQUIRED', $value);
+                }
             }
         }
     }
