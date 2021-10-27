@@ -13,11 +13,11 @@
     "url": "git@sources.gambio-server.net:gambio-store/store-connector.git"
   },
   "scripts": {
-    "start": "gulp dev",
-    "build": "gulp",
-	"sync" : "gulp scripts && gulp styles && gulp sync && sudo chmod 777 -R  docker/*/shop/src/GXModules/Gambio/Store",
-    "configure": "yarn && composer install",
-    "test": "gulp test"
+	  "start": "gulp dev",
+	  "build": "gulp",
+	  "sync": "gulp && gulp sync && sudo chmod 777 -R  docker/*/shop/src/GXModules/Gambio/Store",
+	  "configure": "yarn && composer install",
+	  "test": "gulp test"
   },
   "dependencies": {},
 	"devDependencies": {
