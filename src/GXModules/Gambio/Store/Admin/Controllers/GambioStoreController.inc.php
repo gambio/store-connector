@@ -1,9 +1,9 @@
 <?php
 /* --------------------------------------------------------------
-   GambioStoreController.inc.php 2020-04-29
+   GambioStoreController.inc.php 2021-11-01
    Gambio GmbH
    http://www.gambio.de
-   Copyright (c) 2020 Gambio GmbH
+   Copyright (c) 2021 Gambio GmbH
    Released under the GNU General Public License (Version 2)
    [http://www.gnu.org/licenses/gpl-2.0.html]
    --------------------------------------------------------------
@@ -29,7 +29,7 @@ class GambioStoreController extends AdminHttpViewController
     private $languageTextManager;
     
     /**
-     * Error array with language keys to show error messages if nessary.
+     * Error array with language keys to show error messages if necessary.
      *
      * @var array
      */
@@ -370,8 +370,9 @@ class GambioStoreController extends AdminHttpViewController
         $template = new ExistingFile(new NonEmptyStringType(__DIR__ . '/../Html/gambio_store_configuration.html'));
         
         $data = new KeyValueCollection([
-            'url'    => $gambioStoreUrl,
-            'apiUrl' => $gambioStoreApiUrl
+            'url'        => $gambioStoreUrl,
+            'apiUrl'     => $gambioStoreApiUrl,
+            'storeToken' => $this->getGambioStoreToken()
         ]);
         
         $assets = new AssetCollection([
