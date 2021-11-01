@@ -376,7 +376,8 @@ class GambioStoreController extends AdminHttpViewController
             'url'              => $gambioStoreUrl,
             'apiUrl'           => $gambioStoreApiUrl,
             'storeToken'       => $this->getGambioStoreToken(),
-            'connectorVersion' => $shopInformation['shop']['connectorVersion']
+            'connectorVersion' => $shopInformation['shop']['connectorVersion'],
+            'storeType'        => $this->getStoreType()
         ]);
         
         $assets = new AssetCollection([
@@ -407,6 +408,27 @@ class GambioStoreController extends AdminHttpViewController
         }
         
         return $gambioUrl;
+    }
+    
+    
+    /**
+     * Determines whether the store is in Prod, Stage or something else.
+     *
+     * @return string
+     */
+    private function getStoreType()
+    {
+        $gambioStoreApiUrl = $this->getGambioStoreApiUrl();
+        
+        if (strpos($gambioStoreApiUrl, 'stage.store.gambio.com')) {
+            return 'stage';
+        }
+        
+        if (strpos($gambioStoreApiUrl, 'store.gambio.com')) {
+            return 'production';
+        }
+        
+        return 'other';
     }
     
     
