@@ -366,13 +366,17 @@ class GambioStoreController extends AdminHttpViewController
             $this->configuration->set('GAMBIO_STORE_API_URL', $gambioStoreApiUrl);
         }
         
-        $title    = new NonEmptyStringType($this->languageTextManager->get_text('PAGE_TITLE'));
-        $template = new ExistingFile(new NonEmptyStringType(__DIR__ . '/../Html/gambio_store_configuration.html'));
+        $title           = new NonEmptyStringType($this->languageTextManager->get_text('PAGE_TITLE'));
+        $template        = new ExistingFile(
+            new NonEmptyStringType(__DIR__ . '/../Html/gambio_store_configuration.html')
+        );
+        $shopInformation = $this->connector->getShopInformation();
         
         $data = new KeyValueCollection([
-            'url'        => $gambioStoreUrl,
-            'apiUrl'     => $gambioStoreApiUrl,
-            'storeToken' => $this->getGambioStoreToken()
+            'url'              => $gambioStoreUrl,
+            'apiUrl'           => $gambioStoreApiUrl,
+            'storeToken'       => $this->getGambioStoreToken(),
+            'connectorVersion' => $shopInformation['shop']['connectorVersion']
         ]);
         
         $assets = new AssetCollection([
