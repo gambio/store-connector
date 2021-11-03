@@ -248,11 +248,11 @@ class GambioStoreController extends AdminHttpViewController
      * Returns the content navigation for the store pages (once registered and accepted privacy stuff)
      *
      * @param bool $mainPage
-     * @param bool $secondaryPage
+     * @param bool $installationPage
      *
      * @return mixed
      */
-    private function getStoreNavigation($mainPage = true, $secondaryPage = false)
+    private function getStoreNavigation($mainPage = true, $installationPage = false, $configurationPage = false)
     {
         $contentNavigation = MainFactory::create('ContentNavigationCollection', []);
         $contentNavigation->add(
@@ -268,10 +268,31 @@ class GambioStoreController extends AdminHttpViewController
                 )
             ),
             new StringType('admin.php?do=GambioStore/Installations'),
-            new BoolType($secondaryPage)
+            new BoolType($installationPage)
         );
         
+        if ($this->isDevEnvironment()) {
+            $contentNavigation->add(
+                new StringType(
+                    $this->languageTextManager->get_text('CONFIGURATION', 'gambio_store')
+                ),
+                new StringType('admin.php?do=GambioStore/configuration'),
+                new BoolType($configurationPage)
+            );
+        }
+        
         return $contentNavigation;
+    }
+    
+    
+    /**
+     * Determines if the dev environment in the shop is active.
+     *
+     * @return bool
+     */
+    private function isDevEnvironment()
+    {
+        return file_exists(dirname(__DIR__, 5) . '/.dev-environment');
     }
     
     
@@ -380,7 +401,7 @@ class GambioStoreController extends AdminHttpViewController
             new Asset('../GXModules/Gambio/Store/Build/Admin/Javascript/configurationPage.min.js')
         ]);
         
-        $contentNavigation = $this->getStoreNavigation(false);
+        $contentNavigation = $this->getStoreNavigation(false, false, true);
         
         return new AdminLayoutHttpControllerResponse($title, $template, $data, $assets, $contentNavigation);
     }
