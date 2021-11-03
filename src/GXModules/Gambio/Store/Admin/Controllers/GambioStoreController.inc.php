@@ -369,6 +369,10 @@ class GambioStoreController extends AdminHttpViewController
      */
     public function actionConfiguration()
     {
+        if (!$this->isDevEnvironment()) {
+            return $this->actionDefault();
+        }
+        
         $this->setup();
         
         $gambioStoreUrl    = $this->getGambioStoreUrl();
