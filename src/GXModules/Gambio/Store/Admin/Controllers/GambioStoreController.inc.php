@@ -1,6 +1,6 @@
 <?php
 /* --------------------------------------------------------------
-   GambioStoreController.inc.php 2021-11-01
+   GambioStoreController.inc.php 2021-11-03
    Gambio GmbH
    http://www.gambio.de
    Copyright (c) 2021 Gambio GmbH
@@ -381,7 +381,8 @@ class GambioStoreController extends AdminHttpViewController
         ]);
         
         $assets = new AssetCollection([
-            new Asset('gambio_store.lang.inc.php')
+            new Asset('gambio_store.lang.inc.php'),
+            new Asset('../GXModules/Gambio/Store/Build/Admin/Javascript/configurationPage.min.js')
         ]);
         
         $contentNavigation = $this->getStoreNavigation(false);
