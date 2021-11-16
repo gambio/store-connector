@@ -1,6 +1,6 @@
 <?php
 /* --------------------------------------------------------------
-   GambioStoreController.inc.php 2021-11-04
+   GambioStoreController.inc.php 2021-11-16
    Gambio GmbH
    http://www.gambio.de
    Copyright (c) 2021 Gambio GmbH
@@ -402,7 +402,8 @@ class GambioStoreController extends AdminHttpViewController
         
         $assets = new AssetCollection([
             new Asset('gambio_store.lang.inc.php'),
-            new Asset('../GXModules/Gambio/Store/Build/Admin/Javascript/configurationPage.min.js')
+            new Asset('../GXModules/Gambio/Store/Build/Admin/Javascript/callShop.min.js'),
+            new Asset('../GXModules/Gambio/Store/Build/Admin/Javascript/configurationPage.min.js'),
         ]);
         
         $contentNavigation = $this->getStoreNavigation(false, false, true);
@@ -482,9 +483,15 @@ class GambioStoreController extends AdminHttpViewController
         $storeCache      = $this->connector->getCache();
         $storeToken      = $this->configuration->get('GAMBIO_STORE_TOKEN');
         $refreshToken    = $this->configuration->get('GAMBIO_STORE_REFRESH_TOKEN');
+        $accessToken     = $this->configuration->get('GAMBIO_STORE_ACCESS_TOKEN');
         $storeType       = $this->getStoreType($storeApiUrl);
         $storeTokenKey   = "GAMBIO_STORE_TOKEN-$storeType";
         $refreshTokenKey = "GAMBIO_STORE_REFRESH_TOKEN-$storeType";
+    
+        if (!$this->configuration->has('GAMBIO_STORE_ACCESS_TOKEN')) {
+            $accessTokenKey  = "GAMBIO_STORE_ACCESS_TOKEN-$storeType";
+            $storeCache->set($accessTokenKey, $accessToken);
+        }
         
         $storeCache->set($storeTokenKey, $storeToken);
         $storeCache->set($refreshTokenKey, $refreshToken);
@@ -504,6 +511,7 @@ class GambioStoreController extends AdminHttpViewController
         $storeType  = $this->getStoreType($storeApiUrl);
         
         $storeTokenCacheKey   = "GAMBIO_STORE_TOKEN-$storeType";
+        $accessTokenCacheKey  = "GAMBIO_STORE_ACCESS_TOKEN-$storeType";
         $refreshTokenCacheKey = "GAMBIO_STORE_REFRESH_TOKEN-$storeType";
         
         if ($storeCache->has($storeTokenCacheKey)) {
@@ -514,10 +522,14 @@ class GambioStoreController extends AdminHttpViewController
             $refreshToken = $storeCache->get($refreshTokenCacheKey);
         }
         
+        if ($storeCache->has($accessTokenCacheKey)) {
+            $accessToken = $storeCache->get($accessTokenCacheKey);
+        }
+        
         $this->configuration->set('GAMBIO_STORE_TOKEN', isset($storeToken) ? $storeToken : '');
         $this->configuration->set('GAMBIO_STORE_REFRESH_TOKEN', isset($refreshToken) ? $refreshToken : '');
-        $this->configuration->set('GAMBIO_STORE_ACCESS_TOKEN', '');
-        $this->configuration->set('GAMBIO_STORE_IS_REGISTERED', false);
+        $this->configuration->set('GAMBIO_STORE_ACCESS_TOKEN', isset($accessToken) ? $accessToken : '');
+        $this->configuration->set('GAMBIO_STORE_IS_REGISTERED', isset($refreshToken));
     }
     
     

@@ -1,5 +1,5 @@
 /* --------------------------------------------------------------
- configurationPage.js 2021-11-03
+ configurationPage.js 2021-11-16
  Gambio GmbH
  http://www.gambio.de
  Copyright (c) 2021 Gambio GmbH
@@ -17,6 +17,10 @@ const urls = {
 		GUI: 'https://stage.store.gambio.com',
 		API: 'https://api.stage.store.gambio.com'
 	}
+}
+
+const requestNewAuthHeaders = async () => {
+	await GambioStore.callShop('admin.php?do=GambioStoreAjax/requestNewAuth');
 }
 
 const getInputElements = () => {
@@ -43,7 +47,9 @@ const updateStageUrls = () => {
 window.addEventListener('DOMContentLoaded', () => {
 	const setToProductionButtonElement = document.getElementById('set-to-production-button');
 	const setToStageButtonElement = document.getElementById('set-to-stage-button');
+	const requestNewAuthButtonElement = document.getElementById('request-new-auth-button');
 	
 	setToProductionButtonElement.addEventListener('click', updateProductionUrls);
 	setToStageButtonElement.addEventListener('click', updateStageUrls);
+	requestNewAuthButtonElement.addEventListener('click', requestNewAuthHeaders)
 });

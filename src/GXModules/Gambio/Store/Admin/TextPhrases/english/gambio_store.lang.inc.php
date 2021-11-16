@@ -1,6 +1,6 @@
 <?php
 /* --------------------------------------------------------------
-   gambio_store.lang.inc.php 2021-11-03
+   gambio_store.lang.inc.php 2021-11-16
    Gambio GmbH
    http://www.gambio.de
    Copyright (c) 2021 Gambio GmbH
@@ -29,5 +29,6 @@ $t_language_text_section_content_array = [
     'CURL_EXTENSION_MISSING'            => 'Curl PHP extension is required to use Gambio Store.',
     'PDO_EXTENSION_MISSING'             => 'PDO PHP extension is required to use Gambio Store.',
     'CLEARING_CACHE'                    => 'Please wait while the shop\'s caches are clearing.',
-    'INFORMATIONS'                      => 'Informations'
+    'INFORMATIONS'                      => 'Informations',
+    'REQUEST_NEW_AUTH_HEADERS'          => 'Request new auth headers'
 ];
