@@ -1,6 +1,6 @@
 <?php
 /* --------------------------------------------------------------
-   gambio_store.lang.inc.php 2021-11-16
+   gambio_store.lang.inc.php 2021-11-19
    Gambio GmbH
    http://www.gambio.de
    Copyright (c) 2021 Gambio GmbH
@@ -30,5 +30,6 @@ $t_language_text_section_content_array = [
     'PDO_EXTENSION_MISSING'             => 'PDO PHP extension is required to use Gambio Store.',
     'CLEARING_CACHE'                    => 'Please wait while the shop\'s caches are clearing.',
     'INFORMATIONS'                      => 'Informations',
-    'REQUEST_NEW_AUTH_HEADERS'          => 'Request new auth headers'
+    'REQUEST_NEW_AUTH_HEADERS'          => 'Request new auth headers',
+    'RESET_TOKEN'                       => 'Reset token',
 ];
