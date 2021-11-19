@@ -90,13 +90,6 @@ class GambioStoreController extends AdminHttpViewController
     {
         $this->setup();
         
-        if ($this->_getQueryParameter('reset-token') || $this->_getQueryParameter('reset-token') === '') {
-            $this->configuration->set('GAMBIO_STORE_TOKEN', '');
-            $this->configuration->set('GAMBIO_STORE_IS_REGISTERED', false);
-            
-            return new RedirectHttpControllerResponse('./admin.php?do=GambioStore');
-        }
-        
         $title             = new NonEmptyStringType($this->languageTextManager->get_text('PAGE_TITLE'));
         $template          = new ExistingFile(new NonEmptyStringType(__DIR__ . '/../Html/gambio_store.html'));
         $contentNavigation = MainFactory::create('ContentNavigationCollection', []);
@@ -210,6 +203,7 @@ class GambioStoreController extends AdminHttpViewController
         }
         
         return new KeyValueCollection([
+            'updateNeeded'  => $this->getUpdateNeeded(),
             'storeUrl'      => $this->getGambioStoreUrl() . $urlPostfix,
             'storeToken'    => $this->getGambioStoreToken(),
             'authHeaders'   => $this->getGambioStoreAuthHeaders(),
@@ -551,6 +545,17 @@ class GambioStoreController extends AdminHttpViewController
         }
         
         return $gambioUrl;
+    }
+
+
+    /**
+     * Return the "Update needed flag"
+     *
+     * @return bool
+     */
+    private function getUpdateNeeded()
+    {
+        return (bool) $this->configuration->get('GAMBIO_STORE_CONNECTOR_UPDATE_REQUIRED');
     }
     
     
