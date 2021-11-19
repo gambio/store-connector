@@ -1,9 +1,9 @@
 <?php
 /* --------------------------------------------------------------
-   GambioStoreController.inc.php 2020-04-29
+   GambioStoreController.inc.php 2021-11-16
    Gambio GmbH
    http://www.gambio.de
-   Copyright (c) 2020 Gambio GmbH
+   Copyright (c) 2021 Gambio GmbH
    Released under the GNU General Public License (Version 2)
    [http://www.gnu.org/licenses/gpl-2.0.html]
    --------------------------------------------------------------
@@ -29,7 +29,7 @@ class GambioStoreController extends AdminHttpViewController
     private $languageTextManager;
     
     /**
-     * Error array with language keys to show error messages if nessary.
+     * Error array with language keys to show error messages if necessary.
      *
      * @var array
      */
@@ -248,11 +248,11 @@ class GambioStoreController extends AdminHttpViewController
      * Returns the content navigation for the store pages (once registered and accepted privacy stuff)
      *
      * @param bool $mainPage
-     * @param bool $secondaryPage
+     * @param bool $installationPage
      *
      * @return mixed
      */
-    private function getStoreNavigation($mainPage = true, $secondaryPage = false)
+    private function getStoreNavigation($mainPage = true, $installationPage = false, $configurationPage = false)
     {
         $contentNavigation = MainFactory::create('ContentNavigationCollection', []);
         $contentNavigation->add(
@@ -268,10 +268,31 @@ class GambioStoreController extends AdminHttpViewController
                 )
             ),
             new StringType('admin.php?do=GambioStore/Installations'),
-            new BoolType($secondaryPage)
+            new BoolType($installationPage)
         );
         
+        if ($this->isDevEnvironment()) {
+            $contentNavigation->add(
+                new StringType(
+                    $this->languageTextManager->get_text('CONFIGURATION', 'gambio_store')
+                ),
+                new StringType('admin.php?do=GambioStore/configuration'),
+                new BoolType($configurationPage)
+            );
+        }
+        
         return $contentNavigation;
+    }
+    
+    
+    /**
+     * Determines if the dev environment in the shop is active.
+     *
+     * @return bool
+     */
+    private function isDevEnvironment()
+    {
+        return file_exists(dirname(__DIR__, 5) . '/.dev-environment');
     }
     
     
@@ -344,43 +365,171 @@ class GambioStoreController extends AdminHttpViewController
      * Displays the configuration page to change the store URL
      *
      * @return mixed
+     * @throws \GambioStoreCacheException
      */
     public function actionConfiguration()
     {
+        if (!$this->isDevEnvironment()) {
+            return new RedirectHttpControllerResponse('./admin.php?do=GambioStore');
+        }
+        
         $this->setup();
         
         $gambioStoreUrl    = $this->getGambioStoreUrl();
         $gambioStoreApiUrl = $this->getGambioStoreApiUrl();
         
-        if (isset($_POST['url'])
-            && $_POST['url'] !== $gambioStoreUrl
-            && (filter_var($_POST['url'], FILTER_VALIDATE_URL) === $_POST['url'])) {
-            $gambioStoreUrl = $_POST['url'];
-            $this->configuration->set('GAMBIO_STORE_URL', $gambioStoreUrl);
+        if (isset($_POST['url'])) {
+            $gambioStoreUrl = $this->updateGambioStoreUrl($_POST['url'], $gambioStoreUrl);
         }
         
-        if (isset($_POST['apiUrl'])
-            && $_POST['apiUrl'] !== $gambioStoreApiUrl
-            && (filter_var($_POST['apiUrl'], FILTER_VALIDATE_URL) === $_POST['apiUrl'])) {
-            $gambioStoreApiUrl = $_POST['apiUrl'];
-            $this->configuration->set('GAMBIO_STORE_API_URL', $gambioStoreApiUrl);
+        if (isset($_POST['apiUrl'])) {
+            $gambioStoreApiUrl = $this->updateGambioStoreApiUrl($_POST['apiUrl'], $gambioStoreApiUrl);
         }
         
-        $title    = new NonEmptyStringType($this->languageTextManager->get_text('PAGE_TITLE'));
-        $template = new ExistingFile(new NonEmptyStringType(__DIR__ . '/../Html/gambio_store_configuration.html'));
+        $title           = new NonEmptyStringType($this->languageTextManager->get_text('PAGE_TITLE'));
+        $template        = new ExistingFile(
+            new NonEmptyStringType(__DIR__ . '/../Html/gambio_store_configuration.html')
+        );
+        $shopInformation = $this->connector->getShopInformation();
         
         $data = new KeyValueCollection([
-            'url'    => $gambioStoreUrl,
-            'apiUrl' => $gambioStoreApiUrl
+            'url'              => $gambioStoreUrl,
+            'apiUrl'           => $gambioStoreApiUrl,
+            'storeToken'       => $this->getGambioStoreToken(),
+            'connectorVersion' => $shopInformation['shop']['connectorVersion'],
+            'storeType'        => $this->getStoreType($gambioStoreApiUrl)
         ]);
         
         $assets = new AssetCollection([
-            new Asset('gambio_store.lang.inc.php')
+            new Asset('gambio_store.lang.inc.php'),
+            new Asset('../GXModules/Gambio/Store/Build/Admin/Javascript/callShop.min.js'),
+            new Asset('../GXModules/Gambio/Store/Build/Admin/Javascript/configurationPage.min.js'),
         ]);
         
-        $contentNavigation = $this->getStoreNavigation(false);
+        $contentNavigation = $this->getStoreNavigation(false, false, true);
         
         return new AdminLayoutHttpControllerResponse($title, $template, $data, $assets, $contentNavigation);
+    }
+    
+    
+    /**
+     * Updates the Gambio store URL.
+     *
+     * @param $url
+     * @param $gambioStoreUrl
+     *
+     * @return string
+     */
+    private function updateGambioStoreUrl($url, $gambioStoreUrl)
+    {
+        if ($url === $gambioStoreUrl) {
+            return $gambioStoreUrl;
+        }
+        
+        if (filter_var($url, FILTER_VALIDATE_URL) !== $url) {
+            return $gambioStoreUrl;
+        }
+        
+        $this->configuration->set('GAMBIO_STORE_URL', $url);
+        
+        return $url;
+    }
+    
+    
+    /**
+     * Updates the Gambio store api URL.
+     *
+     * @param $newStoreApiUrl
+     * @param $currentStoreApiUrl
+     *
+     * @return string
+     * @throws \GambioStoreCacheException
+     */
+    private function updateGambioStoreApiUrl($newStoreApiUrl, $currentStoreApiUrl)
+    {
+        if ($newStoreApiUrl === $currentStoreApiUrl) {
+            return $currentStoreApiUrl;
+        }
+        
+        if (filter_var($newStoreApiUrl, FILTER_VALIDATE_URL) !== $newStoreApiUrl) {
+            return $currentStoreApiUrl;
+        }
+        
+        $this->cacheGambioStoreRegistration($currentStoreApiUrl);
+        $this->configuration->set('GAMBIO_STORE_API_URL', $newStoreApiUrl);
+        $this->restoreGambioStoreRegistrationFromCache($newStoreApiUrl);
+        
+        return $newStoreApiUrl;
+    }
+    
+    
+    /**
+     * Stores the store API registration on the store cache table.
+     *
+     * @param $storeApiUrl
+     *
+     * @throws \GambioStoreCacheException
+     */
+    private function cacheGambioStoreRegistration($storeApiUrl)
+    {
+        if (!$this->configuration->has('GAMBIO_STORE_REFRESH_TOKEN')) {
+            return;
+        }
+        
+        if (!$this->configuration->has('GAMBIO_STORE_TOKEN')) {
+            return;
+        }
+        
+        $storeCache      = $this->connector->getCache();
+        $storeToken      = $this->configuration->get('GAMBIO_STORE_TOKEN');
+        $refreshToken    = $this->configuration->get('GAMBIO_STORE_REFRESH_TOKEN');
+        $accessToken     = $this->configuration->get('GAMBIO_STORE_ACCESS_TOKEN');
+        $storeType       = $this->getStoreType($storeApiUrl);
+        $storeTokenKey   = "GAMBIO_STORE_TOKEN-$storeType";
+        $refreshTokenKey = "GAMBIO_STORE_REFRESH_TOKEN-$storeType";
+    
+        if (!$this->configuration->has('GAMBIO_STORE_ACCESS_TOKEN')) {
+            $accessTokenKey  = "GAMBIO_STORE_ACCESS_TOKEN-$storeType";
+            $storeCache->set($accessTokenKey, $accessToken);
+        }
+        
+        $storeCache->set($storeTokenKey, $storeToken);
+        $storeCache->set($refreshTokenKey, $refreshToken);
+    }
+    
+    
+    /**
+     * Restores an old store registration, if it is present on the store cache table.
+     *
+     * @param $storeApiUrl
+     *
+     * @throws \GambioStoreCacheException
+     */
+    private function restoreGambioStoreRegistrationFromCache($storeApiUrl)
+    {
+        $storeCache = $this->connector->getCache();
+        $storeType  = $this->getStoreType($storeApiUrl);
+        
+        $storeTokenCacheKey   = "GAMBIO_STORE_TOKEN-$storeType";
+        $accessTokenCacheKey  = "GAMBIO_STORE_ACCESS_TOKEN-$storeType";
+        $refreshTokenCacheKey = "GAMBIO_STORE_REFRESH_TOKEN-$storeType";
+        
+        if ($storeCache->has($storeTokenCacheKey)) {
+            $storeToken = $storeCache->get($storeTokenCacheKey);
+        }
+        
+        if ($storeCache->has($refreshTokenCacheKey)) {
+            $refreshToken = $storeCache->get($refreshTokenCacheKey);
+        }
+        
+        if ($storeCache->has($accessTokenCacheKey)) {
+            $accessToken = $storeCache->get($accessTokenCacheKey);
+        }
+        
+        $this->configuration->set('GAMBIO_STORE_TOKEN', isset($storeToken) ? $storeToken : '');
+        $this->configuration->set('GAMBIO_STORE_REFRESH_TOKEN', isset($refreshToken) ? $refreshToken : '');
+        $this->configuration->set('GAMBIO_STORE_ACCESS_TOKEN', isset($accessToken) ? $accessToken : '');
+        $this->configuration->set('GAMBIO_STORE_IS_REGISTERED', isset($refreshToken));
     }
     
     
@@ -402,6 +551,27 @@ class GambioStoreController extends AdminHttpViewController
         }
         
         return $gambioUrl;
+    }
+    
+    
+    /**
+     * Determines whether the store is in Prod, Stage or something else.
+     *
+     * @param string $gambioStoreApiUrl
+     *
+     * @return string
+     */
+    private function getStoreType($gambioStoreApiUrl)
+    {
+        if (strpos($gambioStoreApiUrl, 'stage.store.gambio.com')) {
+            return 'stage';
+        }
+        
+        if (strpos($gambioStoreApiUrl, 'store.gambio.com')) {
+            return 'production';
+        }
+        
+        return 'other';
     }
     
     

@@ -2,42 +2,113 @@
 {load_language_text section="gambio_store" name="gambio_store"}
 {block name="content"}
 <div class="gx-container breakpoint-small">
-    <div class="col-md-12">
-        <form
-            action=""
-            class="form-horizontal"
-            data-cy="gambio-store-configuration-form"
-            id="gambio-store-configuration-form"
-            method="post">
-            <fieldset>
-                <legend>{$gambio_store['CONFIGURATION']}</legend>
-                <div class="form-group">
-                    <label class="control-label col-sm-4" for="store-gui-url">STORE URL</label>
-                    <div class="col-sm-8" data-gx-widget="switcher">
-                        <input
-                            class="form-control"
-                            data-cy="store-gui-url-input"
-                            id="store-gui-url"
-                            name="url"
-                            type="text"
-                            value="{$content['url']}">
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label class="control-label col-sm-4" for="store-api-url">STORE API URL</label>
-                    <div class="col-sm-8" data-gx-widget="switcher">
-                        <input
-                            class="form-control"
-                            data-cy="store-api-url-input"
-                            id="store-api-url"
-                            name="apiUrl"
-                            type="text"
-                            value="{$content['apiUrl']}">
-                    </div>
-                </div>
-            </fieldset>
-        </form>
-    </div>
+	<div class="col-md-12">
+		<form
+			action=""
+			class="form-horizontal"
+			data-cy="gambio-store-configuration-form"
+			id="gambio-store-configuration-form"
+			method="post">
+			<fieldset>
+				<legend>{$gambio_store['CONFIGURATION']}</legend>
+				<div class="form-group">
+					<label class="control-label col-sm-4" for="store-gui-url">STORE URL</label>
+					<div class="col-sm-8" data-gx-widget="switcher">
+						<input
+							class="form-control"
+							data-cy="store-gui-url-input"
+							id="store-gui-url"
+							name="url"
+							type="text"
+							value="{$content['url']}">
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label col-sm-4" for="store-api-url">STORE API URL</label>
+					<div class="col-sm-8" data-gx-widget="switcher">
+						<input
+							class="form-control"
+							data-cy="store-api-url-input"
+							id="store-api-url"
+							name="apiUrl"
+							type="text"
+							value="{$content['apiUrl']}">
+					</div>
+				</div>
+				
+				<div class="form-group">
+					<label class="control-label col-sm-4 block"></label>
+					<div class="col-sm-8">
+						<button
+							id="set-to-production-button"
+							class="btn btn-secondary"
+							type="button"
+						>
+							Production
+						</button>
+						<button
+							id="set-to-stage-button"
+							class="btn btn-secondary"
+							type="button"
+						>
+							Stage
+						</button>
+					</div>
+				</div>
+				<legend>{$gambio_store['INFORMATIONS']}</legend>
+				<div class="form-group">
+					<label class="control-label col-sm-4" for="store-token">STORE TOKEN</label>
+					<div class="col-sm-8" data-gx-widget="switcher">
+						<input
+							class="form-control"
+							data-cy="store-token-input"
+							id="store-token"
+							name="storeToken"
+							type="text"
+							value="{$content['storeToken']}"
+							readonly
+						>
+					</div>
+				</div>
+				<div class="form-group">
+					<label class="control-label col-sm-4" for="connector-version">CONNECTOR VERSION</label>
+					<div class="col-sm-8" data-gx-widget="switcher">
+						<input
+							class="form-control"
+							data-cy="connector-version-input"
+							id="connector-version"
+							name="connectorVersion"
+							type="text"
+							value="{$content['connectorVersion']}"
+							readonly
+						>
+					</div>
+				</div>
+				
+				<div class="form-group">
+					<label class="control-label col-sm-4">API TYPE</label>
+					<div class="col-sm-8 pt-2">
+						{if $content['storeType'] === "production"}
+						<div class="label label-danger">Production</div>
+						{elseif $content['storeType'] === "stage"}
+						<div class="label label-warning">Stage</div>
+						{else}
+						<div class="label label-default">Other</div>
+						{/if}
+					</div>
+				</div>
+				
+				<div class="form-group">
+					<label class="control-label col-sm-4 block"></label>
+					<div class="col-sm-8 pt-2">
+						<button type="button" id="request-new-auth-button" class="btn btn-secondary">
+							{$gambio_store['REQUEST_NEW_AUTH_HEADERS']}
+						</button>
+					</div>
+				</div>
+			</fieldset>
+		</form>
+	</div>
 </div>
 {/block}
 

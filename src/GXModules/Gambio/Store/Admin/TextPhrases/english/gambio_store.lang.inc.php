@@ -1,9 +1,9 @@
 <?php
 /* --------------------------------------------------------------
-   gambio_store.lang.inc.php 2020-05-04
+   gambio_store.lang.inc.php 2021-11-16
    Gambio GmbH
    http://www.gambio.de
-   Copyright (c) 2020 Gambio GmbH
+   Copyright (c) 2021 Gambio GmbH
    Released under the GNU General Public License (Version 2)
    [http://www.gnu.org/licenses/gpl-2.0.html]
    --------------------------------------------------------------
@@ -28,5 +28,7 @@ $t_language_text_section_content_array = [
     'NEW_AUTH_NETWORK_ERROR'            => 'The Gambio Store was unable to receive the required information from the shop for a new session.',
     'CURL_EXTENSION_MISSING'            => 'Curl PHP extension is required to use Gambio Store.',
     'PDO_EXTENSION_MISSING'             => 'PDO PHP extension is required to use Gambio Store.',
-    'CLEARING_CACHE'                    => 'Please wait while the shop\'s caches are clearing.'
+    'CLEARING_CACHE'                    => 'Please wait while the shop\'s caches are clearing.',
+    'INFORMATIONS'                      => 'Informations',
+    'REQUEST_NEW_AUTH_HEADERS'          => 'Request new auth headers'
 ];
