@@ -53,6 +53,13 @@
 						>
 							Stage
 						</button>
+						<button
+							id="set-to-docker-button"
+							class="btn btn-secondary"
+							type="button"
+						>
+							Docker
+						</button>
 					</div>
 				</div>
 				<legend>{$gambio_store['INFORMATIONS']}</legend>
@@ -92,8 +99,10 @@
 						<div class="label label-danger">Production</div>
 						{elseif $content['storeType'] === "stage"}
 						<div class="label label-warning">Stage</div>
+						{elseif $content['storeType'] === "docker"}
+						<div class="label label-success">Docker</div>
 						{else}
-						<div class="label label-default">Other</div>
+						<div class="label label-default">undefined</div>
 						{/if}
 					</div>
 				</div>
@@ -103,6 +112,10 @@
 					<div class="col-sm-8 pt-2">
 						<button type="button" id="request-new-auth-button" class="btn btn-secondary">
 							{$gambio_store['REQUEST_NEW_AUTH_HEADERS']}
+						</button>
+						
+						<button type="button" id="reset-token-button" class="btn btn-secondary">
+							{$gambio_store['RESET_TOKEN']}
 						</button>
 					</div>
 				</div>
