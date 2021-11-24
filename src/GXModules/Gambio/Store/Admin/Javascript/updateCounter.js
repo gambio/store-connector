@@ -1,8 +1,8 @@
 /* --------------------------------------------------------------
-   updateCounter.js 2020-04-30
+   updateCounter.js 2021-11-24
    Gambio GmbH
    http://www.gambio.de
-   Copyright (c) 2020 Gambio GmbH
+   Copyright (c) 2021 Gambio GmbH
    Released under the GNU General Public License (Version 2)
    [http://www.gnu.org/licenses/gpl-2.0.html]
    --------------------------------------------------------------
@@ -31,7 +31,13 @@ const setUpdatesCounter = ({updatesCounter}) => {
     updatesCounterElement.className = 'gambio-store-updates-counter';
     updatesCounterElement.innerHTML = updatesCounter;
     
-    const navItem = document.querySelector('#main-content .content-navigation .nav-item:last-child');
+    const contentNav = document.querySelector('#main-content .content-navigation');
+    
+    if (!contentNav) {
+        return;
+    }
+    
+    const navItem = contentNav.children[1];
     
     if (!navItem) {
         return;
@@ -45,6 +51,6 @@ const setUpdatesCounter = ({updatesCounter}) => {
 }
 
 
-window.addEventListener('DOMContentLoaded', function() {
+window.addEventListener('DOMContentLoaded', function () {
     GambioStore.messenger.addListener('updates_counter', setUpdatesCounter);
 });
