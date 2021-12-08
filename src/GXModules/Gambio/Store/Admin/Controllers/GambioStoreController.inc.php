@@ -370,10 +370,6 @@ class GambioStoreController extends AdminHttpViewController
      */
     public function actionConfiguration()
     {
-        if (!$this->isDevEnvironment()) {
-            return new RedirectHttpControllerResponse('./admin.php?do=GambioStore');
-        }
-        
         $this->setup();
         
         $gambioStoreUrl    = $this->getGambioStoreUrl();
