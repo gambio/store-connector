@@ -1,6 +1,6 @@
 <?php
 /* --------------------------------------------------------------
-   GambioStoreInstallation.inc.php 2020-04-29
+   GambioStoreInstallation.inc.php 2022-01-21
    Gambio GmbH
    http://www.gambio.de
    Copyright (c) 2020 Gambio GmbH
@@ -96,14 +96,14 @@ class GambioStoreInstallation
      * @param \GambioStoreHttp       $http
      */
     public function __construct(
-        array $packageData,
-        $token,
-        GambioStoreCache $cache,
-        GambioStoreLogger $logger,
+        array                 $packageData,
+                              $token,
+        GambioStoreCache      $cache,
+        GambioStoreLogger     $logger,
         GambioStoreFileSystem $filesystem,
-        GambioStoreBackup $backup,
-        GambioStoreMigration $migration,
-        GambioStoreHttp $http
+        GambioStoreBackup     $backup,
+        GambioStoreMigration  $migration,
+        GambioStoreHttp       $http
     ) {
         $this->packageData = $packageData;
         $this->token       = $token;
@@ -433,11 +433,15 @@ class GambioStoreInstallation
     private function downloadPackageToCacheFolder()
     {
         if (!extension_loaded('zip')) {
-            $this->logger->warning('The Gambio Store could not locate the zip extension for PHP which is required for installations.');
+            $this->logger->warning(
+                'The Gambio Store could not locate the zip extension for PHP which is required for installations.'
+            );
             $this->downloadPackageFilesToCacheFolder();
         } elseif (!$this->downloadPackageZipToCacheFolder()) {
-            $this->logger->warning('Could not download zip file: ' . $this->packageData['fileList']['zip']['source']
-                                   . ' from package: ' . $this->packageData['details']['title']['de']);
+            $this->logger->warning(
+                'Could not download zip file: ' . $this->packageData['fileList']['zip']['source'] . ' from package: '
+                . $this->packageData['details']['title']['de']
+            );
             $this->downloadPackageFilesToCacheFolder();
         }
     }
@@ -525,7 +529,7 @@ class GambioStoreInstallation
     private function getFileContent($url)
     {
         $response = $this->http->get($url, [
-            CURLOPT_HTTPHEADER => ["X-STORE-TOKEN: $this->token"]
+            CURLOPT_HTTPHEADER => ["X-ACCESS-TOKEN: $this->token"]
         ]);
         
         $code = $response->getInformation('http_code');

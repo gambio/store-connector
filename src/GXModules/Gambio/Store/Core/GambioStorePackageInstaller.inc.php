@@ -1,6 +1,6 @@
 <?php
 /* --------------------------------------------------------------
-   GambioStorePackageInstaller.php 2020-07-08
+   GambioStorePackageInstaller.php 2022-01-21
    Gambio GmbH
    http://www.gambio.de
    Copyright (c) 2020 Gambio GmbH
@@ -58,12 +58,12 @@ class GambioStorePackageInstaller
      * @param \GambioStoreThemes        $themes
      */
     public function __construct(
-        GambioStoreFileSystem $fileSystem,
+        GambioStoreFileSystem    $fileSystem,
         GambioStoreConfiguration $configuration,
-        GambioStoreCache $cache,
-        GambioStoreLogger $logger,
-        GambioStoreBackup $backup,
-        GambioStoreThemes $themes
+        GambioStoreCache         $cache,
+        GambioStoreLogger        $logger,
+        GambioStoreBackup        $backup,
+        GambioStoreThemes        $themes
     ) {
         $this->fileSystem    = $fileSystem;
         $this->configuration = $configuration;
@@ -84,14 +84,18 @@ class GambioStorePackageInstaller
      */
     public function installPackage($packageData)
     {
-        $migration = new GambioStoreMigration($this->fileSystem,
+        $migration = new GambioStoreMigration(
+            $this->fileSystem,
             isset($packageData['migrations']['up']) ? $packageData['migrations']['up'] : [],
-            isset($packageData['migrations']['down']) ? $packageData['migrations']['down'] : []);
+            isset($packageData['migrations']['down']) ? $packageData['migrations']['down'] : []
+        );
         
-        $http = new GambioStoreHttp();
+        $http        = new GambioStoreHttp();
+        $accessToken = $this->configuration->get('GAMBIO_STORE_ACCESS_TOKEN');
         
-        $installation = new GambioStoreInstallation($packageData, $this->configuration->get('GAMBIO_STORE_TOKEN'),
-            $this->cache, $this->logger, $this->fileSystem, $this->backup, $migration, $http);
+        $installation = new GambioStoreInstallation(
+            $packageData, $accessToken, $this->cache, $this->logger, $this->fileSystem, $this->backup, $migration, $http
+        );
         
         try {
             $wasShopOnlineCacheKey = 'WAS_SHOP_ONLINE_' . $packageData['details']['id'];
@@ -195,9 +199,11 @@ class GambioStorePackageInstaller
             $packageData['files_list'] = $postData['file_list'];
         }
         
-        $migration = new GambioStoreMigration($this->fileSystem,
+        $migration = new GambioStoreMigration(
+            $this->fileSystem,
             isset($postData['migrations']['up']) ? $postData['migrations']['up'] : [],
-            isset($postData['migrations']['down']) ? $postData['migrations']['down'] : []);
+            isset($postData['migrations']['down']) ? $postData['migrations']['down'] : []
+        );
         
         $removal = new GambioStoreRemoval($packageData, $this->logger, $this->backup, $migration, $this->fileSystem);
         
