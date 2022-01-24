@@ -1,9 +1,9 @@
 <?php
 /* --------------------------------------------------------------
-   GambioStoreBackup.inc.php 2020-05-14
+   GambioStoreBackup.inc.php 2022-01-24
    Gambio GmbH
    http://www.gambio.de
-   Copyright (c) 2020 Gambio GmbH
+   Copyright (c) 2022 Gambio GmbH
    Released under the GNU General Public License (Version 2)
    [http://www.gnu.org/licenses/gpl-2.0.html]
    --------------------------------------------------------------
@@ -78,7 +78,7 @@ class GambioStoreBackup
      */
     public function removePackageFilesFromCache(array $files)
     {
-        $cacheDirectory = 'cache/backup/';
+        $cacheDirectory = 'cache/GambioStore/backup/';
         
         foreach ($files as $file) {
             $file .= '.bak';
