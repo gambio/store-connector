@@ -1,9 +1,9 @@
 <?php
 /* --------------------------------------------------------------
-   GambioStorePackageInstaller.php 2022-01-21
+   GambioStorePackageInstaller.php 2022-01-27
    Gambio GmbH
    http://www.gambio.de
-   Copyright (c) 2020 Gambio GmbH
+   Copyright (c) 2022 Gambio GmbH
    Released under the GNU General Public License (Version 2)
    [http://www.gnu.org/licenses/gpl-2.0.html]
    --------------------------------------------------------------
@@ -44,7 +44,12 @@ class GambioStorePackageInstaller
     /**
      * @var \GambioStoreThemes
      */
-    private $themes;
+    private                          $themes;
+    
+    /**
+     * @var \GambioStoreCompatibility
+     */
+    private $compatibility;
     
     
     /**
@@ -63,7 +68,8 @@ class GambioStorePackageInstaller
         GambioStoreCache         $cache,
         GambioStoreLogger        $logger,
         GambioStoreBackup        $backup,
-        GambioStoreThemes        $themes
+        GambioStoreThemes        $themes,
+        GambioStoreCompatibility $compatibility
     ) {
         $this->fileSystem    = $fileSystem;
         $this->configuration = $configuration;
@@ -71,6 +77,7 @@ class GambioStorePackageInstaller
         $this->logger        = $logger;
         $this->backup        = $backup;
         $this->themes        = $themes;
+        $this->compatibility = $compatibility;
     }
     
     
@@ -94,7 +101,7 @@ class GambioStorePackageInstaller
         $accessToken = $this->configuration->get('GAMBIO_STORE_ACCESS_TOKEN');
         
         $installation = new GambioStoreInstallation(
-            $packageData, $accessToken, $this->cache, $this->logger, $this->fileSystem, $this->backup, $migration, $http
+            $packageData, $accessToken, $this->cache, $this->logger, $this->fileSystem, $this->backup, $migration, $http, $this->compatibility
         );
         
         try {

@@ -1,9 +1,9 @@
 <?php
 /* --------------------------------------------------------------
-   GambioStoreInstallation.inc.php 2022-01-21
+   GambioStoreInstallation.inc.php 2022-01-27
    Gambio GmbH
    http://www.gambio.de
-   Copyright (c) 2020 Gambio GmbH
+   Copyright (c) 2022 Gambio GmbH
    Released under the GNU General Public License (Version 2)
    [http://www.gnu.org/licenses/gpl-2.0.html]
    --------------------------------------------------------------
@@ -82,37 +82,45 @@ class GambioStoreInstallation
      */
     private $http;
     
+    /**
+     * @var \GambioStoreCompatibility
+     */
+    private $compatibility;
+    
     
     /**
      * GambioStoreInstallation constructor.
      *
-     * @param array                  $packageData
-     * @param string                 $token
-     * @param \GambioStoreCache      $cache
-     * @param \GambioStoreLogger     $logger
-     * @param \GambioStoreFileSystem $filesystem
-     * @param \GambioStoreBackup     $backup
-     * @param \GambioStoreMigration  $migration
-     * @param \GambioStoreHttp       $http
+     * @param array                     $packageData
+     * @param string                    $token
+     * @param \GambioStoreCache         $cache
+     * @param \GambioStoreLogger        $logger
+     * @param \GambioStoreFileSystem    $filesystem
+     * @param \GambioStoreBackup        $backup
+     * @param \GambioStoreMigration     $migration
+     * @param \GambioStoreHttp          $http
+     * @param \GambioStoreCompatibility $compatibility
      */
     public function __construct(
-        array                 $packageData,
-                              $token,
-        GambioStoreCache      $cache,
-        GambioStoreLogger     $logger,
-        GambioStoreFileSystem $filesystem,
-        GambioStoreBackup     $backup,
-        GambioStoreMigration  $migration,
-        GambioStoreHttp       $http
+        array                    $packageData,
+                                 $token,
+        GambioStoreCache         $cache,
+        GambioStoreLogger        $logger,
+        GambioStoreFileSystem    $filesystem,
+        GambioStoreBackup        $backup,
+        GambioStoreMigration     $migration,
+        GambioStoreHttp          $http,
+        GambioStoreCompatibility $compatibility
     ) {
-        $this->packageData = $packageData;
-        $this->token       = $token;
-        $this->cache       = $cache;
-        $this->logger      = $logger;
-        $this->fileSystem  = $filesystem;
-        $this->backup      = $backup;
-        $this->migration   = $migration;
-        $this->http        = $http;
+        $this->packageData   = $packageData;
+        $this->token         = $token;
+        $this->cache         = $cache;
+        $this->logger        = $logger;
+        $this->fileSystem    = $filesystem;
+        $this->backup        = $backup;
+        $this->migration     = $migration;
+        $this->http          = $http;
+        $this->compatibility = $compatibility;
         
         set_error_handler([$this, 'handleUnexpectedError']);
         set_exception_handler([$this, 'handleUnexpectedException']);
@@ -237,6 +245,11 @@ class GambioStoreInstallation
                     ];
                     $destinations  = $this->getPackageFilesDestinations();
                     $this->backup->movePackageFilesToCache($destinations);
+                    
+                    if (!$this->clearMainFactoryDataCache()) {
+                        return [];
+                    }
+                    
                     $this->cache->set($this->getTransactionId(), json_encode($progressArray));
                     
                     return $progressArray;
@@ -261,6 +274,25 @@ class GambioStoreInstallation
                 $this->cache->delete($this->getTransactionId());
                 throw new GambioStorePackageInstallationException($message);
         }
+    }
+    
+    
+    /**
+     * Clears the MainFactory data cache.
+     *
+     * @return bool
+     */
+    private function clearMainFactoryDataCache()
+    {
+        if (!$this->compatibility->has(GambioStoreCompatibility::FEATURE_CACHE_CONTROL)) {
+            $this->logger->critical("Clearing of MainFactory data cache does not work, because the cache control does not exits");
+            return false;
+        }
+        
+        $cacheControl = new CacheControl();
+        $cacheControl->clear_data_cache();
+        
+        return true;
     }
     
     
