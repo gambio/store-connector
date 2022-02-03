@@ -1,8 +1,8 @@
 /* --------------------------------------------------------------
-   package.js 2020-05-05
+   package.js 2022-02-03
    Gambio GmbH
    http://www.gambio.de
-   Copyright (c) 2020 Gambio GmbH
+   Copyright (c) 2022 Gambio GmbH
    Released under the GNU General Public License (Version 2)
    [http://www.gnu.org/licenses/gpl-2.0.html]
    --------------------------------------------------------------
@@ -73,6 +73,10 @@ const installPackage = async (data, progressCallback) => {
 		
 		if (!response.success) {
 			throw new Error('Package not installed!');
+		}
+		
+		if (response.clearCache) {
+			GambioStore.shop.clearShopCache();
 		}
 		
 		progress = response.progress ? response.progress : progress;
@@ -185,7 +189,7 @@ const updateProgressCallback = (progress) => {
 };
 
 /**
- * Replaces the progressbar in the modal with a loading spinner and emptying cache infromation.
+ * Replaces the progressbar in the modal with a loading spinner and emptying cache information.
  */
 const showClearCache = () => {
 	const cacheClearingText = GambioStore.translation.translate('CLEARING_CACHE');

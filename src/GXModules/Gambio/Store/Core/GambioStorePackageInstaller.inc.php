@@ -1,6 +1,6 @@
 <?php
 /* --------------------------------------------------------------
-   GambioStorePackageInstaller.php 2022-01-27
+   GambioStorePackageInstaller.php 2022-02-03
    Gambio GmbH
    http://www.gambio.de
    Copyright (c) 2022 Gambio GmbH
@@ -44,7 +44,7 @@ class GambioStorePackageInstaller
     /**
      * @var \GambioStoreThemes
      */
-    private                          $themes;
+    private $themes;
     
     /**
      * @var \GambioStoreCompatibility
@@ -60,7 +60,6 @@ class GambioStorePackageInstaller
      * @param \GambioStoreCache         $cache
      * @param \GambioStoreLogger        $logger
      * @param \GambioStoreBackup        $backup
-     * @param \GambioStoreThemes        $themes
      */
     public function __construct(
         GambioStoreFileSystem    $fileSystem,
@@ -68,8 +67,7 @@ class GambioStorePackageInstaller
         GambioStoreCache         $cache,
         GambioStoreLogger        $logger,
         GambioStoreBackup        $backup,
-        GambioStoreThemes        $themes,
-        GambioStoreCompatibility $compatibility
+        GambioStoreThemes        $themes
     ) {
         $this->fileSystem    = $fileSystem;
         $this->configuration = $configuration;
@@ -77,7 +75,6 @@ class GambioStorePackageInstaller
         $this->logger        = $logger;
         $this->backup        = $backup;
         $this->themes        = $themes;
-        $this->compatibility = $compatibility;
     }
     
     
@@ -101,7 +98,14 @@ class GambioStorePackageInstaller
         $accessToken = $this->configuration->get('GAMBIO_STORE_ACCESS_TOKEN');
         
         $installation = new GambioStoreInstallation(
-            $packageData, $accessToken, $this->cache, $this->logger, $this->fileSystem, $this->backup, $migration, $http, $this->compatibility
+            $packageData,
+            $accessToken,
+            $this->cache,
+            $this->logger,
+            $this->fileSystem,
+            $this->backup,
+            $migration,
+            $http
         );
         
         try {

@@ -1,6 +1,6 @@
 <?php
 /* --------------------------------------------------------------
-   GambioStoreConnector.php 2022-01-28
+   GambioStoreConnector.php 2022-02-03
    Gambio GmbH
    http://www.gambio.de
    Copyright (c) 2022 Gambio GmbH
@@ -155,7 +155,7 @@ class GambioStoreConnector
         $logger          = new GambioStoreLogger($cache);
         $themes          = new GambioStoreThemes($compatibility, $fileSystem, $logger);
         $installer       = new GambioStorePackageInstaller(
-            $fileSystem, $configuration, $cache, $logger, $backup, $themes, $compatibility
+            $fileSystem, $configuration, $cache, $logger, $backup, $themes
         );
         $auth            = new GambioStoreAuth($configuration, $http, $shopInformation);
         

@@ -1,6 +1,6 @@
 <?php
 /* --------------------------------------------------------------
-   GambioStoreInstallation.inc.php 2022-01-27
+   GambioStoreInstallation.inc.php 2022-02-03
    Gambio GmbH
    http://www.gambio.de
    Copyright (c) 2022 Gambio GmbH
@@ -82,11 +82,6 @@ class GambioStoreInstallation
      */
     private $http;
     
-    /**
-     * @var \GambioStoreCompatibility
-     */
-    private $compatibility;
-    
     
     /**
      * GambioStoreInstallation constructor.
@@ -99,7 +94,6 @@ class GambioStoreInstallation
      * @param \GambioStoreBackup        $backup
      * @param \GambioStoreMigration     $migration
      * @param \GambioStoreHttp          $http
-     * @param \GambioStoreCompatibility $compatibility
      */
     public function __construct(
         array                    $packageData,
@@ -109,8 +103,7 @@ class GambioStoreInstallation
         GambioStoreFileSystem    $filesystem,
         GambioStoreBackup        $backup,
         GambioStoreMigration     $migration,
-        GambioStoreHttp          $http,
-        GambioStoreCompatibility $compatibility
+        GambioStoreHttp          $http
     ) {
         $this->packageData   = $packageData;
         $this->token         = $token;
@@ -120,7 +113,6 @@ class GambioStoreInstallation
         $this->backup        = $backup;
         $this->migration     = $migration;
         $this->http          = $http;
-        $this->compatibility = $compatibility;
         
         set_error_handler([$this, 'handleUnexpectedError']);
         set_exception_handler([$this, 'handleUnexpectedException']);
@@ -235,64 +227,43 @@ class GambioStoreInstallation
         
         $progress = json_decode($this->cache->get($this->getTransactionId()), true);
         
-        switch ($progress['progress']) {
-            case 0:
-                try {
+        try {
+            switch ($progress['progress']) {
+                case 0:
                     $progressArray = [
-                        'success'  => true,
-                        'state'    => 'backedup',
-                        'progress' => 20
+                        'success'    => true,
+                        'state'      => 'backedup',
+                        'progress'   => 20,
+                        'clearCache' => true
                     ];
                     $destinations  = $this->getPackageFilesDestinations();
                     $this->backup->movePackageFilesToCache($destinations);
                     
-                    if (!$this->clearMainFactoryDataCache()) {
-                        return [];
-                    }
-                    
                     $this->cache->set($this->getTransactionId(), json_encode($progressArray));
                     
                     return $progressArray;
-                } catch (Exception $exception) {
-                    $this->handleException($exception);
+                case 20:
                     
-                    return [];
-                }
-            case 20:
-                return $this->nextProgressState(50, 'downloaded', [$this, 'downloadPackageToCacheFolder']);
-            case 50:
-                return $this->nextProgressState(80, 'installed', [$this, 'installPackage']);
-            case 80:
-                $progressArray = $this->nextProgressState(100, 'migrated', [$this, 'migration', 'up']);
-                $this->cache->delete($this->getTransactionId());
-                $this->cleanCache();
-                
-                return $progressArray;
-            default:
-                $message = 'There is no progress sett for transaction id: ' . $this->getTransactionId();
-                $this->cleanCache();
-                $this->cache->delete($this->getTransactionId());
-                throw new GambioStorePackageInstallationException($message);
+                    return $this->nextProgressState(50, 'downloaded', [$this, 'downloadPackageToCacheFolder']);
+                case 50:
+                    return $this->nextProgressState(80, 'installed', [$this, 'installPackage']);
+                case 80:
+                    $progressArray = $this->nextProgressState(100, 'migrated', [$this, 'migration', 'up']);
+                    $this->cache->delete($this->getTransactionId());
+                    $this->cleanCache();
+                    
+                    return $progressArray;
+                default:
+                    $message = 'There is no progress sett for transaction id: ' . $this->getTransactionId();
+                    $this->cleanCache();
+                    $this->cache->delete($this->getTransactionId());
+                    throw new GambioStorePackageInstallationException($message);
+            }
+        } catch (Exception $exception) {
+            $this->handleException($exception);
+            
+            return [];
         }
-    }
-    
-    
-    /**
-     * Clears the MainFactory data cache.
-     *
-     * @return bool
-     */
-    private function clearMainFactoryDataCache()
-    {
-        if (!$this->compatibility->has(GambioStoreCompatibility::FEATURE_CACHE_CONTROL)) {
-            $this->logger->critical("Clearing of MainFactory data cache does not work, because the cache control does not exits");
-            return false;
-        }
-        
-        $cacheControl = new CacheControl();
-        $cacheControl->clear_data_cache();
-        
-        return true;
     }
     
     
