@@ -86,33 +86,33 @@ class GambioStoreInstallation
     /**
      * GambioStoreInstallation constructor.
      *
-     * @param array                     $packageData
-     * @param string                    $token
-     * @param \GambioStoreCache         $cache
-     * @param \GambioStoreLogger        $logger
-     * @param \GambioStoreFileSystem    $filesystem
-     * @param \GambioStoreBackup        $backup
-     * @param \GambioStoreMigration     $migration
-     * @param \GambioStoreHttp          $http
+     * @param array                  $packageData
+     * @param string                 $token
+     * @param \GambioStoreCache      $cache
+     * @param \GambioStoreLogger     $logger
+     * @param \GambioStoreFileSystem $filesystem
+     * @param \GambioStoreBackup     $backup
+     * @param \GambioStoreMigration  $migration
+     * @param \GambioStoreHttp       $http
      */
     public function __construct(
-        array                    $packageData,
-                                 $token,
-        GambioStoreCache         $cache,
-        GambioStoreLogger        $logger,
-        GambioStoreFileSystem    $filesystem,
-        GambioStoreBackup        $backup,
-        GambioStoreMigration     $migration,
-        GambioStoreHttp          $http
+        array                 $packageData,
+                              $token,
+        GambioStoreCache      $cache,
+        GambioStoreLogger     $logger,
+        GambioStoreFileSystem $filesystem,
+        GambioStoreBackup     $backup,
+        GambioStoreMigration  $migration,
+        GambioStoreHttp       $http
     ) {
-        $this->packageData   = $packageData;
-        $this->token         = $token;
-        $this->cache         = $cache;
-        $this->logger        = $logger;
-        $this->fileSystem    = $filesystem;
-        $this->backup        = $backup;
-        $this->migration     = $migration;
-        $this->http          = $http;
+        $this->packageData = $packageData;
+        $this->token       = $token;
+        $this->cache       = $cache;
+        $this->logger      = $logger;
+        $this->fileSystem  = $filesystem;
+        $this->backup      = $backup;
+        $this->migration   = $migration;
+        $this->http        = $http;
         
         set_error_handler([$this, 'handleUnexpectedError']);
         set_exception_handler([$this, 'handleUnexpectedException']);
@@ -243,12 +243,14 @@ class GambioStoreInstallation
                     
                     return $progressArray;
                 case 20:
-                    
                     return $this->nextProgressState(50, 'downloaded', [$this, 'downloadPackageToCacheFolder']);
                 case 50:
                     return $this->nextProgressState(80, 'installed', [$this, 'installPackage']);
                 case 80:
                     $progressArray = $this->nextProgressState(100, 'migrated', [$this, 'migration', 'up']);
+                    
+                    $this->placeUpdateNeededFlagIfRequired();
+                    
                     $this->cache->delete($this->getTransactionId());
                     $this->cleanCache();
                     
@@ -263,6 +265,24 @@ class GambioStoreInstallation
             $this->handleException($exception);
             
             return [];
+        }
+    }
+    
+    
+    /**
+     * Places the update needed flag in the cache directory if the key is present on the cache table.
+     *
+     * @throws \GambioStoreCacheException
+     */
+    private function placeUpdateNeededFlagIfRequired()
+    {
+        $transactionId            = $this->getTransactionId();
+        $cacheKey                 = "UPDATE_NEEDED_$transactionId";
+        $hasUpdateNeededCacheFlag = $this->cache->has($cacheKey) && $this->cache->get($cacheKey) === true;
+        
+        if ($hasUpdateNeededCacheFlag) {
+            touch($this->fileSystem->getCacheDirectory() . "update_needed.flag");
+            $this->cache->delete($cacheKey);
         }
     }
     
@@ -554,16 +574,69 @@ class GambioStoreInstallation
      * @throws \GambioStoreCreateDirectoryException
      * @throws \GambioStoreFileMoveException
      * @throws \GambioStoreFileNotFoundException
+     * @throws \GambioStoreCacheException
      */
     private function installPackage()
     {
-        foreach ($this->getPackageFilesDestinations() as $file) {
-            $newPackageFile = 'cache/GambioStore/' . $this->getTransactionId() . '/' . $file;
+        $fileList     = $this->getPackageFilesDestinations();
+        $updateNeeded = false;
+        
+        foreach ($fileList as $file) {
+            if ($this->isCacheFile($file)) {
+                $updateNeeded = true;
+                continue;
+            }
             
-            // Replace the old package file with new
-            $this->fileSystem->move($newPackageFile, $file);
+            $this->moveFile($file);
+        }
+        
+        if ($updateNeeded) {
+            $this->setUpdateNeededFlag();
         }
         
         $this->logger->notice('Successfully installed package : ' . $this->packageData['details']['title']['de']);
+    }
+    
+    
+    /**
+     * Determines whether the given fileName is the update_needed.flag.
+     *
+     * @param $file
+     *
+     * @return bool
+     */
+    private function isCacheFile($file)
+    {
+        return basename($file) === "update_needed.flag";
+    }
+    
+    
+    /**
+     * Move the file to its new destination.
+     *
+     * @param $file
+     *
+     * @throws \GambioStoreCreateDirectoryException
+     * @throws \GambioStoreFileMoveException
+     * @throws \GambioStoreFileNotFoundException
+     */
+    private function moveFile($file)
+    {
+        $newPackageFile = 'cache/GambioStore/' . $this->getTransactionId() . '/' . $file;
+        
+        // Replace the old package file with new
+        $this->fileSystem->move($newPackageFile, $file);
+    }
+    
+    
+    /**
+     * Set the update needed flag in the cache for the current transaction.
+     *
+     * @throws \GambioStoreCacheException
+     */
+    private function setUpdateNeededFlag()
+    {
+        $transactionId = $this->getTransactionId();
+        $this->cache->set("UPDATE_NEEDED_$transactionId", true);
     }
 }
