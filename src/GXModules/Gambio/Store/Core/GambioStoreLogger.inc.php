@@ -56,6 +56,7 @@ class GambioStoreLogger
      * @param array  $context
      *
      * @return void
+     * @throws \GambioStoreCacheException
      */
     public function log($level, $message, array $context = [])
     {

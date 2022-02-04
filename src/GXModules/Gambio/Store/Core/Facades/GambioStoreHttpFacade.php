@@ -96,8 +96,8 @@ if (defined('StoreKey_MigrationScript')) {
                 $error       = curl_error($handle);
                 
                 if (!empty($error)) {
-                    throw new GambioStoreHttpErrorException('The curl request to ' . $url
-                                                            . ' failed with the following error: ' . $error);
+            throw new GambioStoreHttpErrorException('The curl request to ' . $url . ' failed with the following error: '
+                                                    . $error);
                 }
                 
                 return new GambioStoreResponse($body, $headers, $information);

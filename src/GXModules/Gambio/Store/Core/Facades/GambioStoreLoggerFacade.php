@@ -54,6 +54,28 @@ if (defined('StoreKey_MigrationScript')) {
             
             
             /**
+             * Checks whether logs directory is writable. Returns true if so, false otherwise.
+             *
+             * @return bool
+             */
+            public function isWritable()
+            {
+                return is_writable($this->getLogsPath());
+            }
+            
+            
+            /**
+             * Returns Logs directory path.
+             *
+             * @return string
+             */
+            private function getLogsPath()
+            {
+                return __DIR__ . '/../../Logs/';
+            }
+            
+            
+            /**
              * System is unusable.
              *
              * @param string $message
@@ -184,6 +206,7 @@ if (defined('StoreKey_MigrationScript')) {
              * @param array  $context
              *
              * @return void
+             * @throws \GambioStoreCacheException
              */
             public function log($level, $message, array $context = [])
             {

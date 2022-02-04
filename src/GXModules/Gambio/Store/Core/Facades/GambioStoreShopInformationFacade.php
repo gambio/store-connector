@@ -80,41 +80,45 @@ if (defined('StoreKey_MigrationScript')) {
             public function getShopInformation()
             {
                 return [
-                    'version'     => 3,
-                    'shop'        => [
-                        'url'     => $this->getShopUrl(),
-                        'key'     => $this->getShopKey(),
-                        'version' => $this->getShopVersion()
+                    'version'      => 3,
+                    'shop'         => [
+                        'url'              => $this->getShopUrl(),
+                        'key'              => $this->getShopKey(),
+                        'version'          => $this->getShopVersion(),
+                        'connectorVersion' => $this->getConnectorVersion(),
                     ],
-                    'server'      => [
+                    'server'       => [
                         'phpVersion'   => $this->getPhpVersion(),
                         'mySQLVersion' => $this->getMySQLVersion()
                     ],
-                    'modules'     => $this->getModuleVersionFiles(),
-                    'themes'      => $this->getThemes(),
-                    'activeTheme' => $this->getCurrentTheme()
+                    'modules'      => $this->getModuleVersionFiles(),
+                    'themes'       => $this->getThemes(),
+                    'currentTheme' => $this->getCurrentTheme()
                 ];
             }
-            
-            
+    
+    
             /**
              * @return mixed
              * @throws \GambioStoreShopClassMissingException
              */
             private function getCurrentTheme()
             {
-                if (!class_exists('Gambio\AdminFeed\Services\ShopInformation\Settings')) {
-                    throw new GambioStoreShopClassMissingException('The HTTP Server constant is missing from the configure.php file in admin.');
+                if (!class_exists('StaticGXCoreLoader')) {
+                    throw new GambioStoreShopClassMissingException(
+                        'The shop class StaticGXCoreLoader is not accessable'
+                    );
                 }
-                
-                if (!class_exists('Gambio\AdminFeed\Services\ShopInformation\Reader\TemplateDetailsReader')) {
-                    throw new GambioStoreShopClassMissingException('The HTTP Server constant is missing from the configure.php file in admin.');
+        
+                $currentTheme = '';
+        
+                if ($this->areThemesAvailable()) {
+                    /* @var \ThemeControl $themeControl */
+                    $themeControl = StaticGXCoreLoader::getThemeControl();
+                    $currentTheme = $themeControl->isThemeSystemActive() ? $themeControl->getCurrentTheme() : '';
                 }
-                
-                $settings = new Gambio\AdminFeed\Services\ShopInformation\Settings();
-                $reader   = new Gambio\AdminFeed\Services\ShopInformation\Reader\TemplateDetailsReader($settings);
-                
-                return $reader->getActiveTemplate();
+        
+                return $currentTheme;
             }
             
             
@@ -128,11 +132,15 @@ if (defined('StoreKey_MigrationScript')) {
             private function getShopUrl()
             {
                 if (!defined('HTTP_SERVER')) {
-                    throw new GambioStoreHttpServerMissingException('The HTTP Server constant is missing from the configure.php file in admin.');
+                    throw new GambioStoreHttpServerMissingException(
+                        'The HTTP Server constant is missing from the configure.php file in admin.'
+                    );
                 }
                 
                 if (!defined('DIR_WS_CATALOG')) {
-                    throw new GambioStoreRelativeShopPathMissingException('The DIR_WS_CATALOG constant is missing from the configure.php file in admin.');
+                    throw new GambioStoreRelativeShopPathMissingException(
+                        'The DIR_WS_CATALOG constant is missing from the configure.php file in admin.'
+                    );
                 }
                 
                 return HTTP_SERVER . DIR_WS_CATALOG;
@@ -148,7 +156,9 @@ if (defined('StoreKey_MigrationScript')) {
             private function getShopKey()
             {
                 if (!defined('GAMBIO_SHOP_KEY')) {
-                    throw new GambioStoreShopKeyMissingException('The GAMBIO_SHOP_KEY constant is missing from the shop.');
+                    throw new GambioStoreShopKeyMissingException(
+                        'The GAMBIO_SHOP_KEY constant is missing from the shop.'
+                    );
                 }
                 
                 return GAMBIO_SHOP_KEY;
@@ -165,7 +175,9 @@ if (defined('StoreKey_MigrationScript')) {
                 require $this->fileSystem->getShopDirectory() . '/release_info.php';
                 
                 if (!isset($gx_version)) {
-                    throw new GambioStoreShopVersionMissingException('The release_info.php no longer includes a $gx_version variable or the file is missing.');
+                    throw new GambioStoreShopVersionMissingException(
+                        'The release_info.php no longer includes a $gx_version variable or the file is missing.'
+                    );
                 }
                 
                 return $gx_version;
@@ -214,6 +226,30 @@ if (defined('StoreKey_MigrationScript')) {
             
             
             /**
+             * Returns the current connector version of the shop
+             *
+             * @return array|false
+             */
+            private function getConnectorVersion()
+            {
+                $connectorVersions = [];
+                
+                foreach (new DirectoryIterator($this->fileSystem->getShopDirectory() . '/version_info') as $file) {
+                    if ($file->isFile() && strpos($file->getFilename(), '.php')
+                        && strpos($file->getFilename(), 'gambio_store-') === 0) {
+                        $connectorVersions[] = $file->getFilename();
+                    }
+                }
+                
+                sort($connectorVersions);
+                
+                $latestConnectorReceiptFile = array_pop($connectorVersions);
+                
+                return str_replace(['gambio_store-', '.php', '_'], ["", "", '.'], $latestConnectorReceiptFile);
+            }
+            
+            
+            /**
              * Returns all the folders in the themes directory and tries to see if they have a version
              *
              * @return array|false
@@ -235,6 +271,19 @@ if (defined('StoreKey_MigrationScript')) {
                 }
                 
                 return $themes;
+            }
+            
+            
+            /**
+             * Returns the status of theme support for this shop.
+             *
+             * @return bool
+             */
+            public function areThemesAvailable()
+            {
+                return defined('DIR_FS_CATALOG') && defined('CURRENT_THEME') && !empty(CURRENT_THEME) ? is_dir(
+                    DIR_FS_CATALOG . 'themes/' . CURRENT_THEME
+                ) : false;
             }
         }
     }

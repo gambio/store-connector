@@ -89,7 +89,7 @@ if (defined('StoreKey_MigrationScript')) {
              */
             private function gmGet($key)
             {
-                $statement = $this->database->query('SELECT `gm_value` FROM `gm_configuration` WHERE `gm_key` = :key',
+        $statement = $this->database->query('SELECT gm_value FROM gm_configuration WHERE gm_key = :key',
                     ['key' => $key]);
                 
                 $result = $statement->fetch(PDO::FETCH_ASSOC);
@@ -217,8 +217,7 @@ if (defined('StoreKey_MigrationScript')) {
              */
             private function gxRemove($key)
             {
-                $this->database->query('DELETE FROM gx_configurations `key` = :key',
-                    [':key' => 'gm_configuration/' . $key]);
+        $this->database->query('DELETE FROM gx_configurations `key` = :key', [':key' => 'gm_configuration/' . $key]);
             }
             
             

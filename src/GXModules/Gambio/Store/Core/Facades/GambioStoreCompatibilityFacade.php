@@ -53,6 +53,11 @@ if (defined('StoreKey_MigrationScript')) {
              */
             const FEATURE_THEME_SERVICE = 'themeService';
             
+            /**
+             * Determines whether the shop has the CacheControl and PhraseCacheBuilder classes
+             */
+            const FEATURE_CACHE_CONTROL = 'cacheControl';
+    
             
             /**
              * GambioStoreCompatibilityFacade constructor.
@@ -84,6 +89,9 @@ if (defined('StoreKey_MigrationScript')) {
                     case self::FEATURE_THEME_SERVICE:
                         return $this->doesFeatureThemeServiceExists();
                     
+                    case self::FEATURE_CACHE_CONTROL:
+                        return $this->doesFeatureCacheControlAndPhraseBuilderExists();
+            
                     default:
                         return false;
                 }
@@ -97,7 +105,7 @@ if (defined('StoreKey_MigrationScript')) {
              */
             private function doesGxConfigurationTableExists()
             {
-                $sql = 'SELECT * FROM `information_schema`.`tables` WHERE `table_schema` = :database AND `table_name` = :table_name;';
+                $sql = 'SELECT * FROM information_schema.tables WHERE table_schema = :database AND table_name = :table_name;';
                 
                 $query = $this->database->query($sql,
                     [':database' => DB_DATABASE, ':table_name' => self::RESOURCE_GM_CONFIGURATION_TABLE]);
@@ -125,6 +133,17 @@ if (defined('StoreKey_MigrationScript')) {
             private function doesFeatureThemeServiceExists()
             {
                 return class_exists('ThemeService');
+            }
+    
+    
+            /**
+             * Determines whether the shop has the CacheControl and PhraseCacheBuilder class
+             *
+             * @return bool
+             */
+            private function doesFeatureCacheControlAndPhraseBuilderExists()
+            {
+                return class_exists('CacheControl') && class_exists('PhraseCacheBuilder');
             }
         }
     }

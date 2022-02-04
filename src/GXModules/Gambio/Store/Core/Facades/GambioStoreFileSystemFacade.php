@@ -354,18 +354,21 @@ if (defined('StoreKey_MigrationScript')) {
                 
                 try {
                     $recursiveDirectories = [];
-                    $directoryIterator    = new RecursiveDirectoryIterator($directoryPath,
-                        FilesystemIterator::SKIP_DOTS);
+                    $directoryIterator    = new RecursiveDirectoryIterator(
+                        $directoryPath, FilesystemIterator::SKIP_DOTS
+                    );
                     
-                    foreach (new RecursiveIteratorIterator($directoryIterator,
-                        RecursiveIteratorIterator::SELF_FIRST) as $path) {
+                    foreach (new RecursiveIteratorIterator(
+                                 $directoryIterator, RecursiveIteratorIterator::SELF_FIRST
+                             ) as $path) {
                         if ($path->isDir()) {
                             $recursiveDirectories[] = $path->__toString();
                         }
                     }
                 } catch (Exception $exception) {
-                    throw new GambioStoreDirectoryContentException('Could not get content form directory:'
-                                                                   . $directoryPath, 0, [], $exception);
+                    throw new GambioStoreDirectoryContentException(
+                        'Could not get content form directory:' . $directoryPath, 0, [], $exception
+                    );
                 }
                 
                 return $recursiveDirectories;
@@ -404,16 +407,18 @@ if (defined('StoreKey_MigrationScript')) {
                     $recursiveFileList = [];
                     $directoryIterator = new RecursiveDirectoryIterator($directoryPath, FilesystemIterator::SKIP_DOTS);
                     
-                    foreach (new RecursiveIteratorIterator($directoryIterator,
-                        RecursiveIteratorIterator::SELF_FIRST) as $path) {
+                    foreach (new RecursiveIteratorIterator(
+                                 $directoryIterator, RecursiveIteratorIterator::SELF_FIRST
+                             ) as $path) {
                         if ($path->isDir()) {
                             continue;
                         }
                         $recursiveFileList[] = realpath($path->__toString());
                     }
                 } catch (Exception $exception) {
-                    throw new GambioStoreDirectoryContentException('Could not get content form directory:'
-                                                                   . $directoryPath, 0, [], $exception);
+                    throw new GambioStoreDirectoryContentException(
+                        'Could not get content form directory:' . $directoryPath, 0, [], $exception
+                    );
                 }
                 
                 return $recursiveFileList;
@@ -453,11 +458,14 @@ if (defined('StoreKey_MigrationScript')) {
                 
                 try {
                     $recursiveContentsList = [];
-                    $directoryIterator     = new RecursiveDirectoryIterator($directoryPath,
-                        FilesystemIterator::SKIP_DOTS);
+                    $directoryIterator     = new RecursiveDirectoryIterator(
+                        $directoryPath,
+                        FilesystemIterator::SKIP_DOTS
+                    );
                     
-                    foreach (new RecursiveIteratorIterator($directoryIterator,
-                        RecursiveIteratorIterator::SELF_FIRST) as $path) {
+                    foreach (new RecursiveIteratorIterator(
+                                 $directoryIterator, RecursiveIteratorIterator::SELF_FIRST
+                             ) as $path) {
                         if ($path->isDir()) {
                             $recursiveContentsList[] = $path->__toString();
                         } else {
@@ -465,11 +473,23 @@ if (defined('StoreKey_MigrationScript')) {
                         }
                     }
                 } catch (Exception $exception) {
-                    throw new GambioStoreDirectoryContentException('Could not get content form directory:'
-                                                                   . $directoryPath, 0, [], $exception);
+                    throw new GambioStoreDirectoryContentException(
+                        'Could not get content form directory:' . $directoryPath, 0, [], $exception
+                    );
                 }
                 
                 return $recursiveContentsList;
+            }
+            
+            
+            /**
+             * Returns themes directory path.
+             *
+             * @return string
+             */
+            public function getThemeDirectory()
+            {
+                return $this->getShopDirectory() . '/themes';
             }
             
             
@@ -480,7 +500,7 @@ if (defined('StoreKey_MigrationScript')) {
              */
             public function getCacheDirectory()
             {
-                return $this->getShopDirectory() . '/cache';
+                return $this->getShopDirectory() . '/cache/GambioStore';
             }
             
             
