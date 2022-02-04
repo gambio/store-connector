@@ -582,7 +582,7 @@ class GambioStoreInstallation
         $updateNeeded = false;
         
         foreach ($fileList as $file) {
-            if ($this->isCacheFile($file)) {
+            if (!$updateNeeded && $this->isCacheFile($file)) {
                 $updateNeeded = true;
                 continue;
             }
@@ -623,8 +623,6 @@ class GambioStoreInstallation
     private function moveFile($file)
     {
         $newPackageFile = 'cache/GambioStore/' . $this->getTransactionId() . '/' . $file;
-        
-        // Replace the old package file with new
         $this->fileSystem->move($newPackageFile, $file);
     }
     
