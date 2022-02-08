@@ -1,6 +1,6 @@
 <?php
 /* --------------------------------------------------------------
-   GambioStoreInstallation.inc.php 2022-02-03
+   GambioStoreInstallation.inc.php 2022-02-08
    Gambio GmbH
    http://www.gambio.de
    Copyright (c) 2022 Gambio GmbH
@@ -249,8 +249,6 @@ class GambioStoreInstallation
                 case 80:
                     $progressArray = $this->nextProgressState(100, 'migrated', [$this, 'migration', 'up']);
                     
-                    $this->placeUpdateNeededFlagIfRequired();
-                    
                     $this->cache->delete($this->getTransactionId());
                     $this->cleanCache();
                     
@@ -265,24 +263,6 @@ class GambioStoreInstallation
             $this->handleException($exception);
             
             return [];
-        }
-    }
-    
-    
-    /**
-     * Places the update needed flag in the cache directory if the key is present on the cache table.
-     *
-     * @throws \GambioStoreCacheException
-     */
-    private function placeUpdateNeededFlagIfRequired()
-    {
-        $transactionId            = $this->getTransactionId();
-        $cacheKey                 = "UPDATE_NEEDED_$transactionId";
-        $hasUpdateNeededCacheFlag = $this->cache->has($cacheKey) && $this->cache->get($cacheKey) === true;
-        
-        if ($hasUpdateNeededCacheFlag) {
-            touch($this->fileSystem->getCacheDirectory() . "update_needed.flag");
-            $this->cache->delete($cacheKey);
         }
     }
     
@@ -634,7 +614,6 @@ class GambioStoreInstallation
      */
     private function setUpdateNeededFlag()
     {
-        $transactionId = $this->getTransactionId();
-        $this->cache->set("UPDATE_NEEDED_$transactionId", true);
+        $this->cache->set("UPDATE_NEEDED", true);
     }
 }

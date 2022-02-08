@@ -1,9 +1,9 @@
 <?php
 /* --------------------------------------------------------------
-   GambioStoreAjaxController.inc.php 2020-04-30
+   GambioStoreAjaxController.inc.php 2022-02-08
    Gambio GmbH
    http://www.gambio.de
-   Copyright (c) 2020 Gambio GmbH
+   Copyright (c) 2022 Gambio GmbH
    Released under the GNU General Public License (Version 2)
    [http://www.gnu.org/licenses/gpl-2.0.html]
    --------------------------------------------------------------
@@ -50,6 +50,16 @@ class GambioStoreAjaxController extends AdminHttpViewController
      * @var \GambioStoreAuth
      */
     private $auth;
+    
+    /**
+     * @var \GambioStoreCache
+     */
+    private $cache;
+    
+    /**
+     * @var \GambioStoreFileSystem
+     */
+    private $fileSystem;
     
     
     /**
@@ -114,6 +124,8 @@ class GambioStoreAjaxController extends AdminHttpViewController
         $this->themes        = $this->connector->getThemes();
         $this->logger        = $this->connector->getLogger();
         $this->compatibility = $this->connector->getCompatibility();
+        $this->cache         = $this->connector->getCache();
+        $this->fileSystem    = $this->connector->getFileSystem();
     }
     
     
@@ -205,6 +217,46 @@ class GambioStoreAjaxController extends AdminHttpViewController
     
     
     /**
+     * Checks if the updater needs to be run.
+     *
+     * If this is the case, the flag in on the cache table will be removed and the update_needed.flag will be placed
+     * in the cache directory.
+     *
+     * @throws \GambioStoreCacheException
+     */
+    public function actionIsTheUpdaterNeeded()
+    {
+        $this->setup();
+        
+        $updateNeededKey = 'UPDATE_NEEDED';
+        
+        if (!$this->cache->has($updateNeededKey)) {
+            return new JsonHttpControllerResponse(['isNeeded' => false]);
+        }
+        
+        $isUpdateNeeded = $this->cache->get($updateNeededKey) === true;
+        
+        if ($isUpdateNeeded) {
+            $this->placeUpdateNeededFlagInCacheDirectoryAndRemoveTheFlagOnTheCacheTable();
+        }
+        
+        return new JsonHttpControllerResponse(['isNeeded' => $isUpdateNeeded]);
+    }
+    
+    
+    /**
+     * Places the update needed flag in the cache directory and removes the entry from the cache table.
+     *
+     * @throws \GambioStoreCacheException
+     */
+    private function placeUpdateNeededFlagInCacheDirectoryAndRemoveTheFlagOnTheCacheTable()
+    {
+        file_put_contents($this->fileSystem->getShopDirectory() . "/cache/update_needed.flag", "");
+        $this->cache->delete('UPDATE_NEEDED');
+    }
+    
+    
+    /**
      * Return whether the data processing has been accepted.
      *
      * @return JsonHttpControllerResponse
@@ -234,10 +286,8 @@ class GambioStoreAjaxController extends AdminHttpViewController
         $this->setup();
         
         if (!isset($_GET, $_GET['themeName'])) {
-            $this->logger->warning(
-                'Can not check if theme is active because no theme name was provided',
-                ['getParams' => $_GET]
-            );
+            $this->logger->warning('Can not check if theme is active because no theme name was provided',
+                ['getParams' => $_GET]);
             
             return new JsonHttpControllerResponse(['success' => false]);
         }
@@ -260,10 +310,8 @@ class GambioStoreAjaxController extends AdminHttpViewController
         $this->setup();
         
         if (!isset($_POST, $_POST['themeStorageName'])) {
-            $this->logger->warning(
-                'Can not activate theme, because it was no theme storage name provided',
-                ['getParams' => $_POST]
-            );
+            $this->logger->warning('Can not activate theme, because it was no theme storage name provided',
+                ['getParams' => $_POST]);
             
             return new JsonHttpControllerResponse(['success' => false]);
         }

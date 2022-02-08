@@ -1,5 +1,5 @@
 /* --------------------------------------------------------------
-   package.js 2022-02-03
+   package.js 2022-02-08
    Gambio GmbH
    http://www.gambio.de
    Copyright (c) 2022 Gambio GmbH
@@ -94,6 +94,23 @@ const installPackage = async (data, progressCallback) => {
 }
 
 /**
+ * Redirects to the gambio updater if it needs to be executed.
+ */
+const redirectToUpdaterIfNeeded = async () => {
+	try {
+		const response = await GambioStore.callShop('admin.php?do=GambioStoreAjax/isTheUpdaterNeeded');
+		
+		if (!('isNeeded' in response) || !response.isNeeded) {
+			return;
+		}
+		
+		const baseUrl = window.location.pathname.replace('/admin/admin.php', '');
+		window.location.replace(`${baseUrl}/gambio_updater`)
+	} catch (error) {
+	}
+}
+
+/**
  * Uninstall a theme
  *
  * @param data
@@ -166,6 +183,8 @@ const startPackageInstallation = async (data) => {
 		}
 		
 		GambioStore.messenger.send('installation_succeeded')
+		
+		await redirectToUpdaterIfNeeded()
 	} catch (error) {
 		GambioStore.messenger.send('installation_failed');
 	} finally {
