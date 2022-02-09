@@ -70,13 +70,14 @@ if (defined('StoreKey_MigrationScript')) {
             {
                 // Key must be a string in the database.
                 $key    = (string)$key;
-        $sql    = 'SELECT cache_value FROM ' . self::CACHE_TABLE . ' WHERE cache_key = :cache_key LIMIT 1';
+                $sql    = 'SELECT cache_value FROM ' . self::CACHE_TABLE . ' WHERE cache_key = :cache_key LIMIT 1';
                 $query  = $this->database->query($sql, [':cache_key' => $key]);
                 $result = $query->fetch();
                 
                 if ($result === false) {
-                    throw new GambioStoreCacheException('Could not get key: ' . $key . ' from cache table', 0,
-                        ['sqlError' => $query->errorInfo()]);
+                    throw new GambioStoreCacheException(
+                        'Could not get key: ' . $key . ' from cache table', 0, ['sqlError' => $query->errorInfo()]
+                    );
                 }
                 
                 $cacheValue = $result['cache_value'];
@@ -106,9 +107,10 @@ if (defined('StoreKey_MigrationScript')) {
                 
                 // Key must be a string in the database.
                 $key     = (string)$key;
-        $sql     = 'INSERT INTO ' . self::CACHE_TABLE . ' (cache_key,cache_value) VALUES (:cache_key, :cache_value) '
-                   . 'ON DUPLICATE KEY UPDATE cache_value=:cache_value ';
-        $query   = $this->database->query($sql, ['cache_key' => $key, 'cache_value' => $value]);
+                $sql     = 'INSERT INTO ' . self::CACHE_TABLE
+                           . ' (cache_key,cache_value) VALUES (:cache_key, :cache_value) '
+                           . 'ON DUPLICATE KEY UPDATE cache_value=:cache_value ';
+                $query   = $this->database->query($sql, ['cache_key' => $key, 'cache_value' => $value]);
                 $success = $query->execute();
                 
                 if ($success) {
@@ -117,8 +119,11 @@ if (defined('StoreKey_MigrationScript')) {
                 
                 $errorInformation = $query->errorInfo();
                 
-        throw new GambioStoreCacheException('Could not set key: ' . $key . 'value: ' . $value . 'into cache table', 0,
-            ['sqlError' => $errorInformation]);
+                throw new GambioStoreCacheException(
+                    'Could not set key: ' . $key . 'value: ' . $value . 'into cache table',
+                    0,
+                    ['sqlError' => $errorInformation]
+                );
             }
             
             
@@ -134,13 +139,14 @@ if (defined('StoreKey_MigrationScript')) {
             {
                 // Key must be a string in the database.
                 $key   = (string)$key;
-        $sql   = 'SELECT COUNT(*) FROM ' . self::CACHE_TABLE . ' WHERE cache_key = :cache_key LIMIT 1';
+                $sql   = 'SELECT COUNT(*) FROM ' . self::CACHE_TABLE . ' WHERE cache_key = :cache_key LIMIT 1';
                 $query = $this->database->query($sql, [':cache_key' => $key]);
                 $count = $query->fetchColumn();
                 
                 if ($count === false) {
-                    throw  new GambioStoreCacheException('Could not check if cache table has ' . $key, 0,
-                        ['sqlError' => $query->errorInfo()]);
+                    throw  new GambioStoreCacheException(
+                        'Could not check if cache table has ' . $key, 0, ['sqlError' => $query->errorInfo()]
+                    );
                 }
                 
                 return (int)$count > 0;
@@ -158,7 +164,7 @@ if (defined('StoreKey_MigrationScript')) {
             {
                 // Key must be a string in the database.
                 $key     = (string)$key;
-        $sql     = 'DELETE FROM ' . self::CACHE_TABLE . ' WHERE cache_key = :cache_key LIMIT 1';
+                $sql     = 'DELETE FROM ' . self::CACHE_TABLE . ' WHERE cache_key = :cache_key LIMIT 1';
                 $query   = $this->database->query($sql, [':cache_key' => $key]);
                 $success = $query->execute();
                 
@@ -166,8 +172,9 @@ if (defined('StoreKey_MigrationScript')) {
                     return;
                 }
                 
-                throw new GambioStoreCacheException('Could not delete key: ' . $key . 'from cache table', 0,
-                    ['sqlError' => $query->errorInfo()]);
+                throw new GambioStoreCacheException(
+                    'Could not delete key: ' . $key . 'from cache table', 0, ['sqlError' => $query->errorInfo()]
+                );
             }
         }
     }
