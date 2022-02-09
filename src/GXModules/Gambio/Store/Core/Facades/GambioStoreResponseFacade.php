@@ -122,6 +122,19 @@ if (defined('StoreKey_MigrationScript')) {
                 
                 return null;
             }
+            
+            
+            /**
+             * Returns the status code.
+             *
+             * @return array|null
+             */
+            public function getStatus()
+            {
+                return $this->getInformation('http_code');
+            }
+            
+            
         }
     }
 }

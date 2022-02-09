@@ -1,8 +1,8 @@
 /* --------------------------------------------------------------
- shop.js 2020-04-30
+ shop.js 2022-02-03
  Gambio GmbH
  http://www.gambio.de
- Copyright (c) 2020 Gambio GmbH
+ Copyright (c) 2022 Gambio GmbH
  Released under the GNU General Public License (Version 2)
  [http://www.gnu.org/licenses/gpl-2.0.html]
  --------------------------------------------------------------
@@ -30,11 +30,11 @@ const sendShopInfo = (shopInfo) => {
  * Requests new auth headers from the Connector and sends them to the GUI
  */
 const prepareAndSendNewAuthHeaders = async () => {
-	try{
+	try {
 		const authHeaders = await GambioStore.callShop('admin.php?do=GambioStoreAjax/requestNewAuth')
 		
 		GambioStore.messenger.send('send_auth_headers', {authHeaders});
-	}catch (error){
+	} catch (error) {
 		switch (error.type) {
 			case(GambioStore.networkErrors.JSON_PARSE_ERROR):
 				GambioStore.error.show(
@@ -100,7 +100,7 @@ window.addEventListener('DOMContentLoaded', () => {
 	GambioStore.messenger.addListener('request_shop_information', sendCollectedShopInformation);
 	GambioStore.messenger.addListener('reload_page_on_inactive_session', GambioStore.shop.reloadPageOnInactiveSession);
 	
-	GambioStore.messenger.addListener('reload_page', () =>( window.location.reload()));
+	GambioStore.messenger.addListener('reload_page', () => (window.location.reload()));
 	GambioStore.messenger.addListener('scroll_to_top', () => (window.scrollTo(0, 0)));
 	
 	GambioStore.messenger.addListener('send_data_processing_accepted', () => {

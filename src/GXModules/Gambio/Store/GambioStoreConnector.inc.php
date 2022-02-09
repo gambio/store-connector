@@ -1,9 +1,9 @@
 <?php
 /* --------------------------------------------------------------
-   GambioStoreConnector.php 2020-06-11
+   GambioStoreConnector.php 2022-02-03
    Gambio GmbH
    http://www.gambio.de
-   Copyright (c) 2020 Gambio GmbH
+   Copyright (c) 2022 Gambio GmbH
    Released under the GNU General Public License (Version 2)
    [http://www.gnu.org/licenses/gpl-2.0.html]
    --------------------------------------------------------------
@@ -109,18 +109,18 @@ class GambioStoreConnector
      * @param \GambioStorePackageInstaller $installer
      */
     private function __construct(
-        GambioStoreDatabase $database,
-        GambioStoreConfiguration $configuration,
-        GambioStoreCompatibility $compatibility,
-        GambioStoreLogger $logger,
-        GambioStoreThemes $themes,
-        GambioStoreFileSystem $fileSystem,
-        GambioStoreShopInformation $shopInformation,
-        GambioStoreCache $cache,
-        GambioStoreHttp $http,
-        GambioStoreBackup $backup,
+        GambioStoreDatabase         $database,
+        GambioStoreConfiguration    $configuration,
+        GambioStoreCompatibility    $compatibility,
+        GambioStoreLogger           $logger,
+        GambioStoreThemes           $themes,
+        GambioStoreFileSystem       $fileSystem,
+        GambioStoreShopInformation  $shopInformation,
+        GambioStoreCache            $cache,
+        GambioStoreHttp             $http,
+        GambioStoreBackup           $backup,
         GambioStorePackageInstaller $installer,
-        GambioStoreAuth $auth
+        GambioStoreAuth             $auth
     ) {
         $this->database        = $database;
         $this->configuration   = $configuration;
@@ -154,12 +154,25 @@ class GambioStoreConnector
         $backup          = new GambioStoreBackup($fileSystem);
         $logger          = new GambioStoreLogger($cache);
         $themes          = new GambioStoreThemes($compatibility, $fileSystem, $logger);
-        $installer       = new GambioStorePackageInstaller($fileSystem, $configuration, $cache, $logger, $backup,
-            $themes);
+        $installer       = new GambioStorePackageInstaller(
+            $fileSystem, $configuration, $cache, $logger, $backup, $themes
+        );
         $auth            = new GambioStoreAuth($configuration, $http, $shopInformation);
         
-        return new self($database, $configuration, $compatibility, $logger, $themes, $fileSystem, $shopInformation,
-            $cache, $http, $backup, $installer, $auth);
+        return new self(
+            $database,
+            $configuration,
+            $compatibility,
+            $logger,
+            $themes,
+            $fileSystem,
+            $shopInformation,
+            $cache,
+            $http,
+            $backup,
+            $installer,
+            $auth
+        );
     }
     
     
@@ -407,14 +420,18 @@ class GambioStoreConnector
         try {
             $shopInformationArray = $this->shopInformation->getShopInformation();
             $apiUrl               = $this->getGambioStoreApiUrl();
-            $response             = $this->http->post($apiUrl . '/connector/updates',
+            $response             = $this->http->post(
+                $apiUrl . '/connector/updates',
                 json_encode(['shopInformation' => $shopInformationArray]),
                 [
-                    CURLOPT_HTTPHEADER => array_merge([
-                        'Content-Type:application/json',
-                    ],
-                    $this->auth->getGambioStoreAuthHeaders())
-                ]);
+                    CURLOPT_HTTPHEADER => array_merge(
+                        [
+                            'Content-Type:application/json',
+                        ],
+                        $this->auth->getGambioStoreAuthHeaders()
+                    )
+                ]
+            );
             
             $response = json_decode($response->getBody(), true);
         } catch (GambioStoreHttpErrorException $exception) {
@@ -428,8 +445,9 @@ class GambioStoreConnector
                     'line'    => $exception->getLine()
                 ],
             ]);
-            throw new GambioStoreUpdatesNotRetrievableException($message, $exception->getCode(),
-                $exception->getContext(), $exception);
+            throw new GambioStoreUpdatesNotRetrievableException(
+                $message, $exception->getCode(), $exception->getContext(), $exception
+            );
         } catch (GambioStoreException $exception) {
             $message = 'Could not fetch shop information during update-fetching!';
             $this->logger->error($message, [
@@ -441,14 +459,16 @@ class GambioStoreConnector
                     'line'    => $exception->getLine()
                 ],
             ]);
-            throw new GambioStoreUpdatesNotRetrievableException($message, $exception->getCode(),
-                $exception->getContext(), $exception);
+            throw new GambioStoreUpdatesNotRetrievableException(
+                $message, $exception->getCode(), $exception->getContext(), $exception
+            );
         }
         
         if (!is_array($response) || !array_key_exists('updates', $response)
             || !is_array($response['updates'])) {
-            throw new GambioStoreUpdatesNotRetrievableException("The API returned invalid updates!", 0,
-                ['response' => $response]);
+            throw new GambioStoreUpdatesNotRetrievableException(
+                "The API returned invalid updates!", 0, ['response' => $response]
+            );
         }
         
         return $response['updates'];

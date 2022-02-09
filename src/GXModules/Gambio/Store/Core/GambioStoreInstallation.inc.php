@@ -1,9 +1,9 @@
 <?php
 /* --------------------------------------------------------------
-   GambioStoreInstallation.inc.php 2022-01-21
+   GambioStoreInstallation.inc.php 2022-02-08
    Gambio GmbH
    http://www.gambio.de
-   Copyright (c) 2020 Gambio GmbH
+   Copyright (c) 2022 Gambio GmbH
    Released under the GNU General Public License (Version 2)
    [http://www.gnu.org/licenses/gpl-2.0.html]
    --------------------------------------------------------------
@@ -214,6 +214,91 @@ class GambioStoreInstallation
      */
     public function perform()
     {
+        if ($this->isStoreVersionPackage()) {
+            return $this->performGambioStoreSelfUpdate();
+        }
+        
+        return $this->performPackageInstallation();
+    }
+    
+    
+    /**
+     * Is package Store version package
+     *
+     * @return bool
+     */
+    private function isStoreVersionPackage()
+    {
+        return 'store-connector' === $this->packageData['details']['repositoryName'];
+    }
+    
+    
+    /**
+     *  Perform gambio store self update.
+     *
+     * @return array
+     * @throws \GambioStoreCacheException
+     * @throws \GambioStorePackageInstallationException
+     */
+    private function performGambioStoreSelfUpdate()
+    {
+        if (!$this->cache->has($this->getTransactionId())) {
+            $startedProgress = [
+                'success'  => true,
+                'state'    => 'started',
+                'progress' => 0
+            ];
+            $this->logger->info('Start Store Connector self update' , $startedProgress);
+    
+            $this->cache->set($this->getTransactionId(), json_encode($startedProgress));
+        
+            return $startedProgress;
+        }
+        
+        try {
+            
+            $progressArray = [
+                'success'    => true,
+                'state'      => 'backedup',
+                'progress'   => 20
+            ];
+            $this->logger->info('Self update progress' , $progressArray);
+    
+            $destinations  = $this->getPackageFilesDestinations();
+            $this->backup->movePackageFilesToCache($destinations);
+            
+            $this->cache->set($this->getTransactionId(), json_encode($progressArray));
+    
+            $progressArray = $this->nextProgressState(50, 'downloaded', [$this, 'downloadPackageToCacheFolder']);
+            $this->logger->info('Self update progress' , $progressArray);
+            
+            $progressArray =  $this->nextProgressState(80, 'installed', [$this, 'installPackage']);
+            $this->logger->info('Self update progress' , $progressArray);
+            
+            $progressArray = $this->nextProgressState(100, 'migrated', [$this, 'migration', 'up']);
+            $this->logger->info('Self update progress' , $progressArray);
+    
+            $this->cache->delete($this->getTransactionId());
+            $this->cleanCache();
+            $this->logger->info('Self update succeeded');
+    
+            return $progressArray;
+            
+        } catch (Exception $exception) {
+            $this->handleException($exception);
+        }
+    }
+    
+    
+    /**
+     * Performs package installation.
+     *
+     * @return array
+     * @throws \GambioStoreCacheException
+     * @throws \GambioStorePackageInstallationException
+     */
+    private function performPackageInstallation()
+    {
         if (!$this->cache->has($this->getTransactionId())) {
             $startedProgress = [
                 'success'  => true,
@@ -227,63 +312,41 @@ class GambioStoreInstallation
         
         $progress = json_decode($this->cache->get($this->getTransactionId()), true);
         
-        switch ($progress['progress']) {
-            case 0:
-                try {
+        try {
+            switch ($progress['progress']) {
+                case 0:
                     $progressArray = [
-                        'success'  => true,
-                        'state'    => 'backedup',
-                        'progress' => 20
+                        'success'    => true,
+                        'state'      => 'backedup',
+                        'progress'   => 20,
+                        'clearCache' => true
                     ];
                     $destinations  = $this->getPackageFilesDestinations();
                     $this->backup->movePackageFilesToCache($destinations);
+                    
                     $this->cache->set($this->getTransactionId(), json_encode($progressArray));
                     
                     return $progressArray;
-                } catch (Exception $exception) {
-                    $this->handleException($exception);
+                case 20:
+                    return $this->nextProgressState(50, 'downloaded', [$this, 'downloadPackageToCacheFolder']);
+                case 50:
+                    return $this->nextProgressState(80, 'installed', [$this, 'installPackage']);
+                case 80:
+                    $progressArray = $this->nextProgressState(100, 'migrated', [$this, 'migration', 'up']);
                     
-                    return [];
-                }
-            case 20:
-                return $this->nextProgressState(50, 'downloaded', [$this, 'downloadPackageToCacheFolder']);
-            case 50:
-                return $this->nextProgressState(80, 'installed', [$this, 'installPackage']);
-            case 80:
-                $progressArray = $this->nextProgressState(100, 'migrated', [$this, 'migration', 'up']);
-                $this->cache->delete($this->getTransactionId());
-                $this->cleanCache();
-                
-                return $progressArray;
-            default:
-                $message = 'There is no progress sett for transaction id: ' . $this->getTransactionId();
-                $this->cleanCache();
-                $this->cache->delete($this->getTransactionId());
-                throw new GambioStorePackageInstallationException($message);
+                    $this->cache->delete($this->getTransactionId());
+                    $this->cleanCache();
+                    
+                    return $progressArray;
+                default:
+                    $message = 'There is no progress sett for transaction id: ' . $this->getTransactionId();
+                    $this->cleanCache();
+                    $this->cache->delete($this->getTransactionId());
+                    throw new GambioStorePackageInstallationException($message);
+            }
+        } catch (Exception $exception) {
+            $this->handleException($exception);
         }
-    }
-    
-    
-    /**
-     * @param $exception \Exception
-     *
-     * @throws \GambioStoreCacheException
-     * @throws \GambioStorePackageInstallationException
-     */
-    private function handleException($exception)
-    {
-        $message = 'Could not install package: ' . $this->packageData['details']['title']['de'];
-        $this->logger->error($message, [
-            'error' => [
-                'code'    => $exception->getCode(),
-                'message' => $exception->getMessage(),
-                'file'    => $exception->getFile(),
-                'line'    => $exception->getLine()
-            ]
-        ]);
-        $this->cleanCache();
-        $this->cache->delete($this->getTransactionId());
-        throw new GambioStorePackageInstallationException($message);
     }
     
     
@@ -337,6 +400,29 @@ class GambioStoreInstallation
     private function cleanCache()
     {
         $this->fileSystem->remove('cache/GambioStore/');
+    }
+    
+    
+    /**
+     * @param $exception \Exception
+     *
+     * @throws \GambioStoreCacheException
+     * @throws \GambioStorePackageInstallationException
+     */
+    private function handleException($exception)
+    {
+        $message = 'Could not install package: ' . $this->packageData['details']['title']['de'];
+        $this->logger->error($message, [
+            'error' => [
+                'code'    => $exception->getCode(),
+                'message' => $exception->getMessage(),
+                'file'    => $exception->getFile(),
+                'line'    => $exception->getLine()
+            ]
+        ]);
+        $this->cleanCache();
+        $this->cache->delete($this->getTransactionId());
+        throw new GambioStorePackageInstallationException($message);
     }
     
     
@@ -551,16 +637,66 @@ class GambioStoreInstallation
      * @throws \GambioStoreCreateDirectoryException
      * @throws \GambioStoreFileMoveException
      * @throws \GambioStoreFileNotFoundException
+     * @throws \GambioStoreCacheException
      */
     private function installPackage()
     {
-        foreach ($this->getPackageFilesDestinations() as $file) {
-            $newPackageFile = 'cache/GambioStore/' . $this->getTransactionId() . '/' . $file;
+        $fileList     = $this->getPackageFilesDestinations();
+        $updateNeeded = false;
+        
+        foreach ($fileList as $file) {
+            if (!$updateNeeded && $this->isCacheFile($file)) {
+                $updateNeeded = true;
+                continue;
+            }
             
-            // Replace the old package file with new
-            $this->fileSystem->move($newPackageFile, $file);
+            $this->moveFile($file);
+        }
+        
+        if ($updateNeeded) {
+            $this->setUpdateNeededFlag();
         }
         
         $this->logger->notice('Successfully installed package : ' . $this->packageData['details']['title']['de']);
+    }
+    
+    
+    /**
+     * Determines whether the given fileName is the update_needed.flag.
+     *
+     * @param $file
+     *
+     * @return bool
+     */
+    private function isCacheFile($file)
+    {
+        return basename($file) === "update_needed.flag";
+    }
+    
+    
+    /**
+     * Move the file to its new destination.
+     *
+     * @param $file
+     *
+     * @throws \GambioStoreCreateDirectoryException
+     * @throws \GambioStoreFileMoveException
+     * @throws \GambioStoreFileNotFoundException
+     */
+    private function moveFile($file)
+    {
+        $newPackageFile = 'cache/GambioStore/' . $this->getTransactionId() . '/' . $file;
+        $this->fileSystem->move($newPackageFile, $file);
+    }
+    
+    
+    /**
+     * Set the update needed flag in the cache for the current transaction.
+     *
+     * @throws \GambioStoreCacheException
+     */
+    private function setUpdateNeededFlag()
+    {
+        $this->cache->set("UPDATE_NEEDED", true);
     }
 }

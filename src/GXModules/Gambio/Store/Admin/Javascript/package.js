@@ -1,8 +1,8 @@
 /* --------------------------------------------------------------
-   package.js 2020-05-05
+   package.js 2022-02-08
    Gambio GmbH
    http://www.gambio.de
-   Copyright (c) 2020 Gambio GmbH
+   Copyright (c) 2022 Gambio GmbH
    Released under the GNU General Public License (Version 2)
    [http://www.gnu.org/licenses/gpl-2.0.html]
    --------------------------------------------------------------
@@ -75,6 +75,10 @@ const installPackage = async (data, progressCallback) => {
 			throw new Error('Package not installed!');
 		}
 		
+		if (response.clearCache) {
+			GambioStore.shop.clearShopCache();
+		}
+		
 		progress = response.progress ? response.progress : progress;
 		progressCallback(progress);
 	}
@@ -87,6 +91,23 @@ const installPackage = async (data, progressCallback) => {
 				.catch(reject);
 		}, 500)
 	});
+}
+
+/**
+ * Redirects to the gambio updater if it needs to be executed.
+ */
+const redirectToUpdaterIfNeeded = async () => {
+	try {
+		const response = await GambioStore.callShop('admin.php?do=GambioStoreAjax/isTheUpdaterNeeded');
+		
+		if (!('isNeeded' in response) || !response.isNeeded) {
+			return;
+		}
+		
+		const baseUrl = window.location.pathname.replace('/admin/admin.php', '');
+		window.location.replace(`${baseUrl}/gambio_updater`)
+	} catch (error) {
+	}
 }
 
 /**
@@ -162,6 +183,8 @@ const startPackageInstallation = async (data) => {
 		}
 		
 		GambioStore.messenger.send('installation_succeeded')
+		
+		await redirectToUpdaterIfNeeded()
 	} catch (error) {
 		GambioStore.messenger.send('installation_failed');
 	} finally {
@@ -185,7 +208,7 @@ const updateProgressCallback = (progress) => {
 };
 
 /**
- * Replaces the progressbar in the modal with a loading spinner and emptying cache infromation.
+ * Replaces the progressbar in the modal with a loading spinner and emptying cache information.
  */
 const showClearCache = () => {
 	const cacheClearingText = GambioStore.translation.translate('CLEARING_CACHE');
