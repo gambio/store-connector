@@ -214,6 +214,91 @@ class GambioStoreInstallation
      */
     public function perform()
     {
+        if ($this->isStoreVersionPackage()) {
+            return $this->performGambioStoreSelfUpdate();
+        }
+        
+        return $this->performPackageInstallation();
+    }
+    
+    
+    /**
+     * Is package Store version package
+     *
+     * @return bool
+     */
+    private function isStoreVersionPackage()
+    {
+        return 'store-connector' === $this->packageData['details']['repositoryName'];
+    }
+    
+    
+    /**
+     *  Perform gambio store self update.
+     *
+     * @return array
+     * @throws \GambioStoreCacheException
+     * @throws \GambioStorePackageInstallationException
+     */
+    private function performGambioStoreSelfUpdate()
+    {
+        if (!$this->cache->has($this->getTransactionId())) {
+            $startedProgress = [
+                'success'  => true,
+                'state'    => 'started',
+                'progress' => 0
+            ];
+            $this->logger->info('Start Store Connector self update' , $startedProgress);
+    
+            $this->cache->set($this->getTransactionId(), json_encode($startedProgress));
+        
+            return $startedProgress;
+        }
+        
+        try {
+            
+            $progressArray = [
+                'success'    => true,
+                'state'      => 'backedup',
+                'progress'   => 20
+            ];
+            $this->logger->info('Self update progress' , $progressArray);
+    
+            $destinations  = $this->getPackageFilesDestinations();
+            $this->backup->movePackageFilesToCache($destinations);
+            
+            $this->cache->set($this->getTransactionId(), json_encode($progressArray));
+    
+            $progressArray = $this->nextProgressState(50, 'downloaded', [$this, 'downloadPackageToCacheFolder']);
+            $this->logger->info('Self update progress' , $progressArray);
+            
+            $progressArray =  $this->nextProgressState(80, 'installed', [$this, 'installPackage']);
+            $this->logger->info('Self update progress' , $progressArray);
+            
+            $progressArray = $this->nextProgressState(100, 'migrated', [$this, 'migration', 'up']);
+            $this->logger->info('Self update progress' , $progressArray);
+    
+            $this->cache->delete($this->getTransactionId());
+            $this->cleanCache();
+            $this->logger->info('Self update succeeded');
+    
+            return $progressArray;
+            
+        } catch (Exception $exception) {
+            $this->handleException($exception);
+        }
+    }
+    
+    
+    /**
+     * Performs package installation.
+     *
+     * @return array
+     * @throws \GambioStoreCacheException
+     * @throws \GambioStorePackageInstallationException
+     */
+    private function performPackageInstallation()
+    {
         if (!$this->cache->has($this->getTransactionId())) {
             $startedProgress = [
                 'success'  => true,
@@ -261,32 +346,7 @@ class GambioStoreInstallation
             }
         } catch (Exception $exception) {
             $this->handleException($exception);
-            
-            return [];
         }
-    }
-    
-    
-    /**
-     * @param $exception \Exception
-     *
-     * @throws \GambioStoreCacheException
-     * @throws \GambioStorePackageInstallationException
-     */
-    private function handleException($exception)
-    {
-        $message = 'Could not install package: ' . $this->packageData['details']['title']['de'];
-        $this->logger->error($message, [
-            'error' => [
-                'code'    => $exception->getCode(),
-                'message' => $exception->getMessage(),
-                'file'    => $exception->getFile(),
-                'line'    => $exception->getLine()
-            ]
-        ]);
-        $this->cleanCache();
-        $this->cache->delete($this->getTransactionId());
-        throw new GambioStorePackageInstallationException($message);
     }
     
     
@@ -340,6 +400,29 @@ class GambioStoreInstallation
     private function cleanCache()
     {
         $this->fileSystem->remove('cache/GambioStore/');
+    }
+    
+    
+    /**
+     * @param $exception \Exception
+     *
+     * @throws \GambioStoreCacheException
+     * @throws \GambioStorePackageInstallationException
+     */
+    private function handleException($exception)
+    {
+        $message = 'Could not install package: ' . $this->packageData['details']['title']['de'];
+        $this->logger->error($message, [
+            'error' => [
+                'code'    => $exception->getCode(),
+                'message' => $exception->getMessage(),
+                'file'    => $exception->getFile(),
+                'line'    => $exception->getLine()
+            ]
+        ]);
+        $this->cleanCache();
+        $this->cache->delete($this->getTransactionId());
+        throw new GambioStorePackageInstallationException($message);
     }
     
     
