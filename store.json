@@ -1,0 +1,54 @@
+{
+    "name": "Gambio Store Connector",
+    "repositoryName": "store-connector",
+    "shopIdentifier": "store-connector",
+    "type": "module",
+    "version": "1.0.0",
+    "title": {
+        "en": "Gambio Store Connector",
+        "de": "Gambio Store Connector"
+    },
+    "description": {
+        "en": "foobar",
+        "de": "foobar"
+    },
+    "vendor": {
+        "name": "Gambio",
+        "url": "",
+        "avatar": "",
+        "gitlabGroupName": "Gambio"
+    },
+    "displayImage": {
+        "en": "/images/placeholder.png",
+        "de": "/images/placeholder.png"
+    },
+    "highlights": [
+    ],
+    "migrations": {
+        "up": [],
+        "down": []
+    },
+    "requirements": {
+        "needed": {
+            "shop": {
+                "shopVersions": [">=4.9.2.1"]
+            },
+            "server": {
+                "phpVersions": [">=5.6"],
+                "mysqlVersions": [">=5.5"]
+            },
+            "themes": [],
+            "receiptFiles": []
+        },
+        "hidden": {
+            "shop": {
+                "shopVersions": []
+            },
+            "server": {
+                "phpVersions": [],
+                "mysqlVersions": []
+            },
+            "themes": []
+        }
+    }
+}
