@@ -162,18 +162,28 @@ class GambioStoreAjaxController extends AdminHttpViewController
         
         return new JsonHttpControllerResponse($shopInformation);
     }
-    
-    
+
+
     /**
      * Starts an installation or gets the progress of one
      *
      * @return mixed
+     * @throws GambioStoreHttpErrorException
      */
     public function actionInstallPackage()
     {
         $this->setup();
         
         $packageData = json_decode(stripcslashes($_POST['gambioStoreData']), true);
+        
+        $subscribed = $this->connector->getSubscriptionStatus(
+            $packageData['packageId'],
+            $packageData['clientId'],
+        );
+        
+        if (!$subscribed) {
+            return new JsonHttpControllerResponse(['success' => false, 'errorCode' => 402]);
+        }
         
         try {
             $response = $this->connector->installPackage($packageData);
