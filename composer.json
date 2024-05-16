@@ -12,7 +12,7 @@
         "badge:coverage": "php vendor/bin/phpunit --coverage-xml badges/coverage",
         "serve:metrics": "google-chrome  ./docs/metrics/index.html || firefox ./docs/metrics/index.html",
         "badge:tests": "php vendor/bin/phpunit --log-junit badges/tests.xml",
-        "post-install-cmd": ["cp -r ./vendor/gambio-store/src/* ./src", "rm -rf ./vendor/gambio-store/src"]
+        "post-install-cmd": ["cp -r ./vendor/gambio-store/src/* ./src", "rm -rf ./vendor/gambio-store/"]
     },
     "repositories": [
         {
