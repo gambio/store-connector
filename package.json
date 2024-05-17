@@ -13,14 +13,13 @@
     "url": "git@sources.gambio-server.net:gambio-store/store-connector.git"
   },
   "scripts": {
-	  "start": "gulp dev",
-	  "build": "gulp",
-	  "sync": "gulp && gulp sync && sudo chmod 777 -R  docker/*/shop/src/GXModules/Gambio/Store",
-	  "configure": "yarn && composer install",
-	  "test": "gulp test"
+    "start": "gulp dev",
+    "build": "gulp",
+    "sync": "gulp && gulp sync && sudo chmod 777 -R  docker/*/shop/src/GXModules/Gambio/Store",
+    "configure": "yarn && composer install",
+    "test": "gulp test"
   },
-  "dependencies": {},
-	"devDependencies": {
+  "devDependencies": {
     "@babel/cli": "^7.10.1",
     "@babel/core": "^7.10.1",
     "@babel/polyfill": "^7.10.1",
@@ -28,7 +27,6 @@
     "@babel/register": "^7.10.1",
     "del": "^5.1.0",
     "fs-extra": "^9.0.0",
-    "gulp": "^4.0.2",
     "gulp-babel": "^8.0.0",
     "gulp-changed": "^4.0.2",
     "gulp-changed-in-place": "^2.3.0",
@@ -60,5 +58,8 @@
     "vinyl-fs": "^3.0.3",
     "vinyl-source-stream": "^2.0.0",
     "zip-dir": "^1.0.2"
+  },
+  "dependencies": {
+    "gulp": "^5.0.0"
   }
 }
