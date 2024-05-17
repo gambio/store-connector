@@ -507,7 +507,7 @@ class GambioStoreConnector
      *
      * @return string
      */
-    private function getGambioStoreApiUrl()
+    public function getGambioStoreApiUrl()
     {
         $gambioUrl = $this->configuration->get('GAMBIO_STORE_API_URL');
         
