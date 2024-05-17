@@ -519,4 +519,28 @@ class GambioStoreConnector
         
         return $gambioUrl;
     }
+
+    /**
+     * Checks if the customer has subscribed to the package
+     *
+     * @throws GambioStoreHttpErrorException
+     */
+    public function getSubscriptionStatus($packageId, $clientId): bool
+    {
+        $apiUrl = $this->getGambioStoreApiUrl();
+        $response = $this->http->post(
+            $apiUrl . '/connector/packageSubscriptionStatus',
+            [
+                CURLOPT_HTTPHEADER => $this->auth->getGambioStoreAuthHeaders(),
+                CURLOPT_POSTFIELDS => json_encode([
+                    'packageId' => $packageId,
+                    'clientId' => $clientId
+                ])
+            ]
+        );
+
+        $response = json_decode($response->getBody(), true);
+
+        return $response['subscription_active'] ?? false;
+    }
 }
